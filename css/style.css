@@ -1,0 +1,9 @@
+body{
+	background: url(../assets/images/Blade-Runner-2-Director.jpg);
+	background-color: #cccccc;
+	border : 5px;
+	padding : 5px;}
+
+h1, h3{
+	text-align: center;
+}
