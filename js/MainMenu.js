@@ -47,8 +47,8 @@ Roguelike.MainMenu.prototype = {
 		creditsButton.onInputUp.add(up, this);
 
 		//play music
-		menuMusic = this.game.add.audio('menuMusic');
-		menuMusic.play();
+		// menuMusic = this.game.add.audio('menuMusic');
+		// menuMusic.play();
 	}, 
 	// 	console.log('button over');
 	// over: function(){
@@ -89,12 +89,17 @@ function actionOnClick(button) {
     switch(button){
     	case newGameButton:
     		console.log('start new game!');
-    		newGameButton.visible = false;
+
+    		//debug
+    		//enter and save name
+    		/*newGameButton.visible = false;
     		settingsButton.visible = false;
     		creditsButton.visible = false;
     		var playerName = prompt("What are you known as?", "Cloud");
-    		localStorage.setItem("playerName", playerName);
-    		menuMusic.stop();
+    		localStorage.setItem("playerName", playerName);*/
+
+    		//debug
+    		// menuMusic.stop();
     		this.game.state.start('Game');
     		break;
     	case settingsButton:
