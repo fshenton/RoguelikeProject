@@ -7,6 +7,8 @@ Roguelike.Game = function(){};
 const mapSize = 50;
 const minRoomsize = 3;
 const numRooms = 7;
+const floorChar = 'R';
+const wallChar = 'w';
 
 var gameMusic;
 var map, rooms, player, actorList, UI;
@@ -52,22 +54,27 @@ Roguelike.Game.prototype = {
 //Roguelike.Game.Tile
 
 function initMap(){
-	//floor = ...
-	//walls = #
 
 	map = [];
 	rooms = [];
 
 	//initialise map (make 2d, then fill with walls)
 	for(let x = 0; x < mapSize; x++){
+		//each col has an array
 		map[x] = [];
+		//for each row, add a new element with a char
 		for(let y = 0; y < mapSize; y++){
-			map[x].push('#');
+			map[x][y] = wallChar;
 		}
 	}
 
+	map[0][0] = 'HEY';
+	map[10][0] = 'HEY';
+	map[24][24] = 'HEY';
+	// console.log(JSON.stringify(map));
+
 	let minXY = 2;
-	let maxXY = mapSize-2; //might need to be -1
+	let maxXY = mapSize-3; //accounts for wall around the edge
 
 	//plants room seeds away from walls
 	let roomsRemaining = numRooms;
@@ -75,50 +82,59 @@ function initMap(){
 	let randomGen = new Phaser.RandomDataGenerator();
 
 	while(roomsRemaining > 0){
-		//console.log("RANDOMINT: " + this.game.rnd.integerInRange(0, 10));
 
 		let x =  Math.floor(Math.random() * (maxXY - minXY + 1)) + minXY;
 		let y =  Math.floor(Math.random() * (maxXY - minXY + 1)) + minXY;
 
-		console.log(x);
-		console.log(y);
-
 		//plant seed & grow to 3x3
-		if(map[x][y] != '...'){
-				let validRoom = checkValidRoomSize(x, y);
-				console.log(validRoom);
-				//if 3x3 room is available, build room to that size from central point
-				if(validRoom){
-					//ADDROOM function
-					map[x-1][y-1] = '...';
-					map[x][y-1] = '...';
-					map[x+1][y-1] = '...';
-					map[x-1][y] = '...';
-					map[x][y] = '...';
-					map[x+1][y] = '...';
-					map[x-1][y+1] = '...';
-					map[x][y+1] = '...';
-					map[x+1][y+1] = '...';
-
-
-					//NEED TO STORE ROOMS AS A 2D ARRAY
-					//would this accound for smaller rooms that may intersect? might need midleft etc
-					//[0] should be current new room index
-
-					let currentRoom = numRooms - roomsRemaining; //works for remaining = 0?
-					//console.log(currentRoom);
-
-					rooms.push([]);
-					rooms[currentRoom].push([{x: x-1, y: y-1}, {x: x, y: y-1}, {x: x+1, y: y-1}]);
-					rooms[currentRoom].push([{x: x-1, y: y}, {x: x, y: y}, {x: x+1, y: y}]);
-					rooms[currentRoom].push([{x: x-1, y: y+1}, {x : x, y: y+1}, {x: x+1, y: y+1}]);
-				
-					//console.log(JSON.stringify(rooms[currentRoom]));
-
-					roomsRemaining--;
-					console.log('Room Created');
-				}
+		let validRoom =false;
+		//find a spot for valid room
+		while(!validRoom){
+			console.log(x);
+			console.log(y);
+		 	
+		 	if(map[x][y] != floorChar){
+		 		validRoom = checkValidRoomSize(x, y);
+		 		if(!validRoom){
+		 			x =  Math.floor(Math.random() * (maxXY - minXY + 1)) + minXY;
+					y =  Math.floor(Math.random() * (maxXY - minXY + 1)) + minXY;
+					console.log("Space not found");
+		 		} 
+		 	}
 		}
+		console.log(validRoom);
+		//if 3x3 room is available, build room to that size from central point
+
+		//ADDROOM function
+		map[x-1][y-1] = floorChar;
+		map[x][y-1] = floorChar;
+		map[x+1][y-1] = floorChar;
+		map[x-1][y] = floorChar;
+		map[x][y] = floorChar;
+		map[x+1][y] = floorChar;
+		map[x-1][y+1] = floorChar;
+		map[x][y+1] = floorChar;
+		map[x+1][y+1] = floorChar;
+
+
+		//NEED TO STORE ROOMS AS A 2D ARRAY
+		//would this accound for smaller rooms that may intersect? might need midleft etc
+		//[0] should be current new room index
+
+		let currentRoom = numRooms - roomsRemaining; //works for remaining = 0?
+		//console.log(currentRoom);
+
+		rooms.push([]);
+		rooms[currentRoom].push([{x: x-1, y: y-1}, {x: x, y: y-1}, {x: x+1, y: y-1}]);
+		rooms[currentRoom].push([{x: x-1, y: y}, {x: x, y: y}, {x: x+1, y: y}]);
+		rooms[currentRoom].push([{x: x-1, y: y+1}, {x : x, y: y+1}, {x: x+1, y: y+1}]);
+	
+		//console.log(JSON.stringify(rooms[currentRoom]));
+
+		roomsRemaining--;
+		console.log('Room Created');
+		
+	}
 		//TODO: need to store each room in a list so I can iterate through
 		//and have access to wall positions
 
@@ -127,15 +143,12 @@ function initMap(){
 		//iterate through each room created and pick a random wall to push back 1 space
 		//if you can't move that wall, go to next room
 
-	}
-
 	for(let i = 0; i < rooms.length; i++){
 		console.log(JSON.stringify(rooms[i]));
 		console.log(JSON.stringify(rooms[i][0][0].x));
 	}
 
 	console.log(JSON.stringify(map));
-	// console.log(JSON.stringify(rooms));
 
 	expandRandomWalls();
 
@@ -151,28 +164,34 @@ function checkValidRoomSize(x, y){
 
 	let space = false;
 
-	if(map[x-1][y-1] == '#' &&
-		map[x][y-1] == '#' &&
-		map[x+1][y-1] == '#' &&
-		map[x-1][y] == '#' &&
-		map[x][y] == '#' &&
-		map[x+1][y] == '#' &&
-		map[x-1][y+1] == '#' &&
-		map[x][y+1] == '#' &&
-		map[x+1][y+1] == '#'){
+	if(map[x-1][y-1] == wallChar &&
+		map[x][y-1] == wallChar &&
+		map[x+1][y-1] == wallChar &&
+		map[x-1][y] == wallChar &&
+		map[x][y] == wallChar &&
+		map[x+1][y] == wallChar &&
+		map[x-1][y+1] == wallChar &&
+		map[x][y+1] == wallChar &&
+		map[x+1][y+1] == wallChar){
 		
 		//check that there are walls all the way around
-		if(map[x-2][y-2] == '#' &&
-			map[x][y-2] == '#' &&
-			map[x+2][y-2] == '#' &&
-			map[x-2][y] == '#' &&
-			map[x+2][y] == '#' &&
-			map[x-2][y+2] == '#' &&
-			map[x][y+2] == '#' &&
-			map[x+2][y+2] == '#'){
+		if(map[x-2][y-2] == wallChar &&
+			map[x][y-2] == wallChar &&
+			map[x+2][y-2] == wallChar && //undefined issue! 21
+			map[x-2][y] == wallChar &&
+			map[x+2][y] == wallChar &&
+			map[x-2][y+2] == wallChar &&
+			map[x][y+2] == wallChar &&
+			map[x+2][y+2] == wallChar){
 
 			space = true;
 		}
+		else{
+			console.log("Cannot have walls around this space");
+		}
+	}
+	else{
+			console.log("Not enough floor space found");
 	}
 
 	return space;
@@ -195,54 +214,43 @@ function expandRandomWalls(){
 		//up = elements of top row
 		//right = last elements of each row
 		//down = elements of bot row
-		console.log("FOR: oob check: ", rooms[0][0].x);
-		// LEFT WALL
-				//only need to check oob once
-				
-
-		//INDEX OF ROOM
-		//INDEX OF ROOM ROW
-		//INDEX OF ROOM ROW ELEMENT
-		//ROOMS[i][j][k].x and .y for values		
+		
+		// TOP WALL
+		//check for oob	
 		if(rooms[i][0][0].x-2 >= 0){
+			//iterate through each column in room
 			for(let j = 0; j < rooms[i].length; j++){
 				//let k = 0;
 				let canExpand = true;
+
+				//for each row (length of left wall)
 				while(j < rooms[i].length && canExpand){
 				//minus 2?
-				//need to check each row before changing map values and updating room arra
-					if(map[rooms[i][j][0].x-2][rooms[i][j][0].y] !='#'){
+					//check the first (top most) value of each row
+					if(map[rooms[i][j][0].x-2][rooms[i][j][0].y] !=wallChar){
 						//if something other than a wall found, cannot expand that direction
 						canExpand = false;
 					}
 					j++;
 				}
 				if(canExpand){
-					for(let j = 0; j < rooms[i].length; j++){
-						map[rooms[i][j][0].x-1][rooms[i][j][0].y] = '...';
-						//add new tile to left column of each row of array
+					let j = 0;
+					while(j < rooms[i].length){
+						console.log("i", i);
+						console.log("j", j);
+						console.log("rooms[i][j] length", rooms[i][j].length );
+						//change map to reflect wall has been pushed back 1 to top
+						map[rooms[i][j][0].x-1][rooms[i][j][0].y] = floorChar;
+						//add new tile to top column of each row of array (new floor area)
 						rooms[i][j].unshift({x: rooms[i][j][0].x-1, y: rooms[i][j][0].y});
+						j++;
 					}
 				}
-				console.log('CAN EXPAND? ', canExpand);
-				}
+				console.log("Room expanded?", canExpand);
+			}
 		}
 		//NEED TO DO FOR EACH ROW IN ROOMS[i]
 		//WE'RE ACCESSING ROOMS[i][j][k
-		
-	
-		// let chosenRoom  = rooms[i];
-		// let checkTopLeftX = chosenRoom.topLeft.x-1;
-		// let checkTopLeftY = chosenRoom.topLeft.y-1;
-		// let checkBotLeftX = chosenRoom.botLeft.x-1;
-		// let checkBotLeftY = chosenRoom.botLeft.y+1;
-
-		// if(map[checkTopLeftX][checkTopLeftY] == '#' &&
-		// 	map[checkBotLeftX][checkBotLeftX] == '#'){
-		// 	console.log("FOUND SPACE");
-		// 	map[chosenRoom.topLeft.x][chosenRoom.topLeft.y] = '...';
-		// 	map[chosenRoom.botLeft.x][chosenRoom.botLeft.y] = '...';
-		// }
 	}
 	//if I want to push one wall out, pick left, up, down, right wall
 	//if left we use top left and bottom left corners
