@@ -23,28 +23,30 @@ Roguelike.MainMenu.prototype = {
 		var t = this.game.add.text(this.game.width/2, this.game.height/2-200, text, style);
 		t.anchor.set(0.5);
 
-		//set up the menu buttons
-		//new game
-		newGameButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
-		// newGameButton = this.game.add.button(this.game.width/2, this.game.height/2, 'greybutton', actionOnClick, this);
+		this.game.state.start('Game'); //FOR QUICKER DEBUGGING
 
-		newGameButton.onInputOver.add(over, this);
-		newGameButton.onInputOut.add(out, this);
-		newGameButton.onInputUp.add(up, this);
+		// //set up the menu buttons
+		// //new game
+		// newGameButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
+		// // newGameButton = this.game.add.button(this.game.width/2, this.game.height/2, 'greybutton', actionOnClick, this);
 
-		//settings
-		settingsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-40, 'greybutton', actionOnClick, this, 2, 1, 0);
+		// newGameButton.onInputOver.add(over, this);
+		// newGameButton.onInputOut.add(out, this);
+		// newGameButton.onInputUp.add(up, this);
 
-		settingsButton.onInputOver.add(over, this);
-		settingsButton.onInputOut.add(out, this);
-		settingsButton.onInputUp.add(up, this);
+		// //settings
+		// settingsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-40, 'greybutton', actionOnClick, this, 2, 1, 0);
 
-		//credits
-		creditsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY+20, 'greybutton', actionOnClick, this, 2, 1, 0);
+		// settingsButton.onInputOver.add(over, this);
+		// settingsButton.onInputOut.add(out, this);
+		// settingsButton.onInputUp.add(up, this);
 
-		creditsButton.onInputOver.add(over, this);
-		creditsButton.onInputOut.add(out, this);
-		creditsButton.onInputUp.add(up, this);
+		// //credits
+		// creditsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY+20, 'greybutton', actionOnClick, this, 2, 1, 0);
+
+		// creditsButton.onInputOver.add(over, this);
+		// creditsButton.onInputOut.add(out, this);
+		// creditsButton.onInputUp.add(up, this);
 
 		//play music
 		// menuMusic = this.game.add.audio('menuMusic');
