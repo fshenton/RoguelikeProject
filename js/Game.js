@@ -34,33 +34,36 @@ Roguelike.Game.prototype = {
 
 		//set up map
 		initMap();
-		expandRandomRooms();
-		//findAdjacentRooms();
-		//connectRooms();
+		expandRandomRooms(); //also populates room adjacency lists
+		randomlyConnectAdjacentRooms(); //use room adjency list to add doors connecting the rooms
+
+		
+
+		// initActors();
+		// initItems();
+		// initPhysics();
+		// setUpGame()
+		// setUpInputHandlers();
+		// setUpSoundAndGraphics();
+		// setUpHUD();
+		// beginRender();
 
 		console.log(JSON.stringify(map));
 
 
-		for(let i = 0; i < rooms.length; i++){
-			let r = rooms[i];
-			console.log("Room ", r.id, "(x: ", r.tiles[0][0].x, " y: ",  r.tiles[0][0].y, ") has:")
-			console.log(r.adjRoomCount, " rooms adjacent to it.");
-			console.log(r.roomToLeft, " rooms to its left.");
-			console.log(r.roomToTop, " rooms to its top.");
-			console.log(r.roomToRight, " rooms to its right.");
-			console.log(r.roomToBot, " rooms to its bot.");
-			console.log(r.adjacentRooms);
-			console.log(r.tiles);
-		}
+		// for(let i = 0; i < rooms.length; i++){
+		// 	let r = rooms[i];
+		// 	console.log("Room ", r.id, "(x: ", r.tiles[0][0].x, " y: ",  r.tiles[0][0].y, ") has:")
+		// 	console.log(r.adjRoomCount, " rooms adjacent to it.");
+		// 	console.log(r.roomToLeft, " rooms to its left.");
+		// 	console.log(r.roomToTop, " rooms to its top.");
+		// 	console.log(r.roomToRight, " rooms to its right.");
+		// 	console.log(r.roomToBot, " rooms to its bot.");
+		// 	console.log(r.adjacentRooms);
+		// 	console.log(r.tiles);
+		// }
 
 		//initActors();
-
-		//populte with npcs, player and items
-		//setup animations/sprites
-		//setup physics
-		//add sound
-		//initialise score and other values
-		//draw GUI
 	},
 	update: function(){
 		//player movement & dodging & attacking
@@ -75,12 +78,13 @@ Roguelike.Game.prototype = {
 var Tile = {
 	WALL: '#',
 	FLOOR: '.',
-	DOOR: '%',
-	PLAYER: '&'
+	DOOR: 'D',
+	PLAYER: 'P'
 };
 
-function Room(currentRoom){
-	this.id = currentRoom,
+//room object that holds id, coordinates in map, adjacent rooms and expansion information
+function Room(num){
+	this.id = num,
 	this.tiles = [],
 	this.x, //initialise?
 	this.y,
@@ -91,6 +95,7 @@ function Room(currentRoom){
 	this.canExp = true,
 	this.doors = 0,
 	this.adjacentRooms = [];
+	this.adjacentRoomCells = [];
 	this.adjRoomCount = 0,
 	this.roomToLeft = 0,
 	this.roomToTop = 0,
@@ -99,6 +104,7 @@ function Room(currentRoom){
 	//methods?
 }
 
+//builds the mapSize x mapSize square array, fills with walls and then plants 3x3 rooms randomly (no overlap)
 function initMap(){
 
 	map = [];
@@ -186,6 +192,7 @@ function initMap(){
 	//console.log(JSON.stringify(map));
 }
 
+//checks that new 3x3 rooms can be placed at random coordinates
 function checkValidRoomSize(x, y){
 	//console.log("in checkvalidroom");
 
@@ -239,6 +246,7 @@ function checkValidRoomSize(x, y){
 	return space;
 }
 
+//tries to expand all rooms until all directions for each room have been expanded to max
 function expandRandomRooms(){
 
 	let roomCannotExpand = 0;
@@ -289,6 +297,9 @@ function expandRandomRooms(){
 	//return?
 }
 
+//takes a direction and a room and expands it if possible
+//NEEDS REFACTORING AS ITS A NIGHTMARE TO READ
+//ALSO SOME BUGS STILL EXIST WITH ADJACENCY ADDING
 function expand(r, d){
 
 	//console.log("in expand method");
@@ -329,19 +340,21 @@ function expand(r, d){
 							//console.log(adjRoomCellCount);
 							if(!newAdjRoom){
 								newAdjRoom = true;
-								console.log("----------------------------------------------");
+								// console.log("----------------------------------------------");
 								if(map[checkX][checkY-1]== Tile.FLOOR){
-									console.log("WTF");
+									// console.log("WTF");
 								}
-								console.log("Room", r.id, "checking adjacent room to left");
-								let adjRoom = findRoomCell(0, checkX, checkY-2);
+								// console.log("Room", r.id, "checking adjacent room to left");
+								let adjRoom = findAdjacentCell(0, checkX, checkY-2);
 								if(r.adjacentRooms.indexOf(adjRoom) == -1){
-									r.adjacentRooms.push(adjRoom);
+									r.adjacentRooms.push(adjRoom);//({r: adjRoom, addedBy: r.id, dir: 0, fX: checkX, fX: checkY-2});
+									r.adjacentRoomCells.push({r: adjRoom, addedBy: r.id, fX: checkX, fY: checkY-2, oX: 0, oY: -2});
 									r.roomToLeft++;
 									r.adjRoomCount++;
 								}
 								if(rooms[adjRoom].adjacentRooms.indexOf(r.id) == -1){
-									rooms[adjRoom].adjacentRooms.push(r.id);
+									rooms[adjRoom].adjacentRooms.push(r.id);//({r: r.id, addedBy: r.id, dir: 0, fX: checkX, fX: checkY-2});
+									rooms[adjRoom].adjacentRoomCells.push({r: r.id, addedBy: r.id, fX: checkX, fY: checkY-2, oX: 0, oY: -2});
 									rooms[adjRoom].roomToRight++;
 									rooms[adjRoom].adjRoomCount++;
 								}
@@ -419,21 +432,23 @@ function expand(r, d){
 
 							if(!newAdjRoom){
 								newAdjRoom = true;
-								console.log("----------------------------------------------");
+								// console.log("----------------------------------------------");
 								if(map[checkX-1][checkY] == Tile.FLOOR){
-									console.log("WTF");
+									// console.log("WTF");
 								}
-								console.log("Room", r.id, "checking adjacent room to top");
-								console.log("checkX:", checkX-2);
-								console.log("checkY:", checkY);
-								let adjRoom = findRoomCell(1, checkX-2, checkY);
+								// console.log("Room", r.id, "checking adjacent room to top");
+								// console.log("checkX:", checkX-2);
+								// console.log("checkY:", checkY);
+								let adjRoom = findAdjacentCell(1, checkX-2, checkY);
 								if(r.adjacentRooms.indexOf(adjRoom) == -1){
-									r.adjacentRooms.push(adjRoom);
+									r.adjacentRooms.push(adjRoom);//({r: adjRoom, addedBy: r.id, dir: 1, fX: checkX-2, fX: checkY});
+									r.adjacentRoomCells.push({r: adjRoom, addedBy: r.id, fX: checkX-2, fY: checkY, oX: -2, oY: 0});
 									r.roomToTop++;
 									r.adjRoomCount++;
 								}
 								if(rooms[adjRoom].adjacentRooms.indexOf(r.id) == -1){
-									rooms[adjRoom].adjacentRooms.push(r.id);
+									rooms[adjRoom].adjacentRooms.push(r.id);//({r: r.id, addedBy: r.id, dir: 1, fX: checkX-2, fX: checkY});
+									rooms[adjRoom].adjacentRoomCells.push({r: r.id, addedBy: r.id, fX: checkX-2, fY: checkY, oX: -2, oY: 0});
 									rooms[adjRoom].roomToBot++;
 									rooms[adjRoom].adjRoomCount++;
 								}
@@ -516,19 +531,21 @@ function expand(r, d){
 							// });
 							if(!newAdjRoom){
 								newAdjRoom = true;
-								console.log("----------------------------------------------");
+								// console.log("----------------------------------------------");
 								if(map[checkX][checkY+1] == Tile.FLOOR){
-									console.log("WTF");
+									// console.log("WTF");
 								}
-								console.log("Room", r.id, "checking adjacent room to right");
-								let adjRoom = findRoomCell(2, checkX, checkY+2);
+								// console.log("Room", r.id, "checking adjacent room to right");
+								let adjRoom = findAdjacentCell(2, checkX, checkY+2);
 								if(r.adjacentRooms.indexOf(adjRoom) == -1){
-									r.adjacentRooms.push(adjRoom);
+									r.adjacentRooms.push(adjRoom);//({r: adjRoom, addedBy: r.id, dir: 2, fX: checkX, fX: checkY+2});
+									r.adjacentRoomCells.push({r: adjRoom, addedBy: r.id, fX: checkX, fY: checkY+2, oX: 0, oY: 2});
 									r.roomToRight++;
 									r.adjRoomCount++;
 								}
 								if(rooms[adjRoom].adjacentRooms.indexOf(r.id) == -1){
-									rooms[adjRoom].adjacentRooms.push(r.id);
+									rooms[adjRoom].adjacentRooms.push(r.id);//({r: r.id, addedBy: r.id, dir: 2, fX: checkX, fX: checkY+2});
+									rooms[adjRoom].adjacentRoomCells.push({r: r.id, addedBy: r.id, fX: checkX, fY: checkY+2, oX: 0, oY: 2});
 									rooms[adjRoom].roomToLeft++;
 									rooms[adjRoom].adjRoomCount++;
 								}
@@ -607,25 +624,27 @@ function expand(r, d){
 							//Found an adjacent room, so add right wall to adjacent array
 							if(!newAdjRoom){
 								newAdjRoom = true;
-								console.log("----------------------------------------------");
+								// console.log("----------------------------------------------");
 								if(map[checkX+1 ][checkY] == Tile.FLOOR){
-									console.log("WTF");
+									// console.log("WTF");
 								}
-								console.log("Room", r.id, "checking adjacent room to bot");
-								console.log("checkX:", checkX+2);
-								console.log("checkY:", checkY);
-								let adjRoom = findRoomCell(3, checkX+2, checkY);
+								// console.log("Room", r.id, "checking adjacent room to bot");
+								// console.log("checkX:", checkX+2);
+								// console.log("checkY:", checkY);
+								let adjRoom = findAdjacentCell(3, checkX+2, checkY);
 								if(r.adjacentRooms.indexOf(adjRoom) == -1){
-									r.adjacentRooms.push(adjRoom);
+									r.adjacentRooms.push(adjRoom);//({r: adjRoom, addedBy: r.id, dir: 3, fX: checkX+2, fX: checkY});
+									r.adjacentRoomCells.push({r: adjRoom, addedBy: r.id, fX: checkX+2, fY: checkY, oX: 2, oY: 0});
 									r.roomToBot++;
 									r.adjRoomCount++;
 								}
 								if(rooms[adjRoom].adjacentRooms.indexOf(r.id) == -1){
-									rooms[adjRoom].adjacentRooms.push(r.id);
+									rooms[adjRoom].adjacentRooms.push(r.id);//({r: r.id, addedBy: r.id, dir: 3, fX: checkX+2, fX: checkY});
+									rooms[adjRoom].adjacentRoomCells.push({r: r.id, addedBy: r.id, fX: checkX+2, fY: checkY, oX: 2, oY: 0});
 									rooms[adjRoom].roomToTop++;
 									rooms[adjRoom].adjRoomCount++;
 								}
-								console.log("New adjacent room found (bot)");
+								// console.log("New adjacent room found (bot)");
 							}
 							
 						}
@@ -647,47 +666,36 @@ function expand(r, d){
 
 							success = true;
 						}
-						//console.log("Room " + r.id + " expanded bot.");
+						// console.log("Room " + r.id + " expanded bot.");
 					}
 					else{
 						r.expBot = false;
 					}
 				}
 				else{
-					console.log("FOUND OUT OF BOUNDS (BOT) ", oobCheck);
+					// console.log("FOUND OUT OF BOUNDS (BOT) ", oobCheck);
 					r.expBot = false;
 				}
 			}
 			else{
 				unnecessaryChecks++;
-				//console.log("Shouldn't be checking as flagged that this direction is not expandable.");
+				// console.log("Shouldn't be checking as flagged that this direction is not expandable.");
 			}
 			return success;
 			break;
 		default:
-			console.log("invalid case number");
+			// console.log("invalid case number");
 			break;
 	}
 }
 
-/*function findAdjacentRooms(){
-	//for each room
-	
-	for(let i = 0; i < rooms.length; i++){
-		//check all four directions
-		//if the roomTo<dir> val is > 0
-			//find room in that dir, add it to adjacent rooms with length of shared wall
-			//repeat for num of rooms in that direction
-		//once all adj rooms have been found, move on to next room
-	}
-}*/
-
-function findRoomCell(d, cX, cY){
+//finds the room id of a room that is adjacent to another, to populate adjacency lists
+function findAdjacentCell(d, cX, cY){
 
 	//d is expansion direction of other room
 	//so if d is left, we check right most values of new room
 
-	console.log("Finding index of adjacent room");
+	// console.log("Finding index of adjacent room");
 
 	//tiles indexes
 	let iX;
@@ -700,7 +708,7 @@ function findRoomCell(d, cX, cY){
 	let l;
 
 	while(!cellFound && p < rooms.length){
-		console.log("p=", p)
+		// console.log("p=", p)
 		chkTiles = rooms[p].tiles;
 
 		//IF ROOM IS NOT THE SAME
@@ -712,11 +720,11 @@ function findRoomCell(d, cX, cY){
 					if(chkTiles[chkTiles.length-1][i].x == cX &&
 						chkTiles[chkTiles.length-1][i].y == cY){
 						cellFound = true;
-						console.log("Room", p, "is left.");
+						// console.log("Room", p, "is left.");
 					}
 					i++;
 				}
-				console.log("Room ", p, " has correct y. Cell found =", cellFound);
+				// console.log("Room ", p, " has correct y. Cell found =", cellFound);
 			}
 		}
 		else if(d == 1){
@@ -727,15 +735,15 @@ function findRoomCell(d, cX, cY){
 					if(chkTiles[i][l-1].x == cX &&
 						chkTiles[i][l-1].y == cY){
 						cellFound = true;
-						console.log("Room", p, "is above.");
+						// console.log("Room", p, "is above.");
 					}
 					i++;
 				}
-				console.log("Room ", p, " has correct x. Cell found =", cellFound);
+				// console.log("Room ", p, " has correct x. Cell found =", cellFound);
 			}
 			else{
-				console.log("Other room x: " + chkTiles[0][l-1].x);
-				console.log("Checking room x: " + cX);
+				// console.log("Other room x: " + chkTiles[0][l-1].x);
+				// console.log("Checking room x: " + cX);
 			}
 		}
 		else if(d == 2){
@@ -745,11 +753,11 @@ function findRoomCell(d, cX, cY){
 					if(chkTiles[0][i].x == cX &&
 						chkTiles[0][i].y == cY){
 						cellFound = true;
-						console.log("Room", p, "is right.");
+						// console.log("Room", p, "is right.");
 					}
 					i++;
 				}
-				console.log("Room ", p, " has correct y. Cell found =", cellFound);
+				// console.log("Room ", p, " has correct y. Cell found =", cellFound);
 			}
 		}
 		else if(d == 3){
@@ -760,42 +768,324 @@ function findRoomCell(d, cX, cY){
 					if(chkTiles[i][0].x == cX &&
 						chkTiles[i][0].y == cY){
 						cellFound = true;
-						console.log("Room", p, "is below.");
+						// console.log("Room", p, "is below.");
 					}
 					i++;
 				}
-				console.log("Room ", p, " has correct x. Cell found =", cellFound);
+				// console.log("Room ", p, " has correct x. Cell found =", cellFound);
 			}
 			else{
-				console.log("Other room x: " + chkTiles[0][0].x);
-				console.log("Checking room x: " + cX);
+				// console.log("Other room x: " + chkTiles[0][0].x);
+				// console.log("Checking room x: " + cX);
 			}
 		}
 		if(!cellFound){
-			console.log("Cell not found, iterating");
+			// console.log("Cell not found, iterating");
 			p++;
 		}
 	}
 
 	if(!cellFound){
-		console.log("Couldn't find cell");
+		// console.log("Couldn't find cell");
 	}
 	else{
-		console.log("Room ", p, " is adjacent to this room.");
+		// console.log("Room ", p, " is adjacent to this room.");
 	}
 
 	return p;
 }
 
-// function connectRooms(){
-// 	//need to create an array of the rooms added to the map
-// 	//need a reference to the rooms walls (floor edge -1/+1) that are adjacent to other rooms
-// 	//obvs walls that border edge of map should not be considered when checking for adjacent rooms
-// 	//
-// 	let roomsRemaining = 
+//uses adjacency list to connect rooms that are adjacent, in a random manner
+function randomlyConnectAdjacentRooms(){
+
+	//CHECK SITE FOR EXACT PROCEDURE
+	//rooms to be placed = rooms
+	let roomsToBePlaced = rooms.slice();
+	// console.log(rooms.length);
+	// console.log(rooms);
+	// console.log(roomsToBePlaced);
+	let placedRooms = [];
+	let adjacentRoomPool = [];
+	let numPlaced = 0;
+
+	let rndRoomNum;
+
+	//array method that could compare two arrays and return similar?
+
+	while(numPlaced < numRooms){
+		//first it: remove random room from ToBePlaced and add it to placed rooms
+		//second onwards: room has been randomly selected from adjacent rooms list
+		console.log("-------------------");
+		console.log("New room being placed");
+
+		// console.log(rndRoomNum);
+		// console.log(roomsToBePlaced[rndRoomNum]);
+		console.log("Rooms to be placed: ", roomsToBePlaced);
+
+		//get random adjacent room from adjacentRoomPool and remove it from pool
+		if(numPlaced == 0){
+			rndRoomNum = Math.floor(Math.random() * roomsToBePlaced.length);
+		}
+		else{
+			let newRoomFound =false;
+			//check that is hasn't been placed already
+			while(!newRoomFound){
+				let ran = Math.floor(Math.random() * adjacentRoomPool.length);
+				if(roomsToBePlaced.findIndex(function(room){ 
+					return room.id == adjacentRoomPool[ran];}) != -1){
+					rndRoomNum = adjacentRoomPool[ran];
+					newRoomFound = true;
+					console.log("new random number: ", ran);
+					console.log("pool: ", adjacentRoomPool);
+					console.log("rndRoomNum: ", rndRoomNum);
+				}
+			}
+		}
+		
+		let newRoom = roomsToBePlaced.find(function(room){ return room.id == rndRoomNum;})
+
+		placedRooms.push(newRoom);
+
+		roomsToBePlaced.splice(roomsToBePlaced.indexOf(newRoom),1);
+
+		console.log("Rooms to be placed: ", roomsToBePlaced);
+
+		console.log("New Room:");
+		console.log(newRoom);
+		console.log(newRoom.id);
+
+		//console.log(newRoom);
+		//console.log(newRoom.adjacentRooms);
+		//console.log(newRoom.adjacentRooms.length);
+		
+		for(let i = 0; i < newRoom.adjacentRooms.length; i++){
+			//only add if unique reference
+			if(adjacentRoomPool.indexOf(newRoom.adjacentRooms[i]) == -1){
+				adjacentRoomPool.push(newRoom.adjacentRooms[i]);
+				console.log(newRoom.adjacentRooms[i], "added to adjacentRoomPool.");
+			}
+		}
+
+		numPlaced++;
+
+		//CONNECT TWO ROOMS
+		//from second placed room onwards
+		if(numPlaced > 1){
+			//check from pool all numbers that exist in  newRoom adjacentRooms list
+			//find only those that are currently in placedRooms array (leave rest to help choose next room to be placed)
+			//adds them to new list
+			let availableConnections = adjacentRoomPool.filter(function(roomId){
+				//new room has these connections in pool
+				return newRoom.adjacentRooms.indexOf(roomId) != -1;
+			})
+
+			let possibleConnections = [];
+
+			//if these rooms have actually been placed already
+			for(let i = 0; i < placedRooms.length; i++){
+				if(availableConnections.indexOf(placedRooms[i].id) != -1){
+					possibleConnections.push({id: placedRooms[i].id, doors: placedRooms[i].doors});
+				}
+			}
+
+			let highestDoorCount = 0;
+			let tie = false;
+			let roomsWithMostDoors = [];
+
+			//finds the placed room that has the most connection already, to create hub rooms
+			for(let i = 0; i < possibleConnections.length; i++){
+				if(possibleConnections[i].doors > highestDoorCount){
+					roomsWithMostDoors = [];
+					roomWithMostDoors.push(possibleConnections[i]);
+					highestDoorCount = possibleConnections[i].doors
+					tie = false;
+				}
+				else if(possibleConnections[i].doors == highestDoorCount)
+				{
+					tie = true;
+					roomsWithMostDoors.push(possibleConnections[i]);
+				}
+			}
+
+			let connectionChoice;
+
+			//if there is a tie, pick randomly from possible connections
+			if(tie) {
+				let rndConnection = Math.floor(Math.random() * roomsWithMostDoors.length);
+				connectionChoice = roomsWithMostDoors[rndConnection];
+			}
+			else{
+				connectionChoice = roomsWithMostDoors[0];
+			}
+
+			let roomToConnect = placedRooms.find(function(room){
+				console.log("room.id: ",room.id);
+				console.log("connectionChoice.id: ", connectionChoice.id);
+				return room.id == connectionChoice.id;
+			})
+
+			console.log("Room To Connect:");
+			console.log(roomToConnect);
+			console.log(roomToConnect.id);
+
+			//remove connection from pool as it has been picked
+			adjacentRoomPool.splice(adjacentRoomPool.indexOf(roomToConnect.id), 1);
+			adjacentRoomPool.splice(adjacentRoomPool.indexOf(newRoom.id), 1);
+
+			//we have reference to first cell of adjacency, room.adjacentRooms[i].fX and fY
+			//we have placedRooms array which contains both rooms (newRoom & roomToConnect)
+			let adjacencyObj = newRoom.adjacentRoomCells.find(function(adj){
+				console.log("adj.r: ", adj.r);
+				console.log("roomToConnect.id: ", roomToConnect.id);
+				return adj.r == roomToConnect.id;
+			})
+
+			console.log(adjacencyObj);
+
+			//so many variables ;_;
+			let roomA;	
+			let roomB;
+
+			//we're doing the checking from the other direction
+			if(newRoom.id == adjacencyObj.addedBy){
+				roomA = roomToConnect;
+				roomB = newRoom;
+			}
+			else if(roomToConnect.id == adjacencyObj.addedBy){
+				roomA = newRoom;
+				roomB = roomToConnect;
+			}
+			else{
+				console.log("WTF MATE");
+			}
+
+			//a lot of offsets!
+			let chkTiles;
+			let xOffset;
+			let yOffset;
+			let wOffsetX;
+			let wOffsetY;
+			let fX = adjacencyObj.fX;
+			let fY = adjacencyObj.fY;
+			let oX = adjacencyObj.oX;
+			let oY = adjacencyObj.oY;
+			let l;
+
+			console.log("RoomA tiles: ", roomA.tiles);
+
+			//work it out from fX and fY
+
+			if(oY < 0){
+				console.log("connectedRoom is to RIGHT");
+				chkTiles = [];//roomA.tiles[length-1];
+				l = roomA.tiles[0].length;
+				for(let t = 0; t < l; t++){
+					chkTiles.push(roomA.tiles[roomA.tiles.length-1][t]);
+				}
+				xOffset = 0;
+				yOffset = 2;
+				wOffsetX = 0;
+				wOffsetY = 1;
+				
+				console.log("want to check RIGHT");
+			}
+			else if(oX < 0){
+				console.log("connectedRoom is to BOT");
+				chkTiles = [];
+				l = roomA.tiles.length; 
+				for(let t = 0; t < roomA.tiles.length; t++){
+					chkTiles.push(roomA.tiles[t][roomA.tiles[0].length-1]);
+				}
+				xOffset = 2;
+				yOffset = 0;
+				wOffsetX = 1;
+				wOffsetY = 0;
+
+				
+				console.log("want to check BOT");
+			}
+			else if(oY > 0){
+				console.log("connectedRoom is to LEFT");
+				chkTiles = [];//roomA.tiles[0];
+				l = roomA.tiles[0].length;
+				for(let t = 0; t < l; t++){
+					chkTiles.push(roomA.tiles[0][t]);
+				}
+				xOffset = 0;
+				yOffset = -2;
+				wOffsetX = 0;
+				wOffsetY = -1;
+				console.log("want to check LEFT");
+			}
+			else if(oX > 0){
+				console.log("connectedRoom is to TOP");
+				chkTiles = [];
+				l = roomA.tiles.length;
+				for(let t = 0; t < roomA.tiles.length; t++){
+					chkTiles.push(roomA.tiles[t][0]);
+				}
+				xOffset = -2;
+				yOffset = 0;
+				wOffsetX = -1;
+				wOffsetY = 0;
+			
+				console.log("want to check TOP");
+			}
+
+			let endOfSharedWallFound = false;
+			let ct = 0;
+			let sharedWallLength = 0;
+			let sharedWall = [];
 
 
-// }
+			console.log("chkTiles: ", chkTiles);
+
+			while(!endOfSharedWallFound && ct < l){
+				//work out direction of walls, left/right or up/down
+				//find out who's side the fX and fY values are on
+				//check both sides until a wall intersects, meaning the shareWall is ended
+				//take the length of sharedWall /2 and place doo
+				
+				let chkX = chkTiles[ct].x;
+				let chkY = chkTiles[ct].y;
+
+				//accounts for all directions and starts checking only from starting tile flagged by adjacency method
+				//MIGHT NOT GET TOTALLY CORRECT AS POINT AT WHICH ROOMS FOUND EACH OTHER MAY BE OUTDATED WITH FURTHER EXPANDING DONE LATER
+				if(chkX >= fX && chkY >= fY){
+					console.log("x: ", chkX+xOffset, "y: ", chkY+yOffset, "FLOOR");
+					if(map[chkX+xOffset][chkY+yOffset] == Tile.FLOOR){
+						sharedWallLength++;
+						sharedWall.push({x: chkX+wOffsetX, y: chkY+wOffsetY});
+					}
+					else{
+						console.log("HIT WALL");
+						endOfSharedWallFound = true;
+					}
+				}
+				else{
+					console.log("x: ", chkX+xOffset, "y: ", chkY+yOffset, "NOT RIGHT FLOOR");
+				}
+				ct++;
+			}
+
+
+			//ONLY ADD NEW DOOR IF SHAREDWALLLENGTH >= 3
+
+			let halfWayPoint = Math.floor(sharedWallLength/2);
+			let newDoorPosition = sharedWall[halfWayPoint-1];
+
+			console.log(roomA);
+			console.log(roomB);
+
+			console.log("THE GREAT WALL:", sharedWall);
+			console.log("THE GREAT DOOR POSITION:", newDoorPosition);
+
+			map[newDoorPosition.x][newDoorPosition.y] = Tile.DOOR;
+		}
+	}
+}
+
+
 
 
 
