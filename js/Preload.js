@@ -20,11 +20,18 @@ Roguelike.Preload.prototype = {
 		this.load.image('eye', 'assets/images/maxresdefault800600.jpg');
 		this.load.image('beautifulFace', 'assets/images/Blade-Runner-2-Director.jpg');
 
+		//single sprites
+		this.load.image('floorTile', 'assets/images/floorTile.png', 32, 32);	
+		this.load.image('wallTile', 'assets/images/wallTile.png', 32, 32);		
+		this.load.image('doorTile', 'assets/images/doorTile.png', 32, 32);	
+
 		//spritesheets
-		this.load.spritesheet('character', 'assets/images/Character1Walk.png', 12, 12);
-		this.load.spritesheet('agent', 'assets/images/AgentWalk.png', 12, 12);	
-		this.load.spritesheet('armor1', 'assets/images/ArmorWalk.png', 12, 12);	
-		this.load.spritesheet('armor2', 'assets/images/Armor2Walk.png', 12, 12);	
+		this.load.spritesheet('player', 'assets/images/Character32.png', 32, 32);
+		this.load.spritesheet('agent', 'assets/images/AgentWalk.png', 64, 64);	
+		this.load.spritesheet('armor1', 'assets/images/ArmorWalk.png', 64, 64);	
+		this.load.spritesheet('armor2', 'assets/images/Armor2Walk.png', 64, 64);	
+		//this.load.spritesheet('interior', 'assets/images/Interior-Furniture.png', 32, 32);	
+		
 
 		//buttons
 		this.load.image('greybutton', 'assets/images/grey_button00.png')

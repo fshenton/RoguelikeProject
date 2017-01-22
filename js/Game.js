@@ -11,7 +11,18 @@ const floorChar = 'R';
 const wallChar = 'w';
 
 var gameMusic;
-var map, rooms, player, actorList, UI;
+
+var map;
+var floorLayer;
+var objLayer;
+
+var rooms;
+
+var player;
+var enemy; 
+//actorList, UI;
+
+var cursors;
 
 var unnecessaryChecks;
 
@@ -21,23 +32,140 @@ Roguelike.Game.prototype = {
 
 		//debug
 		//show name
-		/*console.log(localStorage.getItem("playerName"));
-
-		var text = localStorage.getItem("playerName");
-		var style = {font: "30px Arial", fill: "#fff", align: "center"};
-		var t = this.game.add.text(this.game.width/2, 15, text, style);
-		t.anchor.set(0.5);*/
+		
 
 		//play music
 		// gameMusic = this.game.add.audio('gameMusic');
 		// gameMusic.play();
 
-		//set up map
+		//set up map array
 		initMap();
 		expandRandomRooms(); //also populates room adjacency lists
 		randomlyConnectAdjacentRooms(); //use room adjency list to add doors connecting the rooms
 
+		//add map to csv
+		// var csvMap = '';// = "data:text/csv;charset=utf-8,";
+
+		// map.forEach(function(dataArray, index){
+		// 	let dataString = dataArray.join(",");
+		// 	csvMap += index < mapSize ? dataString + "\n" : dataString;
+		// });
+
+		//this.cache.addTilemap('gMap', null, csvMap, Phaser.Tilemap.CSV);
+
+		//generate tilemap from csv
+		//let tMap = this.game.add.tilemap('gMap', 32, 32);
+		//console.log(tMap);
+		// tMap.addTilesetImage('floorTile');
+		// tMap.addTilesetImage('wallTile');
+		// tMap.addTilesetImage('doorTile');
+
+		//console.log("tile: ", tMap.getTile(0,0));
+
+		//this.game.world.setBounds(0, 0, tMap.widthInPixels, tMap.heightInPixels);
+
+		//create layers that tiles can be added to
+		// floorLayer = tMap.createBlankLayer('floorLayer', mapSize, mapSize, 32, 32);
+		// floorLayer.resizeWorld();
+
+		// objLayer = tMap.createBlankLayer('objectLayer', mapSize-100, mapSize-100, 32, 32);
+
+		//displayMap();
+
+		//Add sprites to layers for displaying
+
+		//GROUPS?
+		//do I even need tilemap?
+		for(let x = 0; x < mapSize; x++){
+			for(let y = 0; y < mapSize; y++){
+				if(map[x][y] == '.'){
+					//floorLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'floorTile'));
+					this.game.add.sprite(y*32, x*32, 'floorTile');
+					//console.log("floor tile added");
+				}
+				else if(map[x][y] == '#'){
+					//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'wallTile'));
+					this.game.add.sprite(y*32, x*32, 'wallTile');
+					//console.log("wall tile added");
+				}
+				else if(map[x][y] == 'D'){
+					//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'doorTile'));
+					this.game.add.sprite(y*32, x*32, 'doorTile');
+					//console.log("door tile added");
+				}
+			}
+		}
+
+		//console.log("tile: ", tMap.getTile(0,0));
+		//console.log(floorLayer);
+		//console.log(objLayer);
+
+
+		//need background
+		//this.background = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'beautifulFace');
+
+		let playerName = localStorage.getItem("playerName");
+		this.player = new Player(this.game, playerName, 10, 1, 100);
+
+		//this.game.camera.follow(this.player);
+
+		//this.game.physics.arcade.enable(this.player);
+		//this.player.body.collideWorldBounds = true;
+		//this.game.camera.follow(this.player);
+
+
+		////HUD STUFF
+		var style = {font: "30px Arial", fill: "#fff", align: "center"};
+		var t = this.game.add.text(this.game.width/2, 15, playerName, style);
+		t.anchor.set(0.5);
+
+		var t = this.game.add.text((this.game.width/2) + 200, 15, this.player.hp, style);
+		t.anchor.set(0.5);
+
+		// this.player.sprite = this.game.add.sprite(this.player.x * 32, this.player.y * 32, this.player.sprite, 19);
+
+		//set up mouse button listener + callback
+		//on click_up, check if valid move, if so move them/attack
+		//ai takes move
 		
+		//also set up keyboard listener + callbacks
+
+		cursors = this.game.input.keyboard.createCursorKeys();
+
+		////player  & camera
+		// var style = {font: '16px monospace', fill: '#fff'};
+		// 	playerHUD = this.add.text(0, 0, 'Player life: ' + actorList[0].hp, style);
+		// 	playerHUD.fixedToCamera = true;
+		// 	playerHUD.cameraOffset.setTo(500, 50);
+
+		////Space hipster
+		// this.game.world.setBounds(0, 0, 1920, 1920);
+		
+		// //same space scrolling background
+		// this.background = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'space');
+		
+		// this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'playership');
+		// this.player.scale.setTo(2);
+
+		////uses the 4 frames from the spritesheet added, with 5 being the frequency for change
+		// this.player.animations.add('fly', [0, 1, 2, 3], 5, true);
+		// this.player.animations.play('fly');
+
+		// this.playerScore = 0;
+
+		// //enable player physics for collisions
+		// this.game.physics.arcade.enable(this.player);
+		// this.playerSpeed = 120;
+		// this.player.body.collideWorldBounds = true;
+
+		// this.game.camera.follow(this.player);
+
+		// this.explosionSound = this.game.add.audio('explosion');
+		// this.collectSound = this.game.add.audio('collect');
+		////Space hipster
+
+
+
 
 		// initActors();
 		// initItems();
@@ -48,8 +176,9 @@ Roguelike.Game.prototype = {
 		// setUpHUD();
 		// beginRender();
 
+		//console.log(JSON.parse(JSON.stringify(map)));
 		console.log(JSON.stringify(map));
-
+		//console.log(csvMap);
 
 		// for(let i = 0; i < rooms.length; i++){
 		// 	let r = rooms[i];
@@ -66,6 +195,23 @@ Roguelike.Game.prototype = {
 		//initActors();
 	},
 	update: function(){
+		if (cursors.up.isDown)
+	    {
+	        moveTo(this.player, 1);
+	    }
+	    else if (cursors.down.isDown)
+	    {
+	        moveTo(this.player, 3);
+	    }
+
+	    if (cursors.left.isDown)
+	    {
+	        moveTo(this.player, 0);
+	    }
+	    else if (cursors.right.isDown)
+	    {
+	        moveTo(this.player, 2);
+	    }
 		//player movement & dodging & attacking
 		//AI decisions
 		//check collisions with enemies, if so call hitEnemy
@@ -103,6 +249,346 @@ function Room(num){
 	this.roomToBot = 0;
 	//methods?
 }
+
+// function Actor(x, y, hp, actorSprite){
+// 	console.log(x);
+// 	console.log(y);
+// 	console.log(hp);
+// 	console.log(actorSprite);
+// 	this.x = x;
+// 	this.y = y;
+// 	this.hp = hp;
+// 	this.actorSprite = actorSprite;
+// 	//want to create sprite in here?
+// 	//isPlayer bool
+// }
+
+//player and enemy 'inherit' from Actor
+function Player(game, name, x, y, hp){
+	this.game = game;
+	this.name = name;
+	this.x = x;
+	this.y = y;
+	this.hp = hp;
+	this.sprite = this.game.add.sprite(x*32, y*32, 'player', 19);
+	//Actor.call(this, x, y, hp, 'player');
+	//this.name = name;
+}
+
+function moveTo(a, d){
+// move actors (a) in direction (d) if possible and handle any outcomes resulting from new tile
+// function moveTo(a, d){
+	//if(validMove(d)){
+	
+	//SHOULDNT OVEWRITE THE EXISTING TILE, NEED TO ACCOUNT FOR THAT
+	switch(d){
+		case 0:
+			//update map
+			//move exactly one tile
+			a.sprite.x -=1;
+			break;
+		case 1:
+			//update map
+			//move exactly one tile
+			a.sprite.y -=1;
+			break;
+		case 2:
+			//update map
+			//move exactly one tile
+			a.sprite.x +=1;
+			break;
+		case 3:
+			//update map
+			//move exactly one tile
+			a.sprite.y +=1;
+			break;
+		default:
+			break;
+	}
+}
+
+// function Enemy(x, y, hp){
+// 	Actor.call(x, y, hp, 'enemy');
+// }
+
+// Player.prototype = new Actor();
+
+// Enemy.prototype = new Actor();
+
+
+////spacehipster
+/*function drawMap(){
+	for(var y = 0; y < ROWS; y++){
+		for(var x = 0; x < COLS; x++){
+			asciidisplay[y][x] = map[y][x];	
+		}
+	}
+}*/
+
+// function drawActors(){
+// 	for(var a in actorList){
+// 		if(actorList[a] != null && actorList[a].hp > 0){
+// 			asciidisplay[actorList[a].y][actorList[a].x] = a == 0?''+player.hp:'e';
+// 		}
+// 	}
+////spacehipster
+
+
+
+////Roguelike-js-master
+// function Actor (game, x, y, keySprite) {
+// 		this.hp = 3;
+// 		this.x = x;
+// 		this.y = y;
+// 		this.isPlayer = null;
+// 		this.damage = 'd8+2';
+
+// 		if (game) {
+// 			this.game = game;
+// 			this.sprite = game.add.sprite(x * 32, y * 32, keySprite);
+// 		} else {
+// 			this.game = null;
+// 			this.sprite = null;
+// 		}
+// 	}
+
+// 	function Player (game, x, y) {
+// 		Actor.call(this, game, x, y, 'hero');
+// 		this.hp = 30;
+// 		this.isPlayer = true;
+// 		this.damage = 'd6+2';
+// 	}
+
+// 	function Enemy (game, x, y) {
+// 		Actor.call(this, game, x, y, 'orc');
+// 		this.hp = 10;
+// 		this.isPlayer = false;
+// 		this.damage = 'd4+2';
+// 	}
+
+// Actor.prototype.setXY = function (x, y) {
+// 		this.x = x;
+// 		this.y = y;
+
+// 		// this.sprite.x = x * 32;
+// 		// this.sprite.y = y * 32;
+
+// 		this.game.add.tween(this.sprite).to(
+// 			{
+// 				x: x * 32,
+// 				y: y * 32
+// 			},
+// 			150,
+// 			Phaser.Easing.Linear.None,
+// 			true
+// 		);
+
+// 	};
+
+// 	Player.prototype = new Actor();
+
+// 	Enemy.prototype = new Actor();
+
+// 	function moveTo (actor, dir) {
+// 		// check if actor can move in the given direction
+// 		if (!Map.canGo(actor, dir)) {
+// 			return false;
+// 		}
+
+// 		if (dir.x === 1) {
+// 			actor.sprite.frame = 2;
+// 		} else if (dir.x === -1) {
+// 			actor.sprite.frame = 3;
+// 		} else if (dir.y === -1) {
+// 			actor.sprite.frame = 1;
+// 		} else if (dir.y === 1) {
+// 			actor.sprite.frame = 0;
+// 		}
+
+// 		// moves actor to the new location
+// 		var newKey = (actor.x + dir.x) + '_' + (actor.y + dir.y);
+
+// 		// if the destination tile has an actor in it
+// 		if (actorMap.hasOwnProperty(newKey) && actorMap[newKey]) {
+// 			//decrement hitpoints of the actor at the destination tile
+// 			var victim = actorMap[newKey];
+
+// 			// avoid orcs to fight with each other
+// 			if (!actor.isPlayer && !victim.isPlayer) {
+// 				return;
+// 			}
+
+// 			var damage = diceRoll('d8+2').total;
+// 			victim.hp -= damage;
+
+// 			var axis = (actor.x === victim.x)
+// 				? 'y'
+// 				: 'x';
+
+// 			dir = victim[axis] - actor[axis];
+// 			dir = dir / Math.abs(dir); // +1 or -1
+
+// 			var pos1 = {}, pos2 = {};
+
+// 			pos1[axis] = (dir * 15).toString();
+// 			pos2[axis] = (dir * 15 * (-1)).toString();
+
+// 			game.camera.follow(false);
+
+// 			game.add.tween(actor.sprite)
+// 				.to(pos1, 100, Phaser.Easing.Linear.None, true)
+// 				.to(pos2, 100, Phaser.Easing.Linear.None, true)
+// 				.onComplete.add(function () {
+// 					game.camera.follow(actor.sprite);
+// 				}, this);
+
+// 			var color = victim.isPlayer ? null : '#fff';
+
+// 			HUD.msg(damage.toString(), victim.sprite, 450, color);
+
+// 			if (victim.isPlayer) {
+// 				playerHUD.setText('Player life: ' + victim.hp);
+// 			}
+
+// 			// if it's dead remove its reference
+// 			if (victim.hp <= 0) {
+// 				victim.sprite.kill();
+// 				delete actorMap[newKey];
+// 				actorList.splice(actorList.indexOf(victim), 1);
+// 				if (victim !== player) {
+// 					if (actorList.length === 1) {
+// 						// victory message
+// 						var victory = game.add.text(
+// 							game.world.centerX,
+// 							game.world.centerY,
+// 							'Victory!\nCtrl+r to restart', {
+// 								fill: '#2e2',
+// 								align: 'center'
+// 							}
+// 						);
+// 						victory.anchor.setTo(0.5, 0.5);
+// 					}
+// 				}
+// 			}
+// 		} else {
+// 			// remove reference to the actor's old position
+// 			delete actorMap[actor.x + '_' + actor.y];
+
+// 			// update position
+// 			actor.setXY(actor.x + dir.x, actor.y + dir.y);
+
+// 			// add reference to the actor's new position
+// 			actorMap[actor.x + '_' + actor.y] = actor;
+// 		}
+
+// 		return true;
+// 	}
+
+// function initActors (game) {
+// 		// create actors at random locations
+// 		actorList = [];
+// 		actorMap = {};
+// 		var actor, x, y;
+
+// 		var random = function (max) {
+// 			return Math.floor(Math.random() * max);
+// 		};
+
+// 		var validpos = [];
+// 		for (x = 0; x < COLS; x++) {
+// 			for (y = 0; y < ROWS; y++) {
+// 				if (!Map.tiles[x][y]) {
+// 					validpos.push({x: x, y: y});
+// 				}
+// 			}
+// 		}
+
+// 		for (var e = 0; e < ACTORS; e++) {
+// 			// create new actor
+// 			do {
+// 				//var room=m.rooms[random(2)][random(2)];
+// 				var r = validpos[random(validpos.length)];
+// 				x = r.x;
+// 				y = r.y;
+// 				// pick a random position that is both a floor and not occupied
+// 				//x=room.x+random(room.width);
+// 				//y=room.y+random(room.height);
+// 			} while (actorMap[x + '_' + y]);
+
+// 			actor = (e === 0)
+// 				? new Player(game, x, y)
+// 				: new Enemy(game, x, y);
+
+
+// 			// add references to the actor to the actors list & map
+// 			actorMap[actor.x + '_' + actor.y] = actor;
+// 			actorList.push(actor);
+// 		}
+
+// 		// the player is the first actor in the list
+// 		player = actorList[0];
+// 		game.camera.follow(player.sprite);
+
+// 	}
+
+// 	function aiAct (actor) {
+// 		var directions = [
+// 			{x: -1, y: 0},
+// 			{x: 1, y: 0},
+// 			{x: 0, y: -1},
+// 			{x: 0, y: 1}
+// 		];
+
+// 		var dx = player.x - actor.x,
+// 			dy = player.y - actor.y;
+
+// 		var moveToRandomPos = function () {
+// 			var rndDirections = shuffleArray(directions);
+// 			for (var i = 0; i < rndDirections.length; i++) {
+// 				if (moveTo(actor, rndDirections[i])) {
+// 					break;
+// 				}
+// 			}
+// 		};
+
+// 		// if player is far away, walk randomly
+// 		if (Math.abs(dx) + Math.abs(dy) > 6) {
+// 			moveToRandomPos();
+// 		} else {
+// 			// otherwise walk towards player
+// 			// dumb walk
+
+// 			directions = directions.map(function (e) {
+// 				return {
+// 					x: e.x,
+// 					y: e.y,
+// 					dist: Math.pow(dx + e.x, 2) + Math.pow(dy + e.y, 2)
+// 				};
+// 				//}).sort(function(a,b){ return a.dist-b.dist; });
+// 			}).sort(function (a, b) {
+// 				return b.dist - a.dist;
+// 			});
+
+// 			for (var d = 0, len = directions.length; d < len; d++) {
+// 				if (moveTo(actor, directions[d])) {
+// 					break;
+// 				}
+// 			}
+
+// 		}
+
+// 		if (player.hp < 1) {
+// 			// game over message
+// 			var gameOver = game.add.text(0, 0, 'Game Over\nCtrl+r to restart', {fill: '#e22', align: 'center'});
+// 			gameOver.fixedToCamera = true;
+// 			gameOver.cameraOffset.setTo(500, 500);
+// 		}
+// 	}
+////Roguelike-js-master
+
+
+
+
 
 //builds the mapSize x mapSize square array, fills with walls and then plants 3x3 rooms randomly (no overlap)
 function initMap(){

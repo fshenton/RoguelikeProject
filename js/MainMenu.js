@@ -23,6 +23,8 @@ Roguelike.MainMenu.prototype = {
 		var t = this.game.add.text(this.game.width/2, this.game.height/2-200, text, style);
 		t.anchor.set(0.5);
 
+
+		localStorage.setItem("playerName", "Kiriyama");
 		this.game.state.start('Game'); //FOR QUICKER DEBUGGING
 
 		// //set up the menu buttons
@@ -94,11 +96,11 @@ function actionOnClick(button) {
 
     		//debug
     		//enter and save name
-    		/*newGameButton.visible = false;
-    		settingsButton.visible = false;
-    		creditsButton.visible = false;
+    		newGameButton.visible = false;
+    		//settingsButton.visible = false;
+    		//creditsButton.visible = false;
     		var playerName = prompt("What are you known as?", "Cloud");
-    		localStorage.setItem("playerName", playerName);*/
+    		localStorage.setItem("playerName", playerName);
 
     		//debug
     		// menuMusic.stop();

@@ -16,10 +16,10 @@ Roguelike.Boot.prototype = {
 		this.game.stage.backgroundColor = '#000';
 		
 		this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-		this.scale.minWidth = 1280;
-		this.scale.minHeight = 720;
-		this.scale.maxWidth = 1920;
-		this.scale.maxHeight = 1080;
+		this.scale.minWidth = 800;
+		this.scale.minHeight = 800;
+		this.scale.maxWidth = 800;
+		this.scale.maxHeight = 800;
 
 		this.scale.pageAlignHorizontally = true;
 
