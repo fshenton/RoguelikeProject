@@ -9,6 +9,9 @@ const minRoomsize = 3;
 const numRooms = 10;
 const floorChar = 'R';
 const wallChar = 'w';
+const numEnemies = 10;
+//numitems
+//numterminals
 
 var gameMusic;
 
@@ -23,8 +26,10 @@ var doors;
 var player;
 //var enemy; 
 var actorList;//, UI;
-var enemyList;
-const numEnemies = 10;
+//var enemyList;
+var actorPositions;
+
+
 
 var cursors;
 
@@ -125,22 +130,34 @@ Roguelike.Game.prototype = {
 		let ranPos = getRandomCoords(rooms);
 		
 		//actorList = [];
+		actorPositions = [];
+		actorList = [];
 
 		let playerName = localStorage.getItem("playerName");
 		player = new Player(this.game, playerName, ranPos.y, ranPos.x, 100);
+
+		actorList.push(player);
+
+		//this could be condensed so that if i == 0, create player, else enemy
+
+		actorPositions.push(ranPos.x + '_' + ranPos.y); //not sure which way around these are!
 		//actorList.push(player);
-		player.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
-		player.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
-		player.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 60, false);
-		player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 60, false);
+		
+		player.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 18, false);
+		player.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 18, false);
+		player.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 18, false);
+		player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 18, false);
 		player.sprite.anchor.y = 0.3 ;
 
-		enemyList = [];
+		//enemyList = [];
 
 		for(let e = 0; e < numEnemies; e++){
 			ranPos = getRandomCoords(rooms);
 			let enemy = new Enemy(this.game, ranPos.y, ranPos.x, 50);
-			enemyList.push(enemy);
+			
+			actorList.push(enemy);
+			actorPositions.push(ranPos.x + '_' + ranPos.y);//not sure which way around
+
 			enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
 			enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
 			enemy.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 60, false);
@@ -288,7 +305,7 @@ Roguelike.Game.prototype = {
 		// 	//game should have ended
 		// 	return;
 		// }
-		console.log("onKeyUp");
+		//console.log("onKeyUp");
 		//console.log(player);
 		//console.log(this.player);
 
@@ -297,26 +314,30 @@ Roguelike.Game.prototype = {
 		switch(event.keyCode){
 			case Phaser.Keyboard.LEFT:
 				console.log("LEFT");
+				console.log("mX: ", player.x, "mY:", player.y-1);
 				if(validMove(player.x, player.y-1)){
-					acted = moveTo(player, {x: 0, y: -1});
+					acted = moveTo(player, 0, {x: 0, y: -1});
 				}
 				break;
 			case Phaser.Keyboard.UP:
 				console.log("UP");
+				console.log("mX: ", player.x-1, "mY:", player.y);
 				if(validMove(player.x-1, player.y)){
-					acted = moveTo(player, {x: -1, y: 0});
+					acted = moveTo(player, 0, {x: -1, y: 0});
 				}
 				break;
 			case Phaser.Keyboard.RIGHT:
 				console.log("RIGHT");
+				console.log("mX: ", player.x, "mY:", player.y+1);
 				if(validMove(player.x, player.y+1)){
-					acted = moveTo(player, {x: 0, y: 1});
+					acted = moveTo(player, 0, {x: 0, y: 1});
 				}
 				break;
 			case Phaser.Keyboard.DOWN:
 				console.log("DOWN");
+				console.log("mX: ", player.x+1, "mY:", player.y);
 				if(validMove(player.x+1, player.y)){
-					acted = moveTo(player, {x: +1, y: 0});
+					acted = moveTo(player, 0, {x: +1, y: 0});
 				}
 				break;
 			default: 
@@ -325,44 +346,137 @@ Roguelike.Game.prototype = {
 		
 		if(acted){
 			//AI TURN
-			for(let i = 0; i < numEnemies; i++){
-				let e = enemyList[i];
+			for(let i = 1; i <= numEnemies; i++){
+				let e = actorList[i];
 				if(e.isAlive){
-					let rndDir = Math.floor(Math.random() * 4);
-					console.log("random dir: ", rndDir);
-					let posX;
-					let posY;
-					switch(rndDir){
-						case 0:
-							posX = 0;
-							posY = -1;
-							break;
-						case 1:
-							posX = -1;
-							posY = 0;
-							break;
-						case 2:
-							posX = 0;
-							posY = 1;
-							break;
-						case 3:
-							posX = 1;
-							posY = 0;
-							break;
-						default:
-							break;
-					}
-					console.log("enemy x: ", e.x, "enemy y: ", e.y);
-					console.log("pos x: ", posX, "pos y: ", posY);
-					if(validMove(e.x + posX, e.y + posY)){
-						moveTo(e, {x: posX, y: posY});
-					}
+					aiAct(e, i);
 				}
 			}
 			
 		}
 	},
 	gameOver: function(){}
+}
+
+function aiAct(e, index){
+
+	let dx = e.x - player.x;
+	let dy = e.y - player.y;
+
+	if(!e.alerted && Math.abs(dx) + Math.abs(dy) <= 5)
+	{
+		e.alerted = true;
+	}
+	
+	let posX;
+	let posY;
+	let rndChoice;
+
+	if(e.alerted){
+		//dum tracking
+		//checks what direction the player is in
+		//if diagonal, chooses randomly between up/down and left/right
+		//if in a straight line direction, chooses that direction
+
+		if(dx < 0){ //player is below
+			if(dy > 0){
+				rndChoice = Math.floor(Math.random() * 2);
+				if(rndChoice == 0){
+					posX = 0;
+					posY = -1;
+				}
+				else{
+					posX = 1;
+					posY = 0;
+				}
+			}
+			else if(dy < 0){
+				rndChoice = Math.floor(Math.random() * 2);
+				if(rndChoice == 0){
+					posX = 0;
+					posY = 1;
+				}
+				else{
+					posX = 1;
+					posY = 0;
+				}
+			}
+			else if(dy ==0){
+				posX = 1;
+				posY = 0;
+			}
+		}
+		else if(dx > 0){ //player is above
+			if(dy > 0){
+				rndChoice = Math.floor(Math.random() * 2);
+				if(rndChoice == 0){
+					posX = 0;
+					posY = -1;
+				}
+				else{
+					posX = -1;
+					posY = 0;
+				}
+			}
+			else if(dy < 0){
+				rndChoice = Math.floor(Math.random() * 2);
+				if(rndChoice == 0){
+					posX = 0;
+					posY = 1;
+				}
+				else{
+					posX = -1;
+					posY = 0;
+				}
+			}
+			else if(dy == 0){
+				posX = -1;
+				posY = 0;
+			}
+		}
+		else if(dx == 0){ //player is to the sides
+			if(dy < 0){
+				posX = 0;
+				posY = 1;
+			}
+			else if(dy > 0){
+				posX = 0;
+				posY = -1;
+			}
+		}
+	
+	}
+	else{
+		//walk randomly
+		let rndDir = Math.floor(Math.random() * 4);
+		//console.log("random dir: ", rndDir);
+		switch(rndDir){
+			case 0:
+				posX = 0;
+				posY = -1;
+				break;
+			case 1:
+				posX = -1;
+				posY = 0;
+				break;
+			case 2:
+				posX = 0;
+				posY = 1;
+				break;
+			case 3:
+				posX = 1;
+				posY = 0;
+				break;
+			default:
+				break;
+		}
+		//console.log("enemy x: ", e.x, "enemy y: ", e.y);
+		//console.log("pos x: ", posX, "pos y: ", posY);
+	}
+
+	if(validMove(e.x + posX, e.y + posY)){
+		moveTo(e, index, {x: posX, y: posY});
+	}
 }
 
 function getRandomCoords(rooms){
@@ -382,84 +496,159 @@ function getRandomCoords(rooms){
 		}
 	}
 	
-	console.log("rndRoomX", rndRoomX);
-	console.log("rndRoomY", rndRoomY);
+	//console.log("rndRoomX", rndRoomX);
+	//console.log("rndRoomY", rndRoomY);
 
 	return {x: rndRoomX, y: rndRoomY};
 }
 
-function moveTo(actor, dir){
+function moveTo(actor, index, dir){
 
 	//all actors can use the same if statement, need to set up sprites and actor types
-	let moved = false;
+
+	let newPosX = actor.x;	
+	let newPosY = actor.y;
+
+	let cellOccupied;
+	let actorKilled;
+
+	// //handle if trying to move to occupied space, should be done before actor.x and actor.y are changed
+	// //could use temp x and y values for checking
+	// let actorFind = actorPositions.indexOf(mX + "_" + mY);
+
+	// if(actorFind != -1){
+	// 	if()
+	// }
 
 	//console.log("In moveTo");
 	// if(actor == player){
 	if(dir.x == 0 && dir.y == -1){
-		actor.y -= 1;
-		//actor.y -= 1;
-		moved = true;
-		actor.sprite.animations.play('walkLeft');
+		newPosY -= 1;
+		cellOccupied = checkCellOccupied(actor.x, newPosY);
+		if(cellOccupied){
+			//attacks and checks if they died, leaving space free to move into
+			actorKilled = attackActor(actor, actor.x, newPosY);
+		}
+		if(actorKilled || !cellOccupied){
+			actor.sprite.animations.play('walkLeft');
+		}
 	}
 	else if(dir.x == -1 && dir.y == 0){
-		actor.x -= 1;
-		//actor.x -= 1;
-		moved = true;
-		actor.sprite.animations.play('walkUp');
-		//actor.sprite.frame = 4;
+		newPosX -= 1;
+		cellOccupied = checkCellOccupied(newPosX, actor.y);
+		if(cellOccupied){
+			//attacks and checks if they died, leaving space free to move into
+			actorKilled = attackActor(actor, newPosX, actor.y);
+		}
+		if(actorKilled || !cellOccupied){
+			actor.sprite.animations.play('walkUp');
+		}
 	}
 	else if(dir.x == 0 && dir.y == 1){
-		actor.y += 1;
-		//actor.y += 1;
-		moved = true;
-		actor.sprite.animations.play('walkRight');
-		//actor.sprite.frame = 29;
+		newPosY += 1;
+		cellOccupied = checkCellOccupied(actor.x, newPosY);
+		if(cellOccupied){
+			//attacks and checks if they died, leaving space free to move into
+			actorKilled = attackActor(actor, actor.x, newPosY);
+		}
+		if(actorKilled || !cellOccupied){
+			actor.sprite.animations.play('walkRight');
+		}
 	}
 	else if(dir.x == 1 && dir.y == 0){
-		actor.x += 1;
-		//actor.x += 1;
-		moved = true;
-		actor.sprite.animations.play('walkDown');
-		//actor.sprite.frame = 22;
+		newPosX += 1;
+		cellOccupied = checkCellOccupied(newPosX, actor.y);
+		if(cellOccupied){
+			//attacks and checks if they died, leaving space free to move into
+			actorKilled = attackActor(actor, newPosX, actor.y);
+		}
+		if(actorKilled || !cellOccupied){
+			actor.sprite.animations.play('walkDown');
+		}
 	}
-	else{
-		console.log("invalid direction to move to");
-	}
-	// }
-	if(moved){
-		//change position of sprite
-		let newPosX = actor.x;	//which way round?
-		let newPosY = actor.y;
 
-		actor.sprite.y = actor.x*64;
-		actor.sprite.x = actor.y*64;
+	if(actorKilled || !cellOccupied){
+		//only move sprite and change x and y position of actor
+		//if cell is free to move into
 
-		console.log("New position, x:" , actor.x , "and y:", actor.y);
+		actorPositions[index] = newPosX + '_' + newPosY;
 
-		// this.game.add.tween(actor.sprite)
-		// 		.to(newPosX, 100, Phaser.Easing.Linear.None, true)
-		// 		.to(newPosY, 100, Phaser.Easing.Linear.None, true);
+		//seems redundant to have multiple records of actor x and y
+		actor.x = newPosX;
+		actor.y = newPosY;
+	
+		//actor.sprite.y = newPosX*64;
+		//actor.sprite.x = newPosY*64;
 
+		Roguelike.game.add.tween(actor.sprite).to({x: newPosY*64, y: newPosX*64}, 500).start();
+
+		if(actor == player){
+			console.log("New position, x:" , newPosX , "and y:", newPosY);
+		}
 	}
 
 	return true;
 }
 
+function checkCellOccupied(x, y){
+	//returns true if x and y are in the actorPositions list
+	//ie an actor is at those coords
+	return actorPositions.indexOf(x + "_" + y) != -1;
+}
+
+function attackActor(aggressor, x, y){
+	let victimIndex = actorPositions.indexOf(x + "_" + y);
+	let victim = actorList[victimIndex];
+	let victimDead = false;
+
+	if(victim != player && aggressor != player){
+		//do nothing, victim is friend 
+	}
+	else{
+		console.log(aggressor);
+		console.log(actorPositions[victimIndex]);
+		victim.hp -= aggressor.dmg;
+		console.log(victim.hp);
+		if(victim.hp <= 0){
+			victimDead = true;
+			//actorList.splice(victimIndex, 1);
+			actorList[victimIndex].isAlive = false;
+			actorPositions.splice(victimIndex, 1);
+			if(victim == player){
+				//game.state.start('gameOver');
+				console.log("GAME OVER");
+			}
+			else{
+				player.score += 100;
+				player.credits += 50;
+				console.log("Enemy Killed");
+			}
+			victim.sprite.kill();
+		}
+		if(victim == player){
+			//change HUD to reflect new health total
+		}
+	}
+
+	return victimDead;
+}
+
+
 function validMove(mX, mY){
 	//console.log("in valid move");
-	console.log("mX: ", mX, "mY", mY);
+	//console.log("mX: ", mX, "mY", mY);
 	//console.log("map x: ", m))
 
 	if(map[mX][mY] == Tile.WALL){
-		console.log("found wall");
+		//console.log("found wall");
 		return false;
 	}
 	else if(map[mX][mY] == Tile.DOOR){
-		console.log("found door");
+		//console.log("found door");
 		//handle if door locked
 	}
 	else{
-		console.log("found floor");
+		//console.log("found floor");
 	}
 		
 	return true;
@@ -514,6 +703,9 @@ function Player(game, name, x, y, hp){
 	this.x = x;	
 	this.y = y;
 	this.hp = hp;
+	this.dmg = 25;
+	this.score = 0;
+	this.credits = 0;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
 }
@@ -523,8 +715,10 @@ function Enemy(game, x, y, hp){
 	this.x = x;	
 	this.y = y;
 	this.hp = hp;
+	this.dmg = 20;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'armor1', 19); 
 	this.isAlive = true;
+	this.alerted = false;
 }
 
 // function moveTo(a, d){
