@@ -4,7 +4,9 @@ var Roguelike = Roguelike || {};
 
 Roguelike.MainMenu = function(){};
 
-var newGameButton, settingsButton, creditsButton, playButton, nameInput;
+var newGameButton, settingsButton, creditsButton, playButton;
+var class1Button, class2Button;
+var nameInput;
 var menuMusic;
 
 Roguelike.MainMenu.prototype = {
@@ -29,6 +31,7 @@ Roguelike.MainMenu.prototype = {
 
 		// //set up the menu buttons
 		// //new game
+		//COULD ADD TWEENS TO MENU BUTTONS FOR COOLNESS
 		// newGameButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
 		// // newGameButton = this.game.add.button(this.game.width/2, this.game.height/2, 'greybutton', actionOnClick, this);
 
@@ -99,11 +102,14 @@ function actionOnClick(button) {
     		newGameButton.visible = false;
     		//settingsButton.visible = false;
     		//creditsButton.visible = false;
+
+
+
     		var playerName = prompt("What are you known as?", "Cloud");
     		localStorage.setItem("playerName", playerName);
 
     		//debug
-    		// menuMusic.stop();
+    		//menuMusic.stop();
     		this.game.state.start('Game');
     		break;
     	case settingsButton:

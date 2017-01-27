@@ -40,6 +40,8 @@ Roguelike.Preload.prototype = {
 		this.load.spritesheet('armor1', 'assets/images/ArmorWalk.png', 64, 64);	
 		this.load.spritesheet('armor2', 'assets/images/Armor2Walk.png', 64, 64);	
 		//this.load.spritesheet('interior', 'assets/images/Interior-Furniture.png', 32, 32);	
+		this.load.spritesheet('armorDeath', 'assets/images/ArmorDeath.png', 64, 64);	
+		this.load.spritesheet('playerDeath', 'assets/images/Character1Hurt.png', 64, 64);	
 		
 
 		//buttons

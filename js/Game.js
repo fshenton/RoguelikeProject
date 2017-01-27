@@ -6,12 +6,19 @@ Roguelike.Game = function(){};
 
 const mapSize = 50;
 const minRoomsize = 3;
-const numRooms = 10;
+const numRooms = 20;
 const floorChar = 'R';
 const wallChar = 'w';
-const numEnemies = 10;
+const numEnemies = 20;
+
 //numitems
 //numterminals
+
+var floorNumber;
+var floorAmount = 10;
+var expThreshold;
+
+var hud;
 
 var gameMusic;
 
@@ -23,6 +30,9 @@ var objLayer;
 var rooms;
 var doors;
 
+var marker;
+
+var playerName;
 var player;
 //var enemy; 
 var actorList;//, UI;
@@ -46,6 +56,9 @@ Roguelike.Game.prototype = {
 		//play music
 		// gameMusic = this.game.add.audio('gameMusic');
 		// gameMusic.play();
+
+		floorNumber = 1;
+		expThreshold = 3000;
 
 		//set up map array
 		initMap();
@@ -71,6 +84,7 @@ Roguelike.Game.prototype = {
 
 		//console.log("tile: ", tMap.getTile(0,0));
 
+		//Area outside of level is only to the right/bot of the map, as map is placed at 0,0
 		this.game.world.resize(4800, 4800);
 
 		// this.game.physics.startSystem(Phaser.Physics.P2JS);
@@ -133,7 +147,7 @@ Roguelike.Game.prototype = {
 		actorPositions = [];
 		actorList = [];
 
-		let playerName = localStorage.getItem("playerName");
+		playerName = localStorage.getItem("playerName");
 		player = new Player(this.game, playerName, ranPos.y, ranPos.x, 100);
 
 		actorList.push(player);
@@ -189,6 +203,7 @@ Roguelike.Game.prototype = {
 		// this.game.physics.p2.enable(this.player.sprite);
 
 		this.game.camera.follow(player.sprite);
+		//SHOULD HAVE AN OFFSET TO KEEP PLAYER IN CENTER OF VIEW PORT (HUD COVERS A COUPLE OF CELLS)
 
 		//
 		//this.player.body.collideWorldBounds = true;
@@ -196,14 +211,12 @@ Roguelike.Game.prototype = {
 
 
 		////HUD STUFF
-		var style = {font: "30px Arial", fill: "#fff", align: "center"};
-		var t = this.game.add.text(this.game.width/2, 15, playerName, style);
-		t.anchor.set(0.5);
-		t.fixedToCamera = true;
+		//create new HUD object, pass in initial values
+		//send group to top
 
-		var t = this.game.add.text((this.game.width/2) + 200, 15, player.hp, style);
-		t.anchor.set(0.5);
-		t.fixedToCamera = true;
+		// this.hud = new HUD();
+
+		createHUD(this.game);
 
 		// this.player.sprite = this.game.add.sprite(this.player.x * 32, this.player.y * 32, this.player.sprite, 19);
 
@@ -217,11 +230,13 @@ Roguelike.Game.prototype = {
 		this.input.keyboard.addCallbacks(null, null, this.onKeyUp);
 		// this.input.setMoveCallback(this.mouseCallback, this);
 
-		 // //  Our painting marker
-		 //    marker = game.add.graphics();
-		 //    marker.lineStyle(2, 0xffffff, 1);
-		 //    marker.drawRect(0, 0, 32, 32);
-		 //Highlight cells, call updateMarker to tell it which cell to highlight (where the mouse is pointing)
+		// this.game.input.addMoveCallback(updateMarker, this);
+		
+		//this.input.mouse.mouseDownCallback = this.onMouseUp();
+
+		this.input.onTap.add(this.onMouseTap, this);
+
+		//Highlight cells, call updateMarker to tell it which cell to highlight (where the mouse is pointing)
 
 
 		////player  & camera
@@ -294,9 +309,6 @@ Roguelike.Game.prototype = {
 		//check collisions with items/objects, if so call interact or smth
 		//lighting
 	},
-	mouseCallBack: function(event){
-
-	},
 	onKeyUp: function(event){
 
 		let acted = false;
@@ -344,7 +356,15 @@ Roguelike.Game.prototype = {
 				break;
 		}
 		
+		console.log("AP: " + player.ap);
+
 		if(acted){
+			player.ap -= 1;
+			//UPDATE HUD
+		}
+
+		if(player.ap == 0){
+			console.log("AI TURN, AP: " + player.ap);
 			//AI TURN
 			for(let i = 1; i <= numEnemies; i++){
 				let e = actorList[i];
@@ -352,16 +372,209 @@ Roguelike.Game.prototype = {
 					aiAct(e, i);
 				}
 			}
-			
+			player.ap = player.maxAP;
+			//update HUD
 		}
+	},
+	onMouseTap: function(pointer, doubleTap){
+		//console.log("mouse tap");
+
+		let tileY = Math.floor(Roguelike.game.input.activePointer.worldX/64);
+		let tileX = Math.floor(Roguelike.game.input.activePointer.worldY/64);
+
+		//console.log("tileX: ", tileX, "tile Y: ", tileY);
+
+		let dX = tileX - player.x;
+		let dY = tileY - player.y;
+
+		//if abs DX+DY == 2
+		//call keyboard control handler twice
+		//possible directions: 4 diagonals, left twice, up twice, right twice, down twice
+		//lose 1 ap per move
+
+
+
+		//if ap > 0 try move
+
+		if(Math.floor(player.ap) > 0){
+			if(dX == -1 && dY == 0){ //move up
+				//console.log("up");
+				this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+				//player.ap -=1;
+				//console.log(player.ap);
+			}
+			else if (dX == -2 && dY == 0 && player.ap >= 2){ //double move up
+				this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+				this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+				//player.ap -= 2;
+			}
+			else if(dX == 1 && dY == 0){ //move down
+				//console.log("up");
+				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+				//player.ap -=1;
+			}
+			else if(dX == 2 && dY == 0 && player.ap >= 2){ //double move up
+				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+				//player.ap -= 2;
+			}
+			else if(dX == 0 && dY == 1){ //move right
+				//console.log("up");
+				this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+				//player.ap -= 1;
+				// 	
+			}
+			else if(dX == 0 && dY == 2 && player.ap >= 2){ 	//double move right
+				this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+				this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+				//player.ap -= 2;
+			}	
+			else if(dX == 0 && dY == -1){ //move left
+				//console.log("up");
+				this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+				//player.ap -= 1;
+					
+			}
+			else if(dX == 0 && dY == -2 && player.ap >= 2){
+				this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+				this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+				//player.ap -=2;
+			}
+
+
+			//DIAGONALS
+			//TRY BOTH POSSIBLE FIRST DIRECTIONS, IE UP THEN LEFT TO GET DIAGONAL UP LEFT
+		}	
 	},
 	gameOver: function(){}
 }
+
+
+function createHUD(game){
+	//create group for hud?
+
+	//var bmd = game.add.bitmapData(800, 600);
+    //bmd.addToWorld();
+
+	let graphics = game.add.graphics(0, 0);
+
+	graphics.beginFill(0x333333);
+   	graphics.lineStyle(1, 0x777777, 1);
+   	let hudBackground = graphics.drawRect(0, game.height-101, game.width-1, 100);
+   	hudBackground.fixedToCamera = true;
+   	graphics.endFill();
+
+   	console.log(game.height);
+   	console.log(game.width);
+
+   	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+	
+	//readouts, just to test it works, should be populated elsewhere using msgs
+   	var t = game.add.text(5, game.height-81, "The door appears to be locked.", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text(5, game.height-63, "I see a terminal in the room.", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text(5, game.height-45, "There is a long way to go yet.", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text(5, game.height-27, "I'm inside, but it looks like I have company...", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+
+	//player stats
+	var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+
+	var t = game.add.text(game.width/2, game.height-90, playerName, style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	//change to a red rectangle, whose width is multiplied by hp value (ie length*0.65)
+	var t = game.add.text((game.width/2), game.height-72, player.hp, style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	//change to x number of images, hide when ap is used, show again once ap is regained
+	var t = game.add.text((game.width/2), game.height-54, player.ap, style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text((game.width/2), game.height-36, player.credits, style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text((game.width/2), game.height-18, floorNumber + " of " + floorAmount, style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+
+	//Equipment
+	var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+
+	var t = game.add.text(game.width-200, game.height-63, "Weapon", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+	var t = game.add.text((game.width-100), game.height-63, "Armor", style);
+	//t.anchor.set(0.5);
+	t.fixedToCamera = true;
+
+   	//bmd.rect(0, game.height-200, game.width, 200, 0xFF0000);
+
+   //	graphics.endFill();
+
+	//create overall group
+	//create subgroups for each 'section' of the HUD
+	//create the elements for the subgroups and then position with the overall group
+	//need player info
+	//readouts
+	//place for items/equip to go
+}
+
+function updateReadout(msg){
+	//add new message to top of list
+	//pop last message off of list
+	//display new list
+}
+
+
+function updatePlayerStatsDisplay(name, hp, ap, score, floor){
+	//if not null passed in, update the value, else ignore that argument
+}
+
+// function updateMarker(){
+
+// 	console.log("Update marker");
+
+// 	//get tile x and y based on activePointer.worldX and Y
+
+// 	let tileX = Math.floor(Roguelike.game.input.activePointer.worldX/64);
+// 	console.log("x: ", tileX);
+// 	let tileY = Math.floor(Roguelike.game.input.activePointer.worldY/64);
+// 	console.log("y: ", tileY);
+
+// 	 // //  Our painting marker
+// 	marker = this.game.add.graphics();
+// 	marker.lineStyle(2, 0x000000, 1);
+// 	// marker.drawRect(tileY, tileX, 64, 64);
+
+// 	marker.drawRect(player.y, player.x, 64, 64);
+
+// 	// marker.x = tileY;
+//  // 	marker.y = tileX;
+// }
 
 function aiAct(e, index){
 
 	let dx = e.x - player.x;
 	let dy = e.y - player.y;
+
+	//NEED TO CHECK FOR WALLS THAT WOULD OBSCURE SIGHT
 
 	if(!e.alerted && Math.abs(dx) + Math.abs(dy) <= 5)
 	{
@@ -527,7 +740,7 @@ function moveTo(actor, index, dir){
 		cellOccupied = checkCellOccupied(actor.x, newPosY);
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
-			actorKilled = attackActor(actor, actor.x, newPosY);
+			actorKilled = attackActor(game, actor, actor.x, newPosY);
 		}
 		if(actorKilled || !cellOccupied){
 			actor.sprite.animations.play('walkLeft');
@@ -615,14 +828,30 @@ function attackActor(aggressor, x, y){
 			actorList[victimIndex].isAlive = false;
 			actorPositions.splice(victimIndex, 1);
 			if(victim == player){
-				//game.state.start('gameOver');
+				game.state.start('gameOver');
+				// player.sprite = game.add.sprite(player.y*64, player.x*64, 'playerDeath', 0); 
+				// player.sprite.animations.add('playerDeath', [0, 1, 2, 3, 4, 5], 18, false);
+				// player.sprite.animations.play('playerDeath');
 				console.log("GAME OVER");
 			}
 			else{
 				player.score += 100;
+				player.exp += 1000;
+				if(player.exp >= expThreshold){
+					player.lvl++;
+					player.maxHP += 20;
+					player.dmg += 5;
+					player.maxAP += 0.5;
+					expThreshold += 3000;
+					console.log("LEVEL UP!");
+					console.log(player);
+				}
 				player.credits += 50;
 				console.log("Enemy Killed");
 			}
+			// victim.sprite = game.add.sprite(player.y*64, player.x*64, 'armorDeath', 0); 
+			// victim.sprite.animations.add('armorDeath', [0, 1, 2, 3, 4, 5], 18, false);
+			// victim.sprite.animations.play('armorDeath');
 			victim.sprite.kill();
 		}
 		if(victim == player){
@@ -702,9 +931,14 @@ function Player(game, name, x, y, hp){
 	this.name = name;
 	this.x = x;	
 	this.y = y;
+	this.maxHP = hp;
 	this.hp = hp;
 	this.dmg = 25;
+	this.maxAP = 2;
+	this.ap = 2;
 	this.score = 0;
+	this.lvl = 1;
+	this.exp = 0;
 	this.credits = 0;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
