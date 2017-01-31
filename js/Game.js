@@ -4,12 +4,13 @@ var Roguelike = Roguelike || {};
 
 Roguelike.Game = function(){};
 
-const mapSize = 50;
+const mapSize = 40;
 const minRoomsize = 3;
 const numRooms = 20;
 const floorChar = 'R';
 const wallChar = 'w';
 const numEnemies = 20;
+const terminalNumber = 5;
 
 //numitems
 //numterminals
@@ -49,14 +50,6 @@ Roguelike.Game.prototype = {
 	create: function(){
 		console.log("Game started");
 
-		//debug
-		//show name
-		
-
-		//play music
-		// gameMusic = this.game.add.audio('gameMusic');
-		// gameMusic.play();
-
 		floorNumber = 1;
 		expThreshold = 3000;
 
@@ -65,46 +58,11 @@ Roguelike.Game.prototype = {
 		expandRandomRooms(); //also populates room adjacency lists
 		randomlyConnectAdjacentRooms(); //use room adjency list to add doors connecting the rooms
 
-		//add map to csv
-		// var csvMap = '';// = "data:text/csv;charset=utf-8,";
-
-		// map.forEach(function(dataArray, index){
-		// 	let dataString = dataArray.join(",");
-		// 	csvMap += index < mapSize ? dataString + "\n" : dataString;
-		// });
-
-		//this.cache.addTilemap('gMap', null, csvMap, Phaser.Tilemap.CSV);
-
-		//generate tilemap from csv
-		//let tMap = this.game.add.tilemap('gMap', 32, 32);
-		//console.log(tMap);
-		// tMap.addTilesetImage('floorTile');
-		// tMap.addTilesetImage('wallTile');
-		// tMap.addTilesetImage('doorTile');
-
 		//console.log("tile: ", tMap.getTile(0,0));
 
 		//Area outside of level is only to the right/bot of the map, as map is placed at 0,0
 		this.game.world.resize(4800, 4800);
 
-		// this.game.physics.startSystem(Phaser.Physics.P2JS);
-		// this.game.physics.p2.setImpactEvents(true);
-
-		// var playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
-		// var environmentCollisionGroup = this.game.physics.p2.createCollisionGroup();
-		// var enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
-		//this.game.physics.p2.updateBoundsCollisionGroup();
-
-
-		//create layers that tiles can be added to
-		// floorLayer = tMap.createBlankLayer('floorLayer', mapSize, mapSize, 32, 32);
-		// floorLayer.resizeWorld();
-
-		// objLayer = tMap.createBlankLayer('objectLayer', mapSize-100, mapSize-100, 32, 32);
-
-		//displayMap();
-
-		//Add sprites to layers for displaying
 
 		//GROUPS?
 		//do I even need tilemap?
@@ -133,15 +91,27 @@ Roguelike.Game.prototype = {
 			}
 		}
 
-		//console.log("tile: ", tMap.getTile(0,0));
-		//console.log(floorLayer);
-		//console.log(objLayer);
+		//CREATE TERMINALS METHOD
+
+		let ranPos;
+
+		for(let t = 0; t < terminalNumber; t++){
+			//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
+			ranPos = getRandomCoords(rooms);
+			let options = ["Heal", "Unlock Door", "Upgrade"];
+			let terminal = new Terminal(this.game, options, ranPos.y, ranPos.x)
+			console.log(terminal.options);
+		}
 
 
-		//need background
-		//this.background = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'beautifulFace');
-		
-		let ranPos = getRandomCoords(rooms);
+		//PLACE EXIT
+		//based on player starting position, pick wall furthest away (perimeter of map) and place exit randomly on that wall
+		//it must be adjacent to a floor cell so it is reachable
+
+
+		//ACTOR INITIALISATION SHOULD BE IN A METHOD
+
+		ranPos = getRandomCoords(rooms);
 		
 		//actorList = [];
 		actorPositions = [];
@@ -179,6 +149,7 @@ Roguelike.Game.prototype = {
 			enemy.sprite.anchor.y = 0.3 ;
 		}
 		
+	
 		//player.sprite.scale.setY(2, 1);
 		// player.sprite.width = 64;
 		// player.sprite.height = 64;
@@ -214,9 +185,8 @@ Roguelike.Game.prototype = {
 		//create new HUD object, pass in initial values
 		//send group to top
 
-		// this.hud = new HUD();
-
-		createHUD(this.game);
+		hud = new HUD(this.game);
+		hud.initHUD("Replicants are either a benefit or a hazard.", playerName, player.hp, player.ap, player.credits, floorNumber, {}, {});
 
 		// this.player.sprite = this.game.add.sprite(this.player.x * 32, this.player.y * 32, this.player.sprite, 19);
 
@@ -238,76 +208,10 @@ Roguelike.Game.prototype = {
 
 		//Highlight cells, call updateMarker to tell it which cell to highlight (where the mouse is pointing)
 
-
-		////player  & camera
-		// var style = {font: '16px monospace', fill: '#fff'};
-		// 	playerHUD = this.add.text(0, 0, 'Player life: ' + actorList[0].hp, style);
-		// 	playerHUD.fixedToCamera = true;
-		// 	playerHUD.cameraOffset.setTo(500, 50);
-
-		////Space hipster
-		// this.game.world.setBounds(0, 0, 1920, 1920);
-		
-		// //same space scrolling background
-		// this.background = this.game.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'space');
-		
-		// this.player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'playership');
-		// this.player.scale.setTo(2);
-
-		////uses the 4 frames from the spritesheet added, with 5 being the frequency for change
-		// this.player.animations.add('fly', [0, 1, 2, 3], 5, true);
-		// this.player.animations.play('fly');
-
-		// this.playerScore = 0;
-
-		// //enable player physics for collisions
-		// this.game.physics.arcade.enable(this.player);
-		// this.playerSpeed = 120;
-		// this.player.body.collideWorldBounds = true;
-
-		// this.game.camera.follow(this.player);
-
-		// this.explosionSound = this.game.add.audio('explosion');
-		// this.collectSound = this.game.add.audio('collect');
-		////Space hipster
-
-
-
-
-		// initActors();
-		// initItems();
-		// initPhysics();
-		// setUpGame()
-		// setUpInputHandlers();
-		// setUpSoundAndGraphics();
-		// setUpHUD();
-		// beginRender();
-
-		//console.log(JSON.parse(JSON.stringify(map)));
-		//console.log(JSON.stringify(map));
-		//console.log(csvMap);
-
-		// for(let i = 0; i < rooms.length; i++){
-		// 	let r = rooms[i];
-		// 	console.log("Room ", r.id, "(x: ", r.tiles[0][0].x, " y: ",  r.tiles[0][0].y, ") has:")
-		// 	console.log(r.adjRoomCount, " rooms adjacent to it.");
-		// 	console.log(r.roomToLeft, " rooms to its left.");
-		// 	console.log(r.roomToTop, " rooms to its top.");
-		// 	console.log(r.roomToRight, " rooms to its right.");
-		// 	console.log(r.roomToBot, " rooms to its bot.");
-		// 	console.log(r.adjacentRooms);
-		// 	console.log(r.tiles);
-		// }
-
 		//initActors();
 	},
 	update: function(){
 
-		//player movement & dodging & attacking
-		//AI decisions
-		//check collisions with enemies, if so call hitEnemy
-		//check collisions with items/objects, if so call interact or smth
-		//lighting
 	},
 	onKeyUp: function(event){
 
@@ -360,10 +264,11 @@ Roguelike.Game.prototype = {
 
 		if(acted){
 			player.ap -= 1;
+			hud.updateAP(player.ap);
 			//UPDATE HUD
 		}
 
-		if(player.ap == 0){
+		if(Math.floor(player.ap) == 0){
 			console.log("AI TURN, AP: " + player.ap);
 			//AI TURN
 			for(let i = 1; i <= numEnemies; i++){
@@ -373,6 +278,7 @@ Roguelike.Game.prototype = {
 				}
 			}
 			player.ap = player.maxAP;
+			hud.updateAP(player.ap);
 			//update HUD
 		}
 	},
@@ -449,125 +355,205 @@ Roguelike.Game.prototype = {
 	gameOver: function(){}
 }
 
+function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment){
+	this.game = game;
+	this.hudReadout = [];// = messages;
+	this.readout0;
+	this.readout1;
+	this.readout2;
+	this.readout3;
+	this.hudName;// = name;
+	this.hudHP;// = hp;
+	this.hudAP;// = ap;
+	this.hudCredits;// = credits;
+	this.hudFloor;// = floor;
+	this.hudWeapon;// = weapon;
+	this.hudEquipment;// = equipment;
+}
 
-function createHUD(game){
-	//create group for hud?
+HUD.prototype = {
+	initHUD: function(message, name, hp, ap, credits, floor, weapon, equipment){
+		let graphics = this.game.add.graphics(0, 0);
 
-	//var bmd = game.add.bitmapData(800, 600);
-    //bmd.addToWorld();
+		graphics.beginFill(0x333333);
+	   	graphics.lineStyle(1, 0x777777, 1);
+	   	let hudBackground = graphics.drawRect(0, this.game.height-101, this.game.width-1, 100);
+	   	hudBackground.fixedToCamera = true;
+	   	graphics.endFill();
 
-	let graphics = game.add.graphics(0, 0);
+	   	//console.log(this.game.height);
+	   	//console.log(this.game.width);
 
-	graphics.beginFill(0x333333);
-   	graphics.lineStyle(1, 0x777777, 1);
-   	let hudBackground = graphics.drawRect(0, game.height-101, game.width-1, 100);
-   	hudBackground.fixedToCamera = true;
-   	graphics.endFill();
+	   	this.updateReadout(message);
+	   	this.updateName(name);
+	   	this.updateHP(hp);
+	   	this.updateAP(ap);
+	   	this.updateCredits(credits);
+	   	this.updateFloor(floor);
+	   	this.updateWeapon(weapon);
+	   	this.updateEquipment(equipment);
 
-   	console.log(game.height);
-   	console.log(game.width);
+	},
+	updateReadout: function(message){
 
-   	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		//IF SPACE IN READOUTS AREA, ADD NEW MESSAGE TO TOP, SHIFT ALL DOWN (USE UNSHIFT?)
+		//IF NOT SPACE, POP LAST ONE/s, ADD NEW ONES
+
+		if(this.hudReadout.length < 4){
+			this.hudReadout.unshift(message);
+		}
+		else{
+			this.hudReadout.pop();
+			this.hudReadout.unshift(message);
+		}
+
+		console.log(this.hudReadout);
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 	
-	//readouts, just to test it works, should be populated elsewhere using msgs
-   	var t = game.add.text(5, game.height-81, "The door appears to be locked.", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		let y = this.game.height-81;
+		let r;
 
-	var t = game.add.text(5, game.height-63, "I see a terminal in the room.", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		//console.log(this.readout0);
 
-	var t = game.add.text(5, game.height-45, "There is a long way to go yet.", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		if(this.readout0 != null){
+			console.log("existing readout0 destroyed");
+			this.readout0.destroy()
+		}
+		if(this.readout1 != null){
+			this.readout1.destroy()
+		}
+		if(this.readout2 != null){
+			this.readout2.destroy()
+		}
+		if(this.readout3 != null){
+			this.readout3.destroy()
+		}
 
-	var t = game.add.text(5, game.height-27, "I'm inside, but it looks like I have company...", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		for(let m = 0; m < this.hudReadout.length; m++){
+			if(m == 0){
+				//r = this.readout0;
+				this.readout0 = this.game.add.text(5, y, this.hudReadout[m], style);
+				this.readout0.fixedToCamera = true;
+			}
+			else if(m == 1){
+				//r = this.readout1;
+				this.readout1 = this.game.add.text(5, y, this.hudReadout[m], style);
+				this.readout1.fixedToCamera = true;
+			}
+			else if(m == 2){
+				//r = this.readout2;
+				this.readout2 = this.game.add.text(5, y, this.hudReadout[m], style);
+				this.readout2.fixedToCamera = true;
+			} 
+			else if(m == 3){
+				//r = this.readout3;
+				this.readout3 = this.game.add.text(5, y, this.hudReadout[m], style);
+				this.readout3.fixedToCamera = true;
+			} 
+			console.log(this.hudReadout[m]);
+			y += 18;
+		}
+	},
+	updateName: function(name){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
 
+		this.hudName = this.game.add.text(this.game.width/2, this.game.height-90, "Name: " + playerName, style);
+		//t.anchor.set(0.5);
+		this.hudName.fixedToCamera = true;
+	},
+	updateHP: function(hp){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
 
-	//player stats
-	var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+		if(this.hudHP != null){
+			this.hudHP.destroy();
+		}
 
-	var t = game.add.text(game.width/2, game.height-90, playerName, style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		//ADD RED RECTANGLE OF CERTAIN WIDTH, FIXED HEIGHT
+		let graphics = this.game.add.graphics(0, 0);
 
-	//change to a red rectangle, whose width is multiplied by hp value (ie length*0.65)
-	var t = game.add.text((game.width/2), game.height-72, player.hp, style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		graphics.beginFill(0xFF0000);
+	   	//graphics.lineStyle(1, 0x880000, 1);
+	   	this.hudHP = graphics.drawRect((this.game.width/2), this.game.height-72, hp, 18);
+	   	this.hudHP.fixedToCamera = true;
+	   	graphics.endFill();
 
-	//change to x number of images, hide when ap is used, show again once ap is regained
-	var t = game.add.text((game.width/2), game.height-54, player.ap, style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		//this.hudHP = this.game.add.text((this.game.width/2), this.game.height-72, "HP: " + player.hp, style);
+		//t.anchor.set(0.5);
+		this.hudHP.fixedToCamera = true;
+	},
+	updateAP: function(ap){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+		//change to x number of images, hide when ap is used, show again once ap is regained
+		
+		if(this.hudAP != null){
+			this.hudAP.destroy();
+		}
 
-	var t = game.add.text((game.width/2), game.height-36, player.credits, style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		let graphics = this.game.add.graphics(0, 0);
+		graphics.beginFill(0xFF9900);
 
-	var t = game.add.text((game.width/2), game.height-18, floorNumber + " of " + floorAmount, style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		let x = this.game.width/2;
 
+		for(let a = 0; a < ap; a++){
+			this.hudAP = graphics.drawRect(x, this.game.height-54, 40, 18);
+			x += 45;
+		}
 
-	//Equipment
-	var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	 	//graphics.lineStyle(1, 0x880000, 1);
+	 	
+	   	this.hudAP.fixedToCamera = true;
+	   	graphics.endFill();
+		
+		//this.hudAP = this.game.add.text((this.game.width/2), this.game.height-54, "AP: " + player.ap, style);
+		//t.anchor.set(0.5);
+		//this.hudAP.fixedToCamera = true;
+	},
+	updateCredits: function(credits){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
 
-	var t = game.add.text(game.width-200, game.height-63, "Weapon", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		if(this.hudCredits != null){
+			this.hudCredits.destroy();
+		}
 
-	var t = game.add.text((game.width-100), game.height-63, "Armor", style);
-	//t.anchor.set(0.5);
-	t.fixedToCamera = true;
+		this.hudCredits = this.game.add.text((this.game.width/2), this.game.height-36, "Credits: " + player.credits, style);
+		//t.anchor.set(0.5);
+		this.hudCredits.fixedToCamera = true;
+	},
+	updateFloor: function(floor){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
 
-   	//bmd.rect(0, game.height-200, game.width, 200, 0xFF0000);
+		if(this.hudFloor != null){
+			this.hudFloor.destroy();
+		}
 
-   //	graphics.endFill();
+		this.hudFloor = this.game.add.text((this.game.width/2), this.game.height-18, "Floor " + floorNumber + " of " + floorAmount, style);
+		//t.anchor.set(0.5);
+		this.hudFloor.fixedToCamera = true;
+	},
+	updateWeapon: function(weapon){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
 
-	//create overall group
-	//create subgroups for each 'section' of the HUD
-	//create the elements for the subgroups and then position with the overall group
-	//need player info
-	//readouts
-	//place for items/equip to go
+		if(this.hudWeapon != null){
+			this.hudWeapon.destroy();
+		}
+
+		this.hudWeapon = this.game.add.text(this.game.width-200, this.game.height-63, "Weapon", style);
+		//t.anchor.set(0.5);
+		this.hudWeapon.fixedToCamera = true;
+	},
+	updateEquipment: function(equipment){
+		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+
+		if(this.hudEquipment != null){
+			this.hudEquipment.destroy();
+		}
+
+		this.hudEquipment = this.game.add.text((this.game.width-100), this.game.height-63, "Armor", style);
+		//t.anchor.set(0.5);
+		this.hudEquipment.fixedToCamera = true;
+	},
 }
-
-function updateReadout(msg){
-	//add new message to top of list
-	//pop last message off of list
-	//display new list
-}
-
-
-function updatePlayerStatsDisplay(name, hp, ap, score, floor){
-	//if not null passed in, update the value, else ignore that argument
-}
-
-// function updateMarker(){
-
-// 	console.log("Update marker");
-
-// 	//get tile x and y based on activePointer.worldX and Y
-
-// 	let tileX = Math.floor(Roguelike.game.input.activePointer.worldX/64);
-// 	console.log("x: ", tileX);
-// 	let tileY = Math.floor(Roguelike.game.input.activePointer.worldY/64);
-// 	console.log("y: ", tileY);
-
-// 	 // //  Our painting marker
-// 	marker = this.game.add.graphics();
-// 	marker.lineStyle(2, 0x000000, 1);
-// 	// marker.drawRect(tileY, tileX, 64, 64);
-
-// 	marker.drawRect(player.y, player.x, 64, 64);
-
-// 	// marker.x = tileY;
-//  // 	marker.y = tileX;
-// }
 
 function aiAct(e, index){
 
@@ -738,9 +724,10 @@ function moveTo(actor, index, dir){
 	if(dir.x == 0 && dir.y == -1){
 		newPosY -= 1;
 		cellOccupied = checkCellOccupied(actor.x, newPosY);
+		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
-			actorKilled = attackActor(game, actor, actor.x, newPosY);
+			actorKilled = attackActor(actor, actor.x, newPosY);
 		}
 		if(actorKilled || !cellOccupied){
 			actor.sprite.animations.play('walkLeft');
@@ -749,6 +736,7 @@ function moveTo(actor, index, dir){
 	else if(dir.x == -1 && dir.y == 0){
 		newPosX -= 1;
 		cellOccupied = checkCellOccupied(newPosX, actor.y);
+		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, newPosX, actor.y);
@@ -760,6 +748,7 @@ function moveTo(actor, index, dir){
 	else if(dir.x == 0 && dir.y == 1){
 		newPosY += 1;
 		cellOccupied = checkCellOccupied(actor.x, newPosY);
+		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, actor.x, newPosY);
@@ -771,6 +760,7 @@ function moveTo(actor, index, dir){
 	else if(dir.x == 1 && dir.y == 0){
 		newPosX += 1;
 		cellOccupied = checkCellOccupied(newPosX, actor.y);
+		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, newPosX, actor.y);
@@ -821,6 +811,14 @@ function attackActor(aggressor, x, y){
 		console.log(aggressor);
 		console.log(actorPositions[victimIndex]);
 		victim.hp -= aggressor.dmg;
+		if(victim == player){
+			hud.updateReadout("Ouch, I took " + aggressor.dmg + " damage ;_;");
+		}
+		else{
+			hud.updateReadout("I did " + aggressor.dmg + " damage to the enemy d:)");
+		}
+
+
 		console.log(victim.hp);
 		if(victim.hp <= 0){
 			victimDead = true;
@@ -828,25 +826,33 @@ function attackActor(aggressor, x, y){
 			actorList[victimIndex].isAlive = false;
 			actorPositions.splice(victimIndex, 1);
 			if(victim == player){
-				game.state.start('gameOver');
+				//game.state.start('gameOver');
 				// player.sprite = game.add.sprite(player.y*64, player.x*64, 'playerDeath', 0); 
 				// player.sprite.animations.add('playerDeath', [0, 1, 2, 3, 4, 5], 18, false);
 				// player.sprite.animations.play('playerDeath');
 				console.log("GAME OVER");
+				//game.state.start("MainMenu");
 			}
 			else{
 				player.score += 100;
 				player.exp += 1000;
+				hud.updateReadout("Enemy Down.");
 				if(player.exp >= expThreshold){
+					//UPDATE HUD
 					player.lvl++;
 					player.maxHP += 20;
 					player.dmg += 5;
-					player.maxAP += 0.5;
+
+					//player.maxAP += 0.5;
+					//if max ap is now a full level higher, updateHUD
+
 					expThreshold += 3000;
+					hud.updateReadout("I feel stronger.");
 					console.log("LEVEL UP!");
 					console.log(player);
 				}
 				player.credits += 50;
+				hud.updateCredits(player.credits + 50);
 				console.log("Enemy Killed");
 			}
 			// victim.sprite = game.add.sprite(player.y*64, player.x*64, 'armorDeath', 0); 
@@ -855,7 +861,7 @@ function attackActor(aggressor, x, y){
 			victim.sprite.kill();
 		}
 		if(victim == player){
-			//change HUD to reflect new health total
+			hud.updateHP(player.hp);//change HUD to reflect new health total
 		}
 	}
 
@@ -867,6 +873,8 @@ function validMove(mX, mY){
 	//console.log("in valid move");
 	//console.log("mX: ", mX, "mY", mY);
 	//console.log("map x: ", m))
+
+	//TERMINAL SHOULD ALSO BLOCK
 
 	if(map[mX][mY] == Tile.WALL){
 		//console.log("found wall");
@@ -892,24 +900,35 @@ var Tile = {
 
 //room object that holds id, coordinates in map, adjacent rooms and expansion information
 function Room(num){
-	this.id = num,
-	this.tiles = [],
-	this.x, //initialise?
-	this.y,
-	this.expLeft = true,
-	this.expTop = true,
-	this.expRight = true,
-	this.expBot = true,
-	this.canExp = true,
-	this.doors = 0,
+	this.id = num;
+	this.tiles = [];
+	this.x; //initialise?
+	this.y;
+	this.expLeft = true;
+	this.expTop = true;
+	this.expRight = true;
+	this.expBot = true;
+	this.canExp = true;
+	this.doors = 0;
 	this.adjacentRooms = [];
 	this.adjacentRoomCells = [];
-	this.adjRoomCount = 0,
-	this.roomToLeft = 0,
-	this.roomToTop = 0,
-	this.roomToRight = 0,
+	this.adjRoomCount = 0;
+	this.roomToLeft = 0;
+	this.roomToTop = 0;
+	this.roomToRight = 0;
 	this.roomToBot = 0;
 	//methods?
+}
+
+function Terminal(game, options, x, y){
+	this.game = game;
+	this.options = options;
+	this.sprite = this.game.add.sprite(y*64, x*64, 'terminal1'); 
+	//difficulty?
+	//healPlayer
+	//unlock room door
+	//upgrade weapon/armor
+	//
 }
 
 // function Actor(x, y, hp, actorSprite){

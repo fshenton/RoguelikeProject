@@ -26,7 +26,8 @@ Roguelike.Preload.prototype = {
 		// this.load.image('doorTile', 'assets/images/doorTile.png', 32, 32);	
 		//64
 		this.load.image('floorTile', 'assets/images/floorTile64.png', 64, 64);	
-		this.load.image('wallTile', 'assets/images/wallTile64.png', 64, 64);		
+		//this.load.image('wallTile', 'assets/images/wallTile64.png', 64, 64);		
+		this.load.image('wallTile', 'assets/images/newWall.png', 64, 64);
 		this.load.image('doorTile', 'assets/images/doorTile64.png', 64, 64);	
 
 	
@@ -43,6 +44,9 @@ Roguelike.Preload.prototype = {
 		this.load.spritesheet('armorDeath', 'assets/images/ArmorDeath.png', 64, 64);	
 		this.load.spritesheet('playerDeath', 'assets/images/Character1Hurt.png', 64, 64);	
 		
+
+		this.load.image('terminal1', 'assets/images/terminal1.png', 64, 64);
+		this.load.image('terminal2', 'assets/images/terminal2.png', 64, 64);
 
 		//buttons
 		this.load.image('greybutton', 'assets/images/grey_button00.png')
