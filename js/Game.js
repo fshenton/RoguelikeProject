@@ -10,7 +10,7 @@ const numRooms = 20;
 const floorChar = 'R';
 const wallChar = 'w';
 const numEnemies = 20;
-const terminalNumber = 5;
+const terminalNumber = 10;
 
 //numitems
 //numterminals
@@ -39,6 +39,8 @@ var player;
 var actorList;//, UI;
 //var enemyList;
 var actorPositions;
+var terminalPositions;
+var terminalList;
 
 
 
@@ -50,8 +52,24 @@ Roguelike.Game.prototype = {
 	create: function(){
 		console.log("Game started");
 
-		floorNumber = 1;
+		if(floorNumber == null){
+			floorNumber = 1;
+		}
+		else{
+			floorNumber++;
+		}
+		
 		expThreshold = 3000;
+
+		//call createLevel(floorNumber);
+		//createLevel calls:
+		//INITMAP() which calls expand and connect methods
+		//INITACTORS()
+		//INIT WORLD OBJECTS()
+		//DRAW MAP()
+		//INIT HUD()
+
+		//if move into exit, call initMap(++floorNumber);
 
 		//set up map array
 		initMap();
@@ -67,9 +85,12 @@ Roguelike.Game.prototype = {
 		//GROUPS?
 		//do I even need tilemap?
 
+		//EVEN USING GROUPS?
 		blockLayer = this.game.add.group();
 		floorLayer = this.game.add.group();
 		objLayer = this.game.add.group();
+
+		//DEF NEEDED TO ADD FOG OF WAR TO UNEXPLORED ROOMS
 
 		for(let x = 0 ; x < mapSize; x++){
 			for(let y = 0; y< mapSize; y++){
@@ -91,16 +112,27 @@ Roguelike.Game.prototype = {
 			}
 		}
 
+
+
+		// let exit = this.game.add.sprite(0*64, 1*64, 'doorTile'); 
+		// map[0][1] = Tile.EXIT;
+
 		//CREATE TERMINALS METHOD
 
 		let ranPos;
+
+		terminalPositions = [];
+		terminalList = [];
 
 		for(let t = 0; t < terminalNumber; t++){
 			//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
 			ranPos = getRandomCoords(rooms);
 			let options = ["Heal", "Unlock Door", "Upgrade"];
 			let terminal = new Terminal(this.game, options, ranPos.y, ranPos.x)
-			console.log(terminal.options);
+			map[ranPos.y][ranPos.x] = Tile.TERMINAL;
+			terminalPositions.push(ranPos.x + '_' + ranPos.y); 
+			terminalList.push(terminal);
+			//console.log(terminal.options);
 		}
 
 
@@ -119,13 +151,19 @@ Roguelike.Game.prototype = {
 
 		playerName = localStorage.getItem("playerName");
 		player = new Player(this.game, playerName, ranPos.y, ranPos.x, 100);
+		actorPositions.push(ranPos.x + '_' + ranPos.y); 
+
+		//FOR EXIT TESTING
+		// if(player == null){
+		// 	player = new Player(this.game, playerName, 1, 1, 100);
+		// }
+		
+		actorPositions.push(1 + '_' + 1); 
+		//////
 
 		actorList.push(player);
 
 		//this could be condensed so that if i == 0, create player, else enemy
-
-		actorPositions.push(ranPos.x + '_' + ranPos.y); //not sure which way around these are!
-		//actorList.push(player);
 		
 		player.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 18, false);
 		player.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 18, false);
@@ -216,6 +254,9 @@ Roguelike.Game.prototype = {
 	onKeyUp: function(event){
 
 		let acted = false;
+		let useTerminal = false;
+		let tX;
+		let tY;
 
 		// if(!this.player.isAlive()){
 		// 	//game should have ended
@@ -234,12 +275,22 @@ Roguelike.Game.prototype = {
 				if(validMove(player.x, player.y-1)){
 					acted = moveTo(player, 0, {x: 0, y: -1});
 				}
+				else if(map[player.x][player.y-1] == Tile.TERMINAL){
+					useTerminal = true;
+					tX = player.x;
+					tY = player.y-1;
+				}
 				break;
 			case Phaser.Keyboard.UP:
 				console.log("UP");
 				console.log("mX: ", player.x-1, "mY:", player.y);
 				if(validMove(player.x-1, player.y)){
 					acted = moveTo(player, 0, {x: -1, y: 0});
+				}
+				else if(map[player.x-1][player.y] == Tile.TERMINAL){
+					useTerminal = true;
+					tX = player.x-1;
+					tY = player.y;
 				}
 				break;
 			case Phaser.Keyboard.RIGHT:
@@ -248,6 +299,11 @@ Roguelike.Game.prototype = {
 				if(validMove(player.x, player.y+1)){
 					acted = moveTo(player, 0, {x: 0, y: 1});
 				}
+				else if(map[player.x][player.y+1] == Tile.TERMINAL){
+					useTerminal = true;
+					tX = player.x;
+					tY = player.y+1;
+				}
 				break;
 			case Phaser.Keyboard.DOWN:
 				console.log("DOWN");
@@ -255,12 +311,25 @@ Roguelike.Game.prototype = {
 				if(validMove(player.x+1, player.y)){
 					acted = moveTo(player, 0, {x: +1, y: 0});
 				}
+				else if(map[player.x+1][player.y] == Tile.TERMINAL){
+					useTerminal = true;
+					tX = player.x+1;
+					tY = player.y;
+				}
 				break;
 			default: 
 				break;
 		}
 		
 		console.log("AP: " + player.ap);
+
+		if(useTerminal){
+			console.log("using terminal");
+			let terminalIndex = terminalPositions.indexOf(tY + "_" + tX);
+			let terminal = terminalList[terminalIndex];
+			terminal.displayTerminal();
+			//counts as an action, can deduct ap once they choose option
+		}
 
 		if(acted){
 			player.ap -= 1;
@@ -309,19 +378,28 @@ Roguelike.Game.prototype = {
 				//player.ap -=1;
 				//console.log(player.ap);
 			}
-			else if (dX == -2 && dY == 0 && player.ap >= 2){ //double move up
-				this.onKeyUp({keyCode: Phaser.Keyboard.UP});
-				this.onKeyUp({keyCode: Phaser.Keyboard.UP});
-				//player.ap -= 2;
-			}
+			else if (dX == -2 && dY == 0){
+				if(player.ap >= 2){
+					this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+					this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+				}
+				else{
+					this.onKeyUp({keyCode: Phaser.Keyboard.UP});
+				}
+			} 
 			else if(dX == 1 && dY == 0){ //move down
 				//console.log("up");
 				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
 				//player.ap -=1;
 			}
-			else if(dX == 2 && dY == 0 && player.ap >= 2){ //double move up
-				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
-				this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+			else if(dX == 2 && dY == 0){ //double move up
+				if(player.ap >= 2){
+					this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+					this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+				}
+				else{
+					this.onKeyUp({keyCode: Phaser.Keyboard.DOWN});
+				}
 				//player.ap -= 2;
 			}
 			else if(dX == 0 && dY == 1){ //move right
@@ -330,9 +408,14 @@ Roguelike.Game.prototype = {
 				//player.ap -= 1;
 				// 	
 			}
-			else if(dX == 0 && dY == 2 && player.ap >= 2){ 	//double move right
-				this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
-				this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+			else if(dX == 0 && dY == 2){ 	//double move right
+				if(player.ap >= 2){
+					this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+					this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+				}
+				else{
+					this.onKeyUp({keyCode: Phaser.Keyboard.RIGHT});
+				}
 				//player.ap -= 2;
 			}	
 			else if(dX == 0 && dY == -1){ //move left
@@ -341,9 +424,14 @@ Roguelike.Game.prototype = {
 				//player.ap -= 1;
 					
 			}
-			else if(dX == 0 && dY == -2 && player.ap >= 2){
-				this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
-				this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+			else if(dX == 0 && dY == -2){
+				if(player.ap >= 2){
+					this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+					this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+				}
+				else{
+					this.onKeyUp({keyCode: Phaser.Keyboard.LEFT});
+				}
 				//player.ap -=2;
 			}
 
@@ -884,8 +972,8 @@ function validMove(mX, mY){
 		//console.log("found door");
 		//handle if door locked
 	}
-	else{
-		//console.log("found floor");
+	else if(map[mX][mY] == Tile.TERMINAL){
+		return false;
 	}
 		
 	return true;
@@ -895,7 +983,9 @@ var Tile = {
 	WALL: '#',
 	FLOOR: '.',
 	DOOR: 'D',
-	PLAYER: 'P'
+	PLAYER: 'P',
+	EXIT: 'X',
+	TERMINAL: 'T'
 };
 
 //room object that holds id, coordinates in map, adjacent rooms and expansion information
@@ -931,18 +1021,65 @@ function Terminal(game, options, x, y){
 	//
 }
 
-// function Actor(x, y, hp, actorSprite){
-// 	console.log(x);
-// 	console.log(y);
-// 	console.log(hp);
-// 	console.log(actorSprite);
-// 	this.x = x;
-// 	this.y = y;
-// 	this.hp = hp;
-// 	this.actorSprite = actorSprite;
-// 	//want to create sprite in here?
-// 	//isPlayer bool
-// }
+Terminal.prototype = {
+	displayTerminal: function(){
+
+		//https://phaser.io/examples/v2/text/display-text-word-by-word
+		//http://phaser.io/examples/v2/input/button-open-popup
+		let text;
+
+		let graphics = this.game.add.graphics(0, 0);
+
+		graphics.beginFill(0x000000);
+	   	graphics.lineStyle(1, 0x777777, 1);
+	   	let terminalBackground = graphics.drawRect(100, 100, this.game.width-200, this.game.height-200);
+	   	terminalBackground.fixedToCamera = true;
+	   	graphics.endFill();
+
+	   	let bootText = "Booting into P.R.A.S.H system, please wait.....";
+	   	let fillerText = ".....";
+	   	let welcomeText = "Welcome " + playerName + " please choose from one of the following options:";
+
+	   	text = this.game.add.text(this.game.width/2-125, this.game.height/2-100, bootText, { font: "15px Arial", fill: "#19de65" });
+	   	text.fixedToCamera = true;
+	  	text = this.game.add.text(this.game.width/2, this.game.height/2-80, fillerText, { font: "15px Arial", fill: "#19de65" });
+   		text.fixedToCamera = true;
+   		text = this.game.add.text(this.game.width/2, this.game.height/2-60, fillerText, { font: "15px Arial", fill: "#19de65" });
+   		text.fixedToCamera = true;
+   		text = this.game.add.text(this.game.width/2-200, this.game.height/2-40, welcomeText, { font: "15px Arial", fill: "#19de65" });
+   		text.fixedToCamera = true;
+
+		let healText = this.game.add.text(this.game.width/2, this.game.height/2, this.options[0], { font: "15px Arial", fill: "#19de65" });
+		healText.fixedToCamera = true;
+		healText.inputEnabled = true;
+		healText.events.onInputDown.add(this.healPlayer, this);
+		healText.events.onInputOver.add(this.overOption, this);
+		healText.events.onInputOut.add(this.outOption, this);
+
+
+		// text = this.game.add.text(100, 120, this.options[1], { font: "15px Arial", fill: "#19de65" });
+		// text.fixedToCamera = true;
+		// text = this.game.add.text(100, 140, this.options[2], { font: "15px Arial", fill: "#19de65" });
+		// text.fixedToCamera = true;
+	},
+	healPlayer: function(){
+		console.log("Terminal heal");
+		if(player.hp + 50 <= player.maxHP){
+			player.hp += 50;
+		}
+		else{
+			player.hp = player.maxHP;
+		}
+		hud.updateHP(player.hp);
+
+	},
+	overOption: function(item){
+		item.fill = "#FF0000";
+	},
+	outOption: function(item){
+		item.fill = "#19de65";
+	}
+}
 
 //player and enemy 'inherit' from Actor?
 function Player(game, name, x, y, hp){
@@ -973,321 +1110,6 @@ function Enemy(game, x, y, hp){
 	this.isAlive = true;
 	this.alerted = false;
 }
-
-// function moveTo(a, d){
-// // move actors (a) in direction (d) if possible and handle any outcomes resulting from new tile
-// // function moveTo(a, d){
-// 	//if(validMove(d)){
-	
-// 	//SHOULDNT OVEWRITE THE EXISTING TILE, NEED TO ACCOUNT FOR THAT
-// 	switch(d){
-// 		case 0:
-// 			//update map
-// 			//move exactly one tile
-// 			a.sprite.x -=1;
-// 			break;
-// 		case 1:
-// 			//update map
-// 			//move exactly one tile
-// 			a.sprite.y -=1;
-// 			break;
-// 		case 2:
-// 			//update map
-// 			//move exactly one tile
-// 			a.sprite.x +=1;
-// 			break;
-// 		case 3:
-// 			//update map
-// 			//move exactly one tile
-// 			a.sprite.y +=1;
-// 			break;
-// 		default:
-// 			break;
-// 	}
-// }
-
-// function Enemy(x, y, hp){
-// 	Actor.call(x, y, hp, 'enemy');
-// }
-
-// Player.prototype = new Actor();
-
-// Enemy.prototype = new Actor();
-
-
-////spacehipster
-/*function drawMap(){
-	for(var y = 0; y < ROWS; y++){
-		for(var x = 0; x < COLS; x++){
-			asciidisplay[y][x] = map[y][x];	
-		}
-	}
-}*/
-
-// function drawActors(){
-// 	for(var a in actorList){
-// 		if(actorList[a] != null && actorList[a].hp > 0){
-// 			asciidisplay[actorList[a].y][actorList[a].x] = a == 0?''+player.hp:'e';
-// 		}
-// 	}
-////spacehipster
-
-
-
-////Roguelike-js-master
-// function Actor (game, x, y, keySprite) {
-// 		this.hp = 3;
-// 		this.x = x;
-// 		this.y = y;
-// 		this.isPlayer = null;
-// 		this.damage = 'd8+2';
-
-// 		if (game) {
-// 			this.game = game;
-// 			this.sprite = game.add.sprite(x * 32, y * 32, keySprite);
-// 		} else {
-// 			this.game = null;
-// 			this.sprite = null;
-// 		}
-// 	}
-
-// 	function Player (game, x, y) {
-// 		Actor.call(this, game, x, y, 'hero');
-// 		this.hp = 30;
-// 		this.isPlayer = true;
-// 		this.damage = 'd6+2';
-// 	}
-
-// 	function Enemy (game, x, y) {
-// 		Actor.call(this, game, x, y, 'orc');
-// 		this.hp = 10;
-// 		this.isPlayer = false;
-// 		this.damage = 'd4+2';
-// 	}
-
-// Actor.prototype.setXY = function (x, y) {
-// 		this.x = x;
-// 		this.y = y;
-
-// 		// this.sprite.x = x * 32;
-// 		// this.sprite.y = y * 32;
-
-// 		this.game.add.tween(this.sprite).to(
-// 			{
-// 				x: x * 32,
-// 				y: y * 32
-// 			},
-// 			150,
-// 			Phaser.Easing.Linear.None,
-// 			true
-// 		);
-
-// 	};
-
-// 	Player.prototype = new Actor();
-
-// 	Enemy.prototype = new Actor();
-
-// 	function moveTo (actor, dir) {
-// 		// check if actor can move in the given direction
-// 		if (!Map.canGo(actor, dir)) {
-// 			return false;
-// 		}
-
-// 		if (dir.x === 1) {
-// 			actor.sprite.frame = 2;
-// 		} else if (dir.x === -1) {
-// 			actor.sprite.frame = 3;
-// 		} else if (dir.y === -1) {
-// 			actor.sprite.frame = 1;
-// 		} else if (dir.y === 1) {
-// 			actor.sprite.frame = 0;
-// 		}
-
-// 		// moves actor to the new location
-// 		var newKey = (actor.x + dir.x) + '_' + (actor.y + dir.y);
-
-// 		// if the destination tile has an actor in it
-// 		if (actorMap.hasOwnProperty(newKey) && actorMap[newKey]) {
-// 			//decrement hitpoints of the actor at the destination tile
-// 			var victim = actorMap[newKey];
-
-// 			// avoid orcs to fight with each other
-// 			if (!actor.isPlayer && !victim.isPlayer) {
-// 				return;
-// 			}
-
-// 			var damage = diceRoll('d8+2').total;
-// 			victim.hp -= damage;
-
-// 			var axis = (actor.x === victim.x)
-// 				? 'y'
-// 				: 'x';
-
-// 			dir = victim[axis] - actor[axis];
-// 			dir = dir / Math.abs(dir); // +1 or -1
-
-// 			var pos1 = {}, pos2 = {};
-
-// 			pos1[axis] = (dir * 15).toString();
-// 			pos2[axis] = (dir * 15 * (-1)).toString();
-
-// 			game.camera.follow(false);
-
-// 			game.add.tween(actor.sprite)
-// 				.to(pos1, 100, Phaser.Easing.Linear.None, true)
-// 				.to(pos2, 100, Phaser.Easing.Linear.None, true)
-// 				.onComplete.add(function () {
-// 					game.camera.follow(actor.sprite);
-// 				}, this);
-
-// 			var color = victim.isPlayer ? null : '#fff';
-
-// 			HUD.msg(damage.toString(), victim.sprite, 450, color);
-
-// 			if (victim.isPlayer) {
-// 				playerHUD.setText('Player life: ' + victim.hp);
-// 			}
-
-// 			// if it's dead remove its reference
-// 			if (victim.hp <= 0) {
-// 				victim.sprite.kill();
-// 				delete actorMap[newKey];
-// 				actorList.splice(actorList.indexOf(victim), 1);
-// 				if (victim !== player) {
-// 					if (actorList.length === 1) {
-// 						// victory message
-// 						var victory = game.add.text(
-// 							game.world.centerX,
-// 							game.world.centerY,
-// 							'Victory!\nCtrl+r to restart', {
-// 								fill: '#2e2',
-// 								align: 'center'
-// 							}
-// 						);
-// 						victory.anchor.setTo(0.5, 0.5);
-// 					}
-// 				}
-// 			}
-// 		} else {
-// 			// remove reference to the actor's old position
-// 			delete actorMap[actor.x + '_' + actor.y];
-
-// 			// update position
-// 			actor.setXY(actor.x + dir.x, actor.y + dir.y);
-
-// 			// add reference to the actor's new position
-// 			actorMap[actor.x + '_' + actor.y] = actor;
-// 		}
-
-// 		return true;
-// 	}
-
-// function initActors (game) {
-// 		// create actors at random locations
-// 		actorList = [];
-// 		actorMap = {};
-// 		var actor, x, y;
-
-// 		var random = function (max) {
-// 			return Math.floor(Math.random() * max);
-// 		};
-
-// 		var validpos = [];
-// 		for (x = 0; x < COLS; x++) {
-// 			for (y = 0; y < ROWS; y++) {
-// 				if (!Map.tiles[x][y]) {
-// 					validpos.push({x: x, y: y});
-// 				}
-// 			}
-// 		}
-
-// 		for (var e = 0; e < ACTORS; e++) {
-// 			// create new actor
-// 			do {
-// 				//var room=m.rooms[random(2)][random(2)];
-// 				var r = validpos[random(validpos.length)];
-// 				x = r.x;
-// 				y = r.y;
-// 				// pick a random position that is both a floor and not occupied
-// 				//x=room.x+random(room.width);
-// 				//y=room.y+random(room.height);
-// 			} while (actorMap[x + '_' + y]);
-
-// 			actor = (e === 0)
-// 				? new Player(game, x, y)
-// 				: new Enemy(game, x, y);
-
-
-// 			// add references to the actor to the actors list & map
-// 			actorMap[actor.x + '_' + actor.y] = actor;
-// 			actorList.push(actor);
-// 		}
-
-// 		// the player is the first actor in the list
-// 		player = actorList[0];
-// 		game.camera.follow(player.sprite);
-
-// 	}
-
-// 	function aiAct (actor) {
-// 		var directions = [
-// 			{x: -1, y: 0},
-// 			{x: 1, y: 0},
-// 			{x: 0, y: -1},
-// 			{x: 0, y: 1}
-// 		];
-
-// 		var dx = player.x - actor.x,
-// 			dy = player.y - actor.y;
-
-// 		var moveToRandomPos = function () {
-// 			var rndDirections = shuffleArray(directions);
-// 			for (var i = 0; i < rndDirections.length; i++) {
-// 				if (moveTo(actor, rndDirections[i])) {
-// 					break;
-// 				}
-// 			}
-// 		};
-
-// 		// if player is far away, walk randomly
-// 		if (Math.abs(dx) + Math.abs(dy) > 6) {
-// 			moveToRandomPos();
-// 		} else {
-// 			// otherwise walk towards player
-// 			// dumb walk
-
-// 			directions = directions.map(function (e) {
-// 				return {
-// 					x: e.x,
-// 					y: e.y,
-// 					dist: Math.pow(dx + e.x, 2) + Math.pow(dy + e.y, 2)
-// 				};
-// 				//}).sort(function(a,b){ return a.dist-b.dist; });
-// 			}).sort(function (a, b) {
-// 				return b.dist - a.dist;
-// 			});
-
-// 			for (var d = 0, len = directions.length; d < len; d++) {
-// 				if (moveTo(actor, directions[d])) {
-// 					break;
-// 				}
-// 			}
-
-// 		}
-
-// 		if (player.hp < 1) {
-// 			// game over message
-// 			var gameOver = game.add.text(0, 0, 'Game Over\nCtrl+r to restart', {fill: '#e22', align: 'center'});
-// 			gameOver.fixedToCamera = true;
-// 			gameOver.cameraOffset.setTo(500, 500);
-// 		}
-// 	}
-////Roguelike-js-master
-
-
-
-
 
 //builds the mapSize x mapSize square array, fills with walls and then plants 3x3 rooms randomly (no overlap)
 function initMap(){
