@@ -1,8 +1,8 @@
 'use strict';
 
-var Roguelike = Roguelike || {};
+//var Roguelike = Roguelike || {};
 
-Roguelike.Game = function(){};
+
 
 const mapSize = 40;
 const minRoomsize = 3;
@@ -14,6 +14,8 @@ const terminalNumber = 10;
 
 //numitems
 //numterminals
+
+var game;
 
 var floorNumber;
 var floorAmount = 10;
@@ -42,15 +44,21 @@ var actorPositions;
 var terminalPositions;
 var terminalList;
 
-
+var enemiesKilled;
+var creditsEarned;
 
 var cursors;
 
 var unnecessaryChecks;
 
+(function (){
+
+Roguelike.Game = function(){};
+
 Roguelike.Game.prototype = {
 	create: function(){
-		console.log("Game started");
+
+		game = this.game;
 
 		if(floorNumber == null){
 			floorNumber = 1;
@@ -186,8 +194,17 @@ Roguelike.Game.prototype = {
 			enemy.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 60, false);
 			enemy.sprite.anchor.y = 0.3 ;
 		}
-		
-	
+
+		//for level change, the enemiesKilled should be persistant
+		//if(enemiesKilled == null){
+			enemiesKilled = 0;
+		//}
+
+		//for level change, the enemiesKilled should be persistant
+		//if(creditsEarned == null){
+			creditsEarned = 0;
+		//}
+
 		//player.sprite.scale.setY(2, 1);
 		// player.sprite.width = 64;
 		// player.sprite.height = 64;
@@ -244,9 +261,13 @@ Roguelike.Game.prototype = {
 
 		this.input.onTap.add(this.onMouseTap, this);
 
+		//showGameOverScreen();
+
 		//Highlight cells, call updateMarker to tell it which cell to highlight (where the mouse is pointing)
 
 		//initActors();
+
+		console.log("New Game Started");
 	},
 	update: function(){
 
@@ -441,7 +462,7 @@ Roguelike.Game.prototype = {
 		}	
 	},
 	gameOver: function(){}
-}
+};
 
 function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment){
 	this.game = game;
@@ -457,7 +478,7 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 	this.hudFloor;// = floor;
 	this.hudWeapon;// = weapon;
 	this.hudEquipment;// = equipment;
-}
+};
 
 HUD.prototype = {
 	initHUD: function(message, name, hp, ap, credits, floor, weapon, equipment){
@@ -641,7 +662,7 @@ HUD.prototype = {
 		//t.anchor.set(0.5);
 		this.hudEquipment.fixedToCamera = true;
 	},
-}
+};
 
 function aiAct(e, index){
 
@@ -764,7 +785,7 @@ function aiAct(e, index){
 	if(validMove(e.x + posX, e.y + posY)){
 		moveTo(e, index, {x: posX, y: posY});
 	}
-}
+};
 
 function getRandomCoords(rooms){
 	
@@ -787,7 +808,7 @@ function getRandomCoords(rooms){
 	//console.log("rndRoomY", rndRoomY);
 
 	return {x: rndRoomX, y: rndRoomY};
-}
+};
 
 function moveTo(actor, index, dir){
 
@@ -879,18 +900,20 @@ function moveTo(actor, index, dir){
 	}
 
 	return true;
-}
+};
 
 function checkCellOccupied(x, y){
 	//returns true if x and y are in the actorPositions list
 	//ie an actor is at those coords
 	return actorPositions.indexOf(x + "_" + y) != -1;
-}
+};
 
 function attackActor(aggressor, x, y){
 	let victimIndex = actorPositions.indexOf(x + "_" + y);
 	let victim = actorList[victimIndex];
 	let victimDead = false;
+
+	let playerDead = false;
 
 	if(victim != player && aggressor != player){
 		//do nothing, victim is friend 
@@ -915,10 +938,13 @@ function attackActor(aggressor, x, y){
 			actorPositions.splice(victimIndex, 1);
 			if(victim == player){
 				//game.state.start('gameOver');
-				// player.sprite = game.add.sprite(player.y*64, player.x*64, 'playerDeath', 0); 
-				// player.sprite.animations.add('playerDeath', [0, 1, 2, 3, 4, 5], 18, false);
-				// player.sprite.animations.play('playerDeath');
+				player.sprite.kill();
+				player.sprite = game.add.sprite(player.y*64, player.x*64, 'playerDeath', 0); 
+				player.sprite.anchor.y = 0.3 ;
+				player.sprite.animations.add('playerDeath', [0, 1, 2, 3, 4, 5], 18, false);
+				player.sprite.animations.play('playerDeath');
 				console.log("GAME OVER");
+				playerDead = true;
 				//game.state.start("MainMenu");
 			}
 			else{
@@ -940,20 +966,107 @@ function attackActor(aggressor, x, y){
 					console.log(player);
 				}
 				player.credits += 50;
+				creditsEarned += 50;
 				hud.updateCredits(player.credits + 50);
+				victim.sprite.kill();
+				victim.sprite = game.add.sprite(victim.y*64, victim.x*64, 'armorDeath', 0); 
+				victim.sprite.anchor.y = 0.3 ;
+				victim.sprite.animations.add('armorDeath', [0, 1, 2, 3, 4, 5], 18, false);
+				victim.sprite.animations.play('armorDeath');
 				console.log("Enemy Killed");
+				enemiesKilled++;
 			}
 			// victim.sprite = game.add.sprite(player.y*64, player.x*64, 'armorDeath', 0); 
 			// victim.sprite.animations.add('armorDeath', [0, 1, 2, 3, 4, 5], 18, false);
 			// victim.sprite.animations.play('armorDeath');
-			victim.sprite.kill();
+			
+			
+			//victim.sprite.kill();
+
+			//victim.sprite.kill();
 		}
 		if(victim == player){
 			hud.updateHP(player.hp);//change HUD to reflect new health total
 		}
 	}
 
-	return victimDead;
+	if(playerDead){
+		showGameOverScreen();
+	}
+	else{
+		return victimDead;
+	}
+};
+
+function showGameOverScreen(){
+	let gameOverGroup = game.add.group();
+
+	let graphics = game.add.graphics(0, 0);
+
+	graphics.beginFill(0x000000);
+   	graphics.lineStyle(1, 0x777777, 1);
+   	let gameOverBackground = graphics.drawRect(100, 100, game.width-200, game.height-200);
+   	gameOverBackground.fixedToCamera = true;
+   	graphics.endFill();
+
+   	let textGroup = game.add.group();
+
+   	let gameOverText = "Game Over"
+   	let statsText = "Stats";
+   	let killedText = "Enemies Killed: " + enemiesKilled;
+   	let scoreText = "Score: " + player.score;
+   	let creditsText = "Credits earned: " + creditsEarned;
+   	let levelText = "Level: " + player.lvl;
+   	let floorsClearedText = "Floors cleared: " + --floorNumber;
+   	let returnText = "Return to menu?";
+   	let restartText = "Restart?";
+
+   	let optionPicked = false;
+
+   	gameOverText = game.add.text(game.width/2, game.height/2-100, gameOverText, { font: "40px Arial", fill: "#19de65" }, textGroup);
+   	gameOverText.fixedToCamera = true;
+   	gameOverText.anchor.x = 0.5;
+
+   	statsText = game.add.text(game.width/2, game.height/2-60, statsText, { font: "24px Arial", fill: "#19de65" }, textGroup);
+   	statsText.fixedToCamera = true;
+   	statsText.anchor.x = 0.5;
+
+   	killedText = game.add.text(game.width/2, game.height/2-40, killedText, { font: "18px Arial", fill: "#19de65" }, textGroup);
+   	killedText.fixedToCamera = true;
+   	killedText.anchor.x = 0.5;
+
+   	scoreText = game.add.text(game.width/2, game.height/2-20, scoreText, { font: "18px Arial", fill: "#19de65" }, textGroup);
+   	scoreText.fixedToCamera = true;
+   	scoreText.anchor.x = 0.5;
+
+   	creditsText = game.add.text(game.width/2, game.height/2, creditsText, { font: "18px Arial", fill: "#19de65" }, textGroup);
+   	creditsText.fixedToCamera = true;
+   	creditsText.anchor.x = 0.5;
+
+   	levelText = game.add.text(game.width/2, game.height/2+20, levelText, { font: "18px Arial", fill: "#19de65" }, textGroup);
+   	levelText.fixedToCamera = true;
+   	levelText.anchor.x = 0.5;
+
+   	floorsClearedText = game.add.text(game.width/2, game.height/2+40, floorsClearedText, { font: "18px Arial", fill: "#19de65" }, textGroup);
+   	floorsClearedText.fixedToCamera = true;
+   	floorsClearedText.anchor.x = 0.5;
+
+	returnText = game.add.text(game.width/2, game.height/2+60, returnText, { font: "24px Arial", fill: "#19de65" }, textGroup);
+	returnText.fixedToCamera = true;
+	returnText.inputEnabled = true;
+	returnText.anchor.x = 0.5;
+	returnText.events.onInputDown.add(function(){textGroup.destroy(); graphics.destroy(); game.state.start('MainMenu');}, this);
+	returnText.events.onInputOver.add(function(){returnText.fill = "#FF0000";}, this);
+	returnText.events.onInputOut.add(function(){returnText.fill = "#19de65";}, this);
+
+	restartText = game.add.text(game.width/2, game.height/2+100, restartText, { font: "32px Arial", fill: "#19de65" }, textGroup);
+	restartText.fixedToCamera = true;
+	restartText.inputEnabled = true;
+	restartText.anchor.x = 0.5
+	restartText.events.onInputDown.add(function(){; textGroup.destroy(); graphics.destroy(); game.state.start('Game')}, this);
+	restartText.events.onInputOver.add(function(){restartText.fill = "#FF0000";}, this);
+	restartText.events.onInputOut.add(function(){restartText.fill = "#19de65";}, this);
+
 }
 
 
@@ -977,7 +1090,7 @@ function validMove(mX, mY){
 	}
 		
 	return true;
-}
+};
 
 var Tile = {
 	WALL: '#',
@@ -1008,7 +1121,7 @@ function Room(num){
 	this.roomToRight = 0;
 	this.roomToBot = 0;
 	//methods?
-}
+};
 
 function Terminal(game, options, x, y){
 	this.game = game;
@@ -1019,7 +1132,7 @@ function Terminal(game, options, x, y){
 	//unlock room door
 	//upgrade weapon/armor
 	//
-}
+};
 
 Terminal.prototype = {
 	displayTerminal: function(){
@@ -1079,7 +1192,7 @@ Terminal.prototype = {
 	outOption: function(item){
 		item.fill = "#19de65";
 	}
-}
+};
 
 //player and enemy 'inherit' from Actor?
 function Player(game, name, x, y, hp){
@@ -1098,7 +1211,7 @@ function Player(game, name, x, y, hp){
 	this.credits = 0;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
-}
+};
 
 function Enemy(game, x, y, hp){
 	this.game = game;
@@ -1109,7 +1222,7 @@ function Enemy(game, x, y, hp){
 	this.sprite = this.game.add.sprite(y*64, x*64, 'armor1', 19); 
 	this.isAlive = true;
 	this.alerted = false;
-}
+};
 
 //builds the mapSize x mapSize square array, fills with walls and then plants 3x3 rooms randomly (no overlap)
 function initMap(){
@@ -1197,7 +1310,7 @@ function initMap(){
 	}
 
 	//console.log(JSON.stringify(map));
-}
+};
 
 //checks that new 3x3 rooms can be placed at random coordinates
 function checkValidRoomSize(x, y){
@@ -1251,7 +1364,7 @@ function checkValidRoomSize(x, y){
 	}
 
 	return space;
-}
+};
 
 //tries to expand all rooms until all directions for each room have been expanded to max
 function expandRandomRooms(){
@@ -1302,7 +1415,7 @@ function expandRandomRooms(){
 	//console.log("Unnecessary Checks made: ", unnecessaryChecks);
 
 	//return?
-}
+};
 
 //takes a direction and a room and expands it if possible
 //NEEDS REFACTORING AS ITS A NIGHTMARE TO READ
@@ -1694,7 +1807,7 @@ function expand(r, d){
 			// console.log("invalid case number");
 			break;
 	}
-}
+};
 
 //finds the room id of a room that is adjacent to another, to populate adjacency lists
 function findAdjacentCell(d, cX, cY){
@@ -1800,7 +1913,7 @@ function findAdjacentCell(d, cX, cY){
 	}
 
 	return p;
-}
+};
 
 //uses adjacency list to connect rooms that are adjacent, in a random manner
 function randomlyConnectAdjacentRooms(){
@@ -2101,7 +2214,7 @@ function randomlyConnectAdjacentRooms(){
 }
 
 
-
+}());
 
 
 

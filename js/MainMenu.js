@@ -103,7 +103,8 @@ function actionOnClick(button) {
     		//settingsButton.visible = false;
     		//creditsButton.visible = false;
 
-
+    		//class1Button = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
+    		//class1Button = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
 
     		var playerName = prompt("What are you known as?", "Cloud");
     		localStorage.setItem("playerName", playerName);
