@@ -53,6 +53,8 @@ var healCost;
 var upgradeDmgCost;
 var upgradeHpCost;
 
+var music;
+
 var cursors;
 
 var unnecessaryChecks;
@@ -279,6 +281,13 @@ Roguelike.Game.prototype = {
 		//initActors();
 
 		console.log("New Game Started");
+
+		//this.game.add.audio('scary').play();
+		this.game.add.audio('mysterious', 0.5, false).play();
+
+		music = this.game.add.audio('synthMusic', 0.7, true)
+		music.play();
+		
 	},
 	update: function(){
 
@@ -892,9 +901,10 @@ function moveTo(actor, index, dir){
 		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
 			//attacks and checks if they died, leaving space free to move into
+			actor.sprite.frame = 10;
 			actorKilled = attackActor(actor, actor.x, newPosY);
 		}
-		if(actorKilled || !cellOccupied){
+		if(!actorKilled && !cellOccupied){
 			actor.sprite.animations.play('walkLeft');
 		}
 	}
@@ -903,10 +913,11 @@ function moveTo(actor, index, dir){
 		cellOccupied = checkCellOccupied(newPosX, actor.y);
 		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
+			actor.sprite.frame = 0;
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, newPosX, actor.y);
 		}
-		if(actorKilled || !cellOccupied){
+		if(!actorKilled && !cellOccupied){
 			actor.sprite.animations.play('walkUp');
 		}
 	}
@@ -915,10 +926,11 @@ function moveTo(actor, index, dir){
 		cellOccupied = checkCellOccupied(actor.x, newPosY);
 		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
+			actor.sprite.frame = 30;
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, actor.x, newPosY);
 		}
-		if(actorKilled || !cellOccupied){
+		if(!actorKilled && !cellOccupied){
 			actor.sprite.animations.play('walkRight');
 		}
 	}
@@ -927,15 +939,20 @@ function moveTo(actor, index, dir){
 		cellOccupied = checkCellOccupied(newPosX, actor.y);
 		//IF TERMINAL, OPEN TERMINAL SCREEN (IF PLAYER)
 		if(cellOccupied){
+			actor.sprite.frame = 20;
 			//attacks and checks if they died, leaving space free to move into
 			actorKilled = attackActor(actor, newPosX, actor.y);
 		}
-		if(actorKilled || !cellOccupied){
+		if(!actorKilled && !cellOccupied){
 			actor.sprite.animations.play('walkDown');
 		}
 	}
 
-	if(actorKilled || !cellOccupied){
+	if(actorKilled)
+	{
+
+	} 
+	else if(!cellOccupied){
 		//only move sprite and change x and y position of actor
 		//if cell is free to move into
 
@@ -1050,6 +1067,7 @@ function attackActor(aggressor, x, y){
 
 	if(playerDead){
 		showGameOverScreen();
+
 	}
 	else{
 		return victimDead;
@@ -1057,6 +1075,11 @@ function attackActor(aggressor, x, y){
 };
 
 function showGameOverScreen(){
+
+	music.stop();
+	let gameOverSound = game.add.audio('gameOver')
+	gameOverSound.play();
+
 	let gameOverGroup = game.add.group();
 
 	let graphics = game.add.graphics(0, 0);
@@ -1197,6 +1220,9 @@ function Terminal(game, options, x, y){
 Terminal.prototype = {
 	displayTerminal: function(){
 
+		let terminalHum = this.game.add.audio('terminalHum');
+		terminalHum.play();
+
 		//GAME SHOULD PAUSE DURING THIS SCREEN
 
 		//https://phaser.io/examples/v2/text/display-text-word-by-word
@@ -1295,7 +1321,13 @@ Terminal.prototype = {
 		logoffText.inputEnabled = true;
 		logoffText.anchor.x = 0.5;
 		//once the player has logged off, we allow for controls again, using onInputUp avoid movement with log off click
-		logoffText.events.onInputUp.add(function(){ this.textGroup.destroy(); this.graphics.destroy(); player.isUsingTerminal = false; }, this);
+		logoffText.events.onInputUp.add(function(){ 
+			this.textGroup.destroy(); 
+			this.graphics.destroy(); 
+			player.isUsingTerminal = false; 
+			this.game.add.audio('mouseClick').play();
+			terminalHum.stop();
+		}, this);
 		logoffText.events.onInputOver.add(this.overOption, this);
 		logoffText.events.onInputOut.add(this.outOption, this);
 
@@ -1312,6 +1344,7 @@ Terminal.prototype = {
 	},
 	healPlayer: function(){
 		console.log("Terminal heal");
+		this.game.add.audio('mouseClick').play();
 		if(player.hp == player.maxHP){
 			hud.updateReadout("I'm already fully healed.");
 		}
@@ -1337,6 +1370,7 @@ Terminal.prototype = {
 	},
 	upgradeDMG: function(){
 		console.log("Terminal upgrade damage");
+		this.game.add.audio('mouseClick').play();
 		if(player.credits >= upgradeDmgCost){
 			player.credits -= upgradeDmgCost;
 			hud.updateCredits();
@@ -1358,6 +1392,7 @@ Terminal.prototype = {
 	},
 	upgradeHP: function(){
 		console.log("Terminal health upgrade");
+		this.game.add.audio('mouseClick').play();
 		if(player.credits >= upgradeHpCost){
 			player.credits -= upgradeHpCost;
 			hud.updateCredits();

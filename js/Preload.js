@@ -53,12 +53,27 @@ Roguelike.Preload.prototype = {
 		this.load.image('greybuttonpressed', 'assets/images/grey_button01.png')
 
 		//audio
-		this.load.audio('menuMusic', 'assets/audio/Rachel.mp3');
-		this.load.audio('gameMusic', 'assets/audio/Blush.mp3');
+		//this.load.audio('menuMusic', 'assets/audio/Rachel.mp3');
+		//this.load.audio('gameMusic', 'assets/audio/Blush.mp3');
+
+		//music
+		this.load.audio('synthMusic', 'assets/audio/cabled-mess__filtered-note-08-01.mp3');
+
+		//sfx
+		this.load.audio('terminalHum', 'assets/audio/bmusic92__computer-hum.mp3');
+		this.load.audio('mouseClick', 'assets/audio/sillyslimeball__mouse-click.mp3');
+		this.load.audio('scary', 'assets/audio/kastenfrosch__scary.mp3');
+		this.load.audio('mysterious', 'assets/audio/kastenfrosch__mysterious.mp3');
+		this.load.audio('gameOver', 'assets/audio/landlucky__game-over-sfx-and-voice.mp3');
+		//footsteps
+		//combat
+
 		// this.load.audio('footSteps', 'assets/audio/xxxx');
 		// this.load.audio('terminalUse', 'assets/audio/xxxx');
 		// this.load.audio('takenDamage', 'assets/audio/xxxx');
 		// this.load.audio('enemyDamage', 'assets/audio/xxxx');
+
+
 	},
 	create: function(){
 		this.game.state.start('MainMenu');
