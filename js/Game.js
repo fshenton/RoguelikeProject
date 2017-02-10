@@ -15,6 +15,8 @@ const terminalNumber = 10;
 //numitems
 //numterminals
 
+//PUT ALL IN GAME.PROTOYPE
+
 var game;
 
 var floorNumber;
@@ -46,6 +48,10 @@ var terminalList;
 
 var enemiesKilled;
 var creditsEarned;
+
+var healCost;
+var upgradeDmgCost;
+var upgradeHpCost;
 
 var cursors;
 
@@ -135,7 +141,7 @@ Roguelike.Game.prototype = {
 		for(let t = 0; t < terminalNumber; t++){
 			//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
 			ranPos = getRandomCoords(rooms);
-			let options = ["Heal", "Unlock Door", "Upgrade"];
+			let options = ["Heal", "UpgradeDMG", "UpgradeHP", "Log Off"];
 			let terminal = new Terminal(this.game, options, ranPos.y, ranPos.x)
 			map[ranPos.y][ranPos.x] = Tile.TERMINAL;
 			terminalPositions.push(ranPos.x + '_' + ranPos.y); 
@@ -205,6 +211,11 @@ Roguelike.Game.prototype = {
 			creditsEarned = 0;
 		//}
 
+		//for level change, the current values should be carried over
+		healCost = 50;
+		upgradeDmgCost = 150;
+		upgradeHpCost = 150;
+
 		//player.sprite.scale.setY(2, 1);
 		// player.sprite.width = 64;
 		// player.sprite.height = 64;
@@ -241,7 +252,7 @@ Roguelike.Game.prototype = {
 		//send group to top
 
 		hud = new HUD(this.game);
-		hud.initHUD("Replicants are either a benefit or a hazard.", playerName, player.hp, player.ap, player.credits, floorNumber, {}, {});
+		hud.initHUD("Replicants are either a benefit or a hazard.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber, {}, {});
 
 		// this.player.sprite = this.game.add.sprite(this.player.x * 32, this.player.y * 32, this.player.sprite, 19);
 
@@ -289,59 +300,62 @@ Roguelike.Game.prototype = {
 
 		console.log("Player x: ", player.x, "Player y: ", player.y);
 
-		switch(event.keyCode){
-			case Phaser.Keyboard.LEFT:
-				console.log("LEFT");
-				console.log("mX: ", player.x, "mY:", player.y-1);
-				if(validMove(player.x, player.y-1)){
-					acted = moveTo(player, 0, {x: 0, y: -1});
-				}
-				else if(map[player.x][player.y-1] == Tile.TERMINAL){
-					useTerminal = true;
-					tX = player.x;
-					tY = player.y-1;
-				}
-				break;
-			case Phaser.Keyboard.UP:
-				console.log("UP");
-				console.log("mX: ", player.x-1, "mY:", player.y);
-				if(validMove(player.x-1, player.y)){
-					acted = moveTo(player, 0, {x: -1, y: 0});
-				}
-				else if(map[player.x-1][player.y] == Tile.TERMINAL){
-					useTerminal = true;
-					tX = player.x-1;
-					tY = player.y;
-				}
-				break;
-			case Phaser.Keyboard.RIGHT:
-				console.log("RIGHT");
-				console.log("mX: ", player.x, "mY:", player.y+1);
-				if(validMove(player.x, player.y+1)){
-					acted = moveTo(player, 0, {x: 0, y: 1});
-				}
-				else if(map[player.x][player.y+1] == Tile.TERMINAL){
-					useTerminal = true;
-					tX = player.x;
-					tY = player.y+1;
-				}
-				break;
-			case Phaser.Keyboard.DOWN:
-				console.log("DOWN");
-				console.log("mX: ", player.x+1, "mY:", player.y);
-				if(validMove(player.x+1, player.y)){
-					acted = moveTo(player, 0, {x: +1, y: 0});
-				}
-				else if(map[player.x+1][player.y] == Tile.TERMINAL){
-					useTerminal = true;
-					tX = player.x+1;
-					tY = player.y;
-				}
-				break;
-			default: 
-				break;
+		if(!player.isUsingTerminal){ //player cannot move while using terminal
+			//THEY MOVE AFTER CHOOSING LOG OFF
+			switch(event.keyCode){
+				case Phaser.Keyboard.LEFT:
+					console.log("LEFT");
+					console.log("mX: ", player.x, "mY:", player.y-1);
+					if(validMove(player.x, player.y-1)){
+						acted = moveTo(player, 0, {x: 0, y: -1});
+					}
+					else if(map[player.x][player.y-1] == Tile.TERMINAL){
+						useTerminal = true;
+						tX = player.x;
+						tY = player.y-1;
+					}
+					break;
+				case Phaser.Keyboard.UP:
+					console.log("UP");
+					console.log("mX: ", player.x-1, "mY:", player.y);
+					if(validMove(player.x-1, player.y)){
+						acted = moveTo(player, 0, {x: -1, y: 0});
+					}
+					else if(map[player.x-1][player.y] == Tile.TERMINAL){
+						useTerminal = true;
+						tX = player.x-1;
+						tY = player.y;
+					}
+					break;
+				case Phaser.Keyboard.RIGHT:
+					console.log("RIGHT");
+					console.log("mX: ", player.x, "mY:", player.y+1);
+					if(validMove(player.x, player.y+1)){
+						acted = moveTo(player, 0, {x: 0, y: 1});
+					}
+					else if(map[player.x][player.y+1] == Tile.TERMINAL){
+						useTerminal = true;
+						tX = player.x;
+						tY = player.y+1;
+					}
+					break;
+				case Phaser.Keyboard.DOWN:
+					console.log("DOWN");
+					console.log("mX: ", player.x+1, "mY:", player.y);
+					if(validMove(player.x+1, player.y)){
+						acted = moveTo(player, 0, {x: +1, y: 0});
+					}
+					else if(map[player.x+1][player.y] == Tile.TERMINAL){
+						useTerminal = true;
+						tX = player.x+1;
+						tY = player.y;
+					}
+					break;
+				default: 
+					break;
+			}
 		}
-		
+
 		console.log("AP: " + player.ap);
 
 		if(useTerminal){
@@ -349,6 +363,10 @@ Roguelike.Game.prototype = {
 			let terminalIndex = terminalPositions.indexOf(tY + "_" + tX);
 			let terminal = terminalList[terminalIndex];
 			terminal.displayTerminal();
+			hud.updateReadout("Let's see what's on this terminal..");
+			// while(terminalUsed != true){
+			// 	console.log("waiting for player to finished with terminal");
+			// }
 			//counts as an action, can deduct ap once they choose option
 		}
 
@@ -471,9 +489,13 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 	this.readout1;
 	this.readout2;
 	this.readout3;
-	this.hudName;// = name;
-	this.hudHP;// = hp;
-	this.hudAP;// = ap;
+	//this.hudName;// = name;
+	this.hudHpText;
+	this.hudCurrentHpBar;// = hp;
+	this.hudMaxHpBar;
+	this.hudApText;
+	this.hudApBar;// = ap;
+	this.hudDmgText;
 	this.hudCredits;// = credits;
 	this.hudFloor;// = floor;
 	this.hudWeapon;// = weapon;
@@ -481,7 +503,7 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 };
 
 HUD.prototype = {
-	initHUD: function(message, name, hp, ap, credits, floor, weapon, equipment){
+	initHUD: function(message, /*name,*/ hp, ap, dmg, credits, floor, weapon, equipment){
 		let graphics = this.game.add.graphics(0, 0);
 
 		graphics.beginFill(0x333333);
@@ -494,9 +516,10 @@ HUD.prototype = {
 	   	//console.log(this.game.width);
 
 	   	this.updateReadout(message);
-	   	this.updateName(name);
+	   	//this.updateName(name);
 	   	this.updateHP(hp);
 	   	this.updateAP(ap);
+	   	this.updateDMG(dmg);
 	   	this.updateCredits(credits);
 	   	this.updateFloor(floor);
 	   	this.updateWeapon(weapon);
@@ -564,18 +587,25 @@ HUD.prototype = {
 			y += 18;
 		}
 	},
-	updateName: function(name){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	// updateName: function(name){
+	// 	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudName = this.game.add.text(this.game.width/2, this.game.height-90, "Name: " + playerName, style);
-		//t.anchor.set(0.5);
-		this.hudName.fixedToCamera = true;
-	},
-	updateHP: function(hp){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	// 	this.hudName = this.game.add.text(this.game.width/2, this.game.height-90, "Name: " + playerName, style);
+	// 	//t.anchor.set(0.5);
+	// 	this.hudName.fixedToCamera = true;
+	// },
+	updateHP: function(){
+		if(this.hudHpText != null){
+			this.hudHpText.destroy();
+		}
 
-		if(this.hudHP != null){
-			this.hudHP.destroy();
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudHpText = this.game.add.text((this.game.width/2), this.game.height-72, "HP: ", style);
+		this.hudHpText.fixedToCamera = true;
+
+		if(this.hudHpBar != null){
+			this.hudHpBar.destroy();
 		}
 
 		//ADD RED RECTANGLE OF CERTAIN WIDTH, FIXED HEIGHT
@@ -583,43 +613,68 @@ HUD.prototype = {
 
 		graphics.beginFill(0xFF0000);
 	   	//graphics.lineStyle(1, 0x880000, 1);
-	   	this.hudHP = graphics.drawRect((this.game.width/2), this.game.height-72, hp, 18);
-	   	this.hudHP.fixedToCamera = true;
+	   	this.hudCurrentHpBar = graphics.drawRect(this.game.width/2+30, this.game.height-72, player.hp, 10);
+	   	this.hudCurrentHpBar.fixedToCamera = true;
+		graphics.beginFill(0xAA0000);
+		console.log(player.hp);
+		console.log(player.maxHP);
+		this.hudMaxHpBar = graphics.drawRect(this.game.width/2+30+player.hp, this.game.height-72, player.maxHP - player.hp, 10);
+	   	this.hudMaxHpBar.fixedToCamera = true;
 	   	graphics.endFill();
+
+	   	
 
 		//this.hudHP = this.game.add.text((this.game.width/2), this.game.height-72, "HP: " + player.hp, style);
 		//t.anchor.set(0.5);
-		this.hudHP.fixedToCamera = true;
+		//this.hudHpBar.fixedToCamera = true;
 	},
-	updateAP: function(ap){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	updateAP: function(){
+		if(this.hudApText != null){
+			this.hudApText.destroy();
+		}
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudApText = this.game.add.text((this.game.width/2), this.game.height-54, "AP: ", style);
+		this.hudApText.fixedToCamera = true;
+
 		//change to x number of images, hide when ap is used, show again once ap is regained
 		
-		if(this.hudAP != null){
-			this.hudAP.destroy();
+		if(this.hudApBar != null){
+			this.hudApBar.destroy();
 		}
 
 		let graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0xFF9900);
 
-		let x = this.game.width/2;
+		let x = this.game.width/2+30;
 
-		for(let a = 0; a < ap; a++){
-			this.hudAP = graphics.drawRect(x, this.game.height-54, 40, 18);
-			x += 45;
+		for(let a = 0; a < player.ap; a++){
+			this.hudApBar = graphics.drawRect(x, this.game.height-54, 20, 10);
+			x += 25;
 		}
 
 	 	//graphics.lineStyle(1, 0x880000, 1);
 	 	
-	   	this.hudAP.fixedToCamera = true;
+	   	this.hudApBar.fixedToCamera = true;
 	   	graphics.endFill();
 		
 		//this.hudAP = this.game.add.text((this.game.width/2), this.game.height-54, "AP: " + player.ap, style);
 		//t.anchor.set(0.5);
 		//this.hudAP.fixedToCamera = true;
 	},
-	updateCredits: function(credits){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	updateDMG: function(){
+		if(this.hudDmgText != null){
+			this.hudDmgText.destroy();
+		}
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudDmgText = this.game.add.text((this.game.width/2), this.game.height-90, "Dmg: " + player.dmg, style);
+		this.hudDmgText.fixedToCamera = true;
+	},
+	updateCredits: function(){
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
 		if(this.hudCredits != null){
 			this.hudCredits.destroy();
@@ -629,8 +684,8 @@ HUD.prototype = {
 		//t.anchor.set(0.5);
 		this.hudCredits.fixedToCamera = true;
 	},
-	updateFloor: function(floor){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	updateFloor: function(){
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
 		if(this.hudFloor != null){
 			this.hudFloor.destroy();
@@ -640,8 +695,8 @@ HUD.prototype = {
 		//t.anchor.set(0.5);
 		this.hudFloor.fixedToCamera = true;
 	},
-	updateWeapon: function(weapon){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	updateWeapon: function(){
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
 		if(this.hudWeapon != null){
 			this.hudWeapon.destroy();
@@ -651,8 +706,8 @@ HUD.prototype = {
 		//t.anchor.set(0.5);
 		this.hudWeapon.fixedToCamera = true;
 	},
-	updateEquipment: function(equipment){
-		var style = {font: "18px Consolas", fill: "#fff", align: "left"};
+	updateEquipment: function(){
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
 		if(this.hudEquipment != null){
 			this.hudEquipment.destroy();
@@ -782,6 +837,7 @@ function aiAct(e, index){
 		//console.log("pos x: ", posX, "pos y: ", posY);
 	}
 
+	//CAUSING ISSUES?
 	if(validMove(e.x + posX, e.y + posY)){
 		moveTo(e, index, {x: posX, y: posY});
 	}
@@ -923,10 +979,10 @@ function attackActor(aggressor, x, y){
 		console.log(actorPositions[victimIndex]);
 		victim.hp -= aggressor.dmg;
 		if(victim == player){
-			hud.updateReadout("Ouch, I took " + aggressor.dmg + " damage ;_;");
+			hud.updateReadout("Ouch, I took " + aggressor.dmg + " damage.");
 		}
 		else{
-			hud.updateReadout("I did " + aggressor.dmg + " damage to the enemy d:)");
+			hud.updateReadout("I did " + aggressor.dmg + " damage to the enemy.");
 		}
 
 
@@ -962,6 +1018,8 @@ function attackActor(aggressor, x, y){
 
 					expThreshold += 3000;
 					hud.updateReadout("I feel stronger.");
+					hud.updateDMG();
+					hud.updateHP();
 					console.log("LEVEL UP!");
 					console.log(player);
 				}
@@ -1127,6 +1185,8 @@ function Terminal(game, options, x, y){
 	this.game = game;
 	this.options = options;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'terminal1'); 
+	this.graphics = null;
+	this.textGroup = null;
 	//difficulty?
 	//healPlayer
 	//unlock room door
@@ -1137,39 +1197,114 @@ function Terminal(game, options, x, y){
 Terminal.prototype = {
 	displayTerminal: function(){
 
+		//GAME SHOULD PAUSE DURING THIS SCREEN
+
 		//https://phaser.io/examples/v2/text/display-text-word-by-word
 		//http://phaser.io/examples/v2/input/button-open-popup
-		let text;
 
-		let graphics = this.game.add.graphics(0, 0);
+		if(this.textGroup != null){
+			this.textGroup.destroy();
+		}
+		if(this.graphics != null){
+			this.graphics.destroy();
+		}
 
-		graphics.beginFill(0x000000);
-	   	graphics.lineStyle(1, 0x777777, 1);
-	   	let terminalBackground = graphics.drawRect(100, 100, this.game.width-200, this.game.height-200);
+		player.isUsingTerminal = true; //game pause
+
+		this.graphics = this.game.add.graphics(0, 0);
+
+		this.graphics.beginFill(0x000000);
+	   	this.graphics.lineStyle(1, 0x777777, 1);
+	   	let terminalBackground = this.graphics.drawRect(100, 100, this.game.width-200, this.game.height-200);
 	   	terminalBackground.fixedToCamera = true;
-	   	graphics.endFill();
+	   	this.graphics.endFill();
 
-	   	let bootText = "Booting into P.R.A.S.H system, please wait.....";
+	   	let bootText = "Booting into P.R.A.S.H system, please wait";
 	   	let fillerText = ".....";
 	   	let welcomeText = "Welcome " + playerName + " please choose from one of the following options:";
 
-	   	text = this.game.add.text(this.game.width/2-125, this.game.height/2-100, bootText, { font: "15px Arial", fill: "#19de65" });
-	   	text.fixedToCamera = true;
-	  	text = this.game.add.text(this.game.width/2, this.game.height/2-80, fillerText, { font: "15px Arial", fill: "#19de65" });
-   		text.fixedToCamera = true;
-   		text = this.game.add.text(this.game.width/2, this.game.height/2-60, fillerText, { font: "15px Arial", fill: "#19de65" });
-   		text.fixedToCamera = true;
-   		text = this.game.add.text(this.game.width/2-200, this.game.height/2-40, welcomeText, { font: "15px Arial", fill: "#19de65" });
-   		text.fixedToCamera = true;
+	    this.textGroup = game.add.group();
 
-		let healText = this.game.add.text(this.game.width/2, this.game.height/2, this.options[0], { font: "15px Arial", fill: "#19de65" });
+	   	bootText = this.game.add.text(this.game.width/2, this.game.height/2-100, bootText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+	   	bootText.fixedToCamera = true;
+	   	bootText.anchor.x = 0.5;
+
+	  	fillerText = this.game.add.text(this.game.width/2, this.game.height/2-80, fillerText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+   		fillerText.fixedToCamera = true;
+   		fillerText.anchor.x = 0.5;
+
+   		// fillerText = this.game.add.text(this.game.width/2, this.game.height/2-60, fillerText, { font: "15px Arial", fill: "#19de65" }, textGroup);
+   		// fillerText.fixedToCamera = true;
+   		// fillerText.anchor.x = 0.5;
+   		
+   		welcomeText = this.game.add.text(this.game.width/2, this.game.height/2-40, welcomeText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+   		welcomeText.fixedToCamera = true;
+   		welcomeText.anchor.x = 0.5;
+
+   		// let costColor;//text should be red if cannot afford
+
+   		let purchaseStyle = { font: "24px Arial", fill: "#19de65" }
+
+   		if(player.credits < healCost){
+   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+   		}
+
+		let healText = this.game.add.text(this.game.width/2, this.game.height/2, this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
 		healText.fixedToCamera = true;
 		healText.inputEnabled = true;
+		healText.anchor.x = 0.5;
 		healText.events.onInputDown.add(this.healPlayer, this);
-		healText.events.onInputOver.add(this.overOption, this);
-		healText.events.onInputOut.add(this.outOption, this);
 
+		if(player.credits >= healCost){
+			healText.events.onInputOver.add(this.overOption, this);
+			healText.events.onInputOut.add(this.outOption, this);
+		}
 
+		if(player.credits < upgradeDmgCost){
+   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+   		}
+
+		let upgradeDmgText = this.game.add.text(this.game.width/2, this.game.height/2+30, this.options[1] + " (" + upgradeDmgCost + ")", purchaseStyle, this.textGroup);
+		upgradeDmgText.fixedToCamera = true;
+		upgradeDmgText.inputEnabled = true;
+		upgradeDmgText.anchor.x = 0.5;
+		upgradeDmgText.events.onInputDown.add(this.upgradeDMG, this);
+
+		if(player.credits >= upgradeDmgCost){
+			upgradeDmgText.events.onInputOver.add(this.overOption, this);
+			upgradeDmgText.events.onInputOut.add(this.outOption, this);
+		}
+
+		if(player.credits < upgradeHpCost){
+   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+   		}
+
+		let upgradeHPText = this.game.add.text(this.game.width/2, this.game.height/2+60, this.options[2] + " (" + upgradeHpCost + ")", purchaseStyle, this.textGroup);
+		upgradeHPText.fixedToCamera = true;
+		upgradeHPText.inputEnabled = true;
+		upgradeHPText.anchor.x = 0.5;
+		upgradeHPText.events.onInputDown.add(this.upgradeHP, this);
+
+		if(player.credits >= upgradeHpCost){
+			upgradeHPText.events.onInputOver.add(this.overOption, this);
+			upgradeHPText.events.onInputOut.add(this.outOption, this);
+		}
+
+		let logoffText = this.game.add.text(this.game.width/2, this.game.height/2+90, this.options[3], { font: "24px Arial", fill: "#19de65" }, this.textGroup);
+		logoffText.fixedToCamera = true;
+		logoffText.inputEnabled = true;
+		logoffText.anchor.x = 0.5;
+		//once the player has logged off, we allow for controls again, using onInputUp avoid movement with log off click
+		logoffText.events.onInputUp.add(function(){ this.textGroup.destroy(); this.graphics.destroy(); player.isUsingTerminal = false; }, this);
+		logoffText.events.onInputOver.add(this.overOption, this);
+		logoffText.events.onInputOut.add(this.outOption, this);
+
+		// game.paused = true;
+		// console.log("game paused");
+
+		// while(player.isUsingTerminal){
+		// 	console.log("console in use");
+		// }
 		// text = this.game.add.text(100, 120, this.options[1], { font: "15px Arial", fill: "#19de65" });
 		// text.fixedToCamera = true;
 		// text = this.game.add.text(100, 140, this.options[2], { font: "15px Arial", fill: "#19de65" });
@@ -1177,20 +1312,79 @@ Terminal.prototype = {
 	},
 	healPlayer: function(){
 		console.log("Terminal heal");
-		if(player.hp + 50 <= player.maxHP){
-			player.hp += 50;
+		if(player.hp == player.maxHP){
+			hud.updateReadout("I'm already fully healed.");
+		}
+		else if(player.credits >= healCost){
+			if(player.hp + 50 <= player.maxHP){
+				player.hp += 50;
+			}
+			else{
+				player.hp = player.maxHP;
+			}
+			hud.updateReadout("Ahhh, much better.");
+			player.credits -= healCost;
+			hud.updateCredits();
+			hud.updateHP();
+
+			healCost += 20;
+
+			this.displayTerminal();
 		}
 		else{
-			player.hp = player.maxHP;
+			hud.updateReadout("I don't have enough credits.");
 		}
-		hud.updateHP(player.hp);
+	},
+	upgradeDMG: function(){
+		console.log("Terminal upgrade damage");
+		if(player.credits >= upgradeDmgCost){
+			player.credits -= upgradeDmgCost;
+			hud.updateCredits();
 
+			hud.updateReadout("Power runs through me.");
+
+			player.dmg += 5;
+			hud.updateDMG();
+
+			upgradeDmgCost += 300;
+
+			this.displayTerminal();
+		}
+		else{
+			hud.updateReadout("I don't have enough credits.");
+		}
+		// check for enough credits
+		// player.DMG += 20
 	},
-	overOption: function(item){
-		item.fill = "#FF0000";
+	upgradeHP: function(){
+		console.log("Terminal health upgrade");
+		if(player.credits >= upgradeHpCost){
+			player.credits -= upgradeHpCost;
+			hud.updateCredits();
+
+			hud.updateReadout("I feel great.");
+
+			player.maxHP += 10;
+			player.hp += 10;
+			hud.updateHP();
+
+			upgradeHpCost += 300;
+
+			this.displayTerminal();
+		}
+		else{
+			hud.updateReadout("I don't have enough credits.");
+		}
 	},
-	outOption: function(item){
-		item.fill = "#19de65";
+	overOption: function(item, valid){
+		if(valid){
+			item.fill = "#FF0000";
+		}
+	},
+	outOption: function(item, valid){
+		if(valid){
+			item.fill = "#19de65";
+		}
 	}
 };
 
@@ -1211,6 +1405,7 @@ function Player(game, name, x, y, hp){
 	this.credits = 0;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
+	this.isUsingTerminal = false;
 };
 
 function Enemy(game, x, y, hp){
