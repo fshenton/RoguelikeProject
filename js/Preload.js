@@ -29,6 +29,9 @@ Roguelike.Preload.prototype = {
 		//this.load.image('wallTile', 'assets/images/wallTile64.png', 64, 64);		
 		this.load.image('wallTile', 'assets/images/newWall.png', 64, 64);
 		this.load.image('doorTile', 'assets/images/doorTile64.png', 64, 64);	
+		this.load.image('exitTile', 'assets/images/exit.png', 64, 64);
+		this.load.image('safeTile', 'assets/images/safe.png', 64, 64);
+
 
 	
 		//this.load.image('player', 'assets/images/Character1.png', 64, 64);
