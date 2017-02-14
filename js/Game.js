@@ -11,6 +11,7 @@ const floorChar = 'R';
 const wallChar = 'w';
 const numEnemies = 20;
 const terminalNumber = 10;
+const lootNumber = 5;
 
 //numitems
 //numterminals
@@ -45,6 +46,8 @@ var actorList;//, UI;
 var actorPositions;
 var terminalPositions;
 var terminalList;
+var lootPositions;
+var lootList;
 
 var enemiesKilled;
 var creditsEarned;
@@ -84,11 +87,11 @@ Roguelike.Game.prototype = {
 		//for level change, the current values should be carried over
 		expThreshold = 3000;
 		healCost = 50;
-		upgradeDmgCost = 150;
-		upgradeHpCost = 150;
+		upgradeDmgCost = 200;
+		upgradeHpCost = 200;
 
 		hud = new HUD(this.game);
-		hud.initHUD("And so it begins.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber, {}, {});
+		hud.initHUD("And so it begins.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber);
 
 		cursors = this.game.input.keyboard.createCursorKeys();
 		this.input.keyboard.addCallbacks(null, null, this.onKeyUp);
@@ -98,10 +101,10 @@ Roguelike.Game.prototype = {
 		console.log("New Game Started");
 
 		//this.game.add.audio('scary').play();
-		//this.game.add.audio('mysterious', 0.5, false).play();
+		this.game.add.audio('mysterious', 0.5, false).play();
 
-		//music = this.game.add.audio('synthMusic', 0.7, true)
-		//music.play();
+		music = this.game.add.audio('synthMusic', 0.7, true)
+		music.play();
 	},
 	/*update: function(){
 	},*/
@@ -109,8 +112,11 @@ Roguelike.Game.prototype = {
 
 		let acted = false;
 		let useTerminal = false;
+		let useLootBox = false;
 		let tX;
 		let tY;
+		let lX;
+		let lY;
 
 		// if(!this.player.isAlive()){
 		// 	//game should have ended
@@ -122,13 +128,14 @@ Roguelike.Game.prototype = {
 
 		//console.log("Player x: ", player.x, "Player y: ", player.y);
 
-		if(!player.isUsingTerminal){ //player cannot move while using terminal
+		if(!player.isUsingTerminal && !player.isUsingLoot){ //player cannot move while using terminal
 			//THEY MOVE AFTER CHOOSING LOG OFF
 			switch(event.keyCode){
 				case Phaser.Keyboard.LEFT:
 					//console.log("LEFT");
 					//console.log("mX: ", player.x, "mY:", player.y-1);
 					if(validMove(player.x, player.y-1)){
+						console.log("valid move");
 						acted = moveTo(player, 0, {x: 0, y: -1});
 						if(map[player.x][player.y] == Tile.EXIT){
 							showFloorSelectScreen();
@@ -139,11 +146,17 @@ Roguelike.Game.prototype = {
 						tX = player.x;
 						tY = player.y-1;
 					}
+					else if(map[player.x][player.y-1] == Tile.LOOT){
+						useLootBox = true;
+						lX = player.x;
+						lY = player.y-1;
+					}
 					break;
 				case Phaser.Keyboard.UP:
 					//console.log("UP");
 					//console.log("mX: ", player.x-1, "mY:", player.y);
 					if(validMove(player.x-1, player.y)){
+						console.log("valid move");
 						acted = moveTo(player, 0, {x: -1, y: 0});
 						if(map[player.x][player.y] == Tile.EXIT){
 							showFloorSelectScreen();
@@ -154,11 +167,17 @@ Roguelike.Game.prototype = {
 						tX = player.x-1;
 						tY = player.y;
 					}
+					else if(map[player.x-1][player.y] == Tile.LOOT){
+						useLootBox = true;
+						lX = player.x-1;
+						lY = player.y;
+					}
 					break;
 				case Phaser.Keyboard.RIGHT:
 					//console.log("RIGHT");
 					//console.log("mX: ", player.x, "mY:", player.y+1);
 					if(validMove(player.x, player.y+1)){
+						console.log("valid move");
 						acted = moveTo(player, 0, {x: 0, y: 1});
 						if(map[player.x][player.y] == Tile.EXIT){
 							showFloorSelectScreen();
@@ -169,11 +188,17 @@ Roguelike.Game.prototype = {
 						tX = player.x;
 						tY = player.y+1;
 					}
+					else if(map[player.x][player.y+1] == Tile.LOOT){
+						useLootBox = true;
+						lX = player.x;
+						lY = player.y+1;
+					}
 					break;
 				case Phaser.Keyboard.DOWN:
 					//console.log("DOWN");
 					//console.log("mX: ", player.x+1, "mY:", player.y);
 					if(validMove(player.x+1, player.y)){
+						console.log("valid move");
 						acted = moveTo(player, 0, {x: +1, y: 0});
 						if(map[player.x][player.y] == Tile.EXIT){
 							showFloorSelectScreen();
@@ -183,6 +208,11 @@ Roguelike.Game.prototype = {
 						useTerminal = true;
 						tX = player.x+1;
 						tY = player.y;
+					}
+					else if(map[player.x+1][player.y] == Tile.LOOT){
+						useLootBox = true;
+						lX = player.x+1;
+						lY = player.y;
 					}
 					break;
 				default: 
@@ -204,6 +234,17 @@ Roguelike.Game.prototype = {
 			// }
 			//counts as an action, can deduct ap once they choose option
 		}
+		else if(useLootBox){
+			console.log("opening loot box");
+			console.log(lootPositions);
+			let lootIndex = lootPositions.indexOf(lY + "_" + lX);
+			let lootBox = lootList[lootIndex];
+			console.log("lY: " + lY);
+			console.log("lX: " + lX);
+			console.log(lootBox);
+			lootBox.displayLoot();
+			hud.updateReadout("What treasures await?");
+		}
 
 		//reduce ap as acted
 		if(acted){
@@ -224,7 +265,26 @@ Roguelike.Game.prototype = {
 					//basics have 1
 				}
 			}
-			player.ap = player.maxAP;
+			//AP UP AUG
+			let aug = player.augmentations.find(function(a){return a.type == Aug.APUP;});
+			let extraAP = false;
+			if(aug != undefined){
+				let chanceToGainAP = 100*(aug.effectVal*aug.level);
+				console.log("chance: " + chanceToGainAP)
+				let diceRoll = Math.ceil(Math.random() * 100);
+				console.log("dice: " + diceRoll)
+				if(diceRoll <= chanceToGainAP){
+					player.ap = player.maxAP+1;
+					extraAP = true;
+					hud.updateReadout("I feel lighter on my feet. <+1AP this turn>");
+					//play sound
+				}
+			}
+
+			if(!extraAP){
+				player.ap = player.maxAP;
+			}
+			
 			hud.updateAP(player.ap);
 			//update HUD
 		}
@@ -322,6 +382,214 @@ Roguelike.Game.prototype = {
 	*/
 };
 
+//adds loot boxes to level that contains augs
+function placeLoot(){
+	//aug ideas:
+	//Download (heal when dealing dmg)
+	//Push() (chance to knockback (push back one tile)
+	//ForEach (adjacent enemies)
+	//CapacityUpgrade AP+1
+	//HighRoll increased crit%
+	//Stop() chance to stun enemy (set ap to 0)
+	//Extend() range increase
+	//TryCatch() increases def/evasion
+
+	//when find lootbox, show loot screen:
+	//you found <insert name>
+	//<effects>
+	//take || leave
+	//if take, add to player augmentations list
+
+	console.log("placing loot");
+
+	let ranPos;
+
+	//used?
+	lootPositions = [];
+	lootList = [];
+
+	//3 have augs
+	//2 have credits
+
+	let a; //aug
+	let c; //credits
+
+	for(let l = 0; l < lootNumber; l++){
+		//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
+
+		//SOME WEIRDNESS GOING ON. DOORS?
+		ranPos = getRandomCoords(rooms, false, true);
+		c = Math.ceil(Math.random() * (250 * floorNumber));
+		if(l < 2){
+			a = null;
+			c += 50 * floorNumber;
+		}
+		else{
+			let ranAug = Math.floor(Math.random() * 3);
+			if(ranAug == 0){
+				a = new Augmentation(Aug.VAMP, 1, 0.05)
+			}
+			else if(ranAug == 1){
+				a = new Augmentation(Aug.DEF, 1, 0.1);
+			}
+			else if(ranAug == 2){
+				a = new Augmentation(Aug.APUP, 1, 0.1);			
+			}
+		}
+		let loot = new LootBox(a, c, ranPos.y, ranPos.x);
+		map[ranPos.y][ranPos.x] = Tile.LOOT;
+		lootPositions.push(ranPos.x + '_' + ranPos.y); 
+		lootList.push(loot);
+		console.log("Loot " + l, loot);
+		//console.log(terminal.options);
+	}
+
+
+	//can upgrade existing augs at terminals
+	//can buy them also?
+
+	//when attacking or moving (apply any augmentations to ap + dmg + effect)
+}
+
+function LootBox(aug, credits, x, y){
+	this.sprite = game.add.sprite(y*64, x*64, 'safeTile'); 
+	this.aug = aug;
+	this.credits = credits;
+	this.augText;
+	this.creditText;
+};
+
+LootBox.prototype = {
+	displayLoot: function(){
+		player.isUsingLoot = true; //game pause
+
+		if(this.textGroup != null){
+			this.textGroup.destroy();
+		}
+		if(this.graphics != null){
+			this.graphics.destroy();
+		}
+
+		this.graphics = game.add.graphics(0, 0);
+
+		this.graphics.beginFill(0x000000);
+	   	this.graphics.lineStyle(1, 0x777777, 1);
+	   	let lootBackground = this.graphics.drawRect(200, 200, game.width/2, game.height/2);
+	   	lootBackground.fixedToCamera = true;
+	   	this.graphics.endFill();
+		
+	   	let openText = "You found some loot, take what you want:"
+
+	    this.textGroup = game.add.group();
+
+	   	openText = game.add.text(game.width/2, game.height/2-100, openText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+	   	openText.fixedToCamera = true;
+	   	openText.anchor.x = 0.5;
+
+   		let lootStyle = { font: "24px Arial", fill: "#19de65" }
+
+   		if(this.aug != null){
+   			let thisAugType = this.aug.type;
+   			let foundAug = player.augmentations.find(function(a){return a.type == thisAugType;});
+	   		let existingString = "";
+	   		let existingAug = false;
+
+	   		if(foundAug){
+	   			existingString = "  (+1 aug level)";
+	   			existingAug = true;
+	   		}
+
+			this.augText = game.add.text(game.width/2, game.height/2, this.aug.type + existingString, lootStyle, this.textGroup);
+			this.augText.fixedToCamera = true;
+			this.augText.inputEnabled = true;
+			this.augText.anchor.x = 0.5;
+			if(existingAug){
+				this.augText.events.onInputDown.add(this.upgradeAug, this);
+			}
+			else{
+				this.augText.events.onInputDown.add(this.takeAug, this);
+			}
+			this.augText.events.onInputOver.add(this.overOption, this);
+			this.augText.events.onInputOut.add(this.outOption, this);
+		}
+
+		if(this.credits != null){
+			this.creditText = game.add.text(game.width/2, game.height/2+50, this.credits, lootStyle, this.textGroup);
+			this.creditText.fixedToCamera = true;
+			this.creditText.inputEnabled = true;
+			this.creditText.anchor.x = 0.5;
+			this.creditText.events.onInputDown.add(this.takeCredits, this);
+			this.creditText.events.onInputOver.add(this.overOption, this);
+			this.creditText.events.onInputOut.add(this.outOption, this);
+		}
+	
+		let closeText = game.add.text(game.width/2, game.height/2+90, "Close box", { font: "24px Arial", fill: "#19de65" }, this.textGroup);
+		closeText.fixedToCamera = true;
+		closeText.inputEnabled = true;
+		closeText.anchor.x = 0.5;
+		closeText.events.onInputUp.add(function(){ 
+			this.textGroup.destroy(); 
+			this.graphics.destroy(); 
+			player.isUsingLoot = false; 
+		}, this);
+		closeText.events.onInputOver.add(this.overOption, this);
+		closeText.events.onInputOut.add(this.outOption, this);
+	},
+	overOption: function(item){
+		item.fill = "#FF0000";
+	},
+	outOption: function(item){
+		item.fill = "#19de65";
+	},
+	takeCredits : function(){
+		player.credits += this.credits;
+		hud.updateReadout("Money, money, money.");
+		hud.updateCredits();
+		this.credits = null;
+		this.displayLoot();
+	},
+	takeAug : function(){
+		player.augmentations.push(this.aug);
+		hud.updateReadout("Ooh, a new augmentation, lovely.");
+		hud.updateAugs();
+		this.aug = null;
+		this.displayLoot();
+	},
+	upgradeAug : function(){
+		let thisAugType = this.aug.type;
+		let existingAug = player.augmentations.find(function(a){return a.type == thisAugType;});
+		existingAug.level += 1;
+		hud.updateReadout("My augmentation became stronger.");
+		hud.updateAugs();
+		this.aug = null;
+		this.displayLoot();
+	}
+};
+
+var Aug = {
+	VAMP: "Vampiric Siphoning",
+	//STUN: "Short Circuit Augmentation",
+	DEF: "Defensive Matrix",
+	APUP: "Mobility Enhancer"
+};
+
+//generic object that 
+function Augmentation(type, level, effectVal){
+ 	this.type = type;
+ 	this.level = level;
+ 	this.effectVal = effectVal;
+
+ 	//create augmentation:
+ 	//let a = new Vamp(); //Vamp is an Augmentation
+ 	//Vamp calls the Augmentation constructor with Aug.VAMP
+
+ 	//create augmentation:
+ 	//let a = new Augmentation(Aug.VAMP, 1); 
+ 	//then could do on attack:
+ 	//if augmentations[i].type = Aug.VAMP{
+ 			//on damage, heal player for vampAmount*augmentations[i].level
+}
+
 //initialises all elements of current floor
 function setupFloor(fn, p){
 	initMap();
@@ -332,12 +600,12 @@ function setupFloor(fn, p){
 	}
 	drawFloor();
 	placeTerminals();
-	//placeSafes(); contain loot, credits or traps
+	placeLoot(); //contain loot, credits or traps
 	//placeFurniture(); blocks pathing, adds interest
 	initActors(p);
 	if(fn > 1){
 		hud = new HUD(game);
-		hud.initHUD("A new floor.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber, {}, {});
+		hud.initHUD("A new floor.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber);
 	}
 }
 
@@ -520,13 +788,28 @@ function initActors(p){
 	actorPositions.push(ranPos.x + '_' + ranPos.y); 
 	actorList.push(player);
 
+
+	// ////////////////////////
+	// //for quick debug
+	// if(floorNumber == 1){
+	// 	player.augmentations.push(new Augmentation(Aug.VAMP, 1, 0.05));
+	// 	player.augmentations.push(new Augmentation(Aug.APUP, 1, 0.1));
+	// 	player.augmentations.push(new Augmentation(Aug.DEF, 1, 0.1));
+	// }
+	// console.log(player.augmentations);
+	// ////////////////////////////
+
 	game.physics.enable(player.sprite, Phaser.Physics.ARCADE);
 
+	//needs offset
 	game.camera.follow(player.sprite);
 
+
+	//change dmg and hp based on floorNumber
+	//change proportion of better ai enemies
 	for(let e = 0; e < numEnemies; e++){
 		ranPos = getRandomCoords(rooms, true, false);
-		//change dmg and hp based on floorNumber
+		
 		let enemy = new Enemy(game, ranPos.y, ranPos.x, 50);
 		
 		actorList.push(enemy);
@@ -541,43 +824,7 @@ function initActors(p){
 
 	console.log("Actor number:", actorList.length);
 }
-	//SHOULD HAVE AN OFFSET TO KEEP PLAYER IN CENTER OF VIEW PORT (HUD COVERS A COUPLE OF CELLS)
-
-	//if p is null, create new player
-	//set random x and y for p
-	//set sprite to x and y
-	//else add p.x and p.y to actorpositions
-	//animations should still be active on p
-	//name should still be saved
-	//terminals should be placed away from doors, exits and terminals, but next to walls
-
-	//for debugging
-	//ranPos.x = 2;
-	//ranPos.y = 2;
 	
-	//actorList = [];
-	
-
-	
-
-	//FOR EXIT TESTING
-	// if(player == null){
-	// 	player = new Player(this.game, playerName, 1, 1, 100);
-	// }
-	
-	//actorPositions.push(1 + '_' + 1); 
-	//////
-
-	
-
-	//this could be condensed so that if i == 0, create player, else enemy
-	
-	
-
-
-
-	//enemyList = [];
-
 function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment){
 	this.game = game;
 	this.hudReadout = [];// = messages;
@@ -594,12 +841,13 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 	this.hudDmgText;
 	this.hudCredits;// = credits;
 	this.hudFloor;// = floor;
-	this.hudWeapon;// = weapon;
-	this.hudEquipment;// = equipment;
+	this.hudAugText;
+	this.hudAugList;
+	this.hudAugTextGroup;
 };
 
 HUD.prototype = {
-	initHUD: function(message, /*name,*/ hp, ap, dmg, credits, floor, weapon, equipment){
+	initHUD: function(message, /*name,*/ hp, ap, dmg, credits, floor){
 		let graphics = this.game.add.graphics(0, 0);
 
 		graphics.beginFill(0x333333);
@@ -618,8 +866,7 @@ HUD.prototype = {
 	   	this.updateDMG(dmg);
 	   	this.updateCredits(credits);
 	   	this.updateFloor(floor);
-	   	this.updateWeapon(weapon);
-	   	this.updateEquipment(equipment);
+	   	this.updateAugs();
 
 	},
 	updateReadout: function(message){
@@ -791,28 +1038,59 @@ HUD.prototype = {
 		//t.anchor.set(0.5);
 		this.hudFloor.fixedToCamera = true;
 	},
-	updateWeapon: function(){
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+	updateAugs: function(){
+		//if(this.hudAugList == undefined){ this.hudAugList = augs;};
 
-		if(this.hudWeapon != null){
-			this.hudWeapon.destroy();
+		// if(this.hudAugList != null){
+
+		// }
+
+		if(this.hudAugTextGroup != null){
+			this.hudAugTextGroup.destroy();
 		}
 
-		this.hudWeapon = this.game.add.text(this.game.width-200, this.game.height-63, "Weapon", style);
-		//t.anchor.set(0.5);
-		this.hudWeapon.fixedToCamera = true;
-	},
-	updateEquipment: function(){
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
-
-		if(this.hudEquipment != null){
-			this.hudEquipment.destroy();
+		if(this.hudAugList != undefined){
+			this.hudAugList.splice(0, this.hudAugList.length);
+		}
+		else{
+			this.hudAugList = [];
 		}
 
-		this.hudEquipment = this.game.add.text((this.game.width-100), this.game.height-63, "Armor", style);
-		//t.anchor.set(0.5);
-		this.hudEquipment.fixedToCamera = true;
-	},
+		//this.hudAugList = [];
+		
+		console.log(this.hudAugList);
+
+		for(let i = 0; i < player.augmentations.length; i++){
+			//should not be any duplicates
+			this.hudAugList.push({type: player.augmentations[i].type, level: player.augmentations[i].level});
+		}
+		
+		console.log(this.hudAugList);
+		
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		if(this.hudAugText == null){
+			this.hudAugText = game.add.text(game.width-200, game.height-90, "--Augmentations--", style);
+			this.hudAugText.fixedToCamera = true;
+		}
+	
+		if(this.augTextGroup != null){
+			this.augTextGroup.destroy();
+		}
+
+		this.augTextGroup = game.add.group();
+		
+		let y = game.height-72;
+
+		for(let i = 0; i < this.hudAugList.length; i++){
+			//r = this.readout3;
+			let aText = this.game.add.text(game.width-200, y, this.hudAugList[i].type + " (lvl " + this.hudAugList[i].level + ")", style, this.augTextGroup);
+			aText.fixedToCamera = true;
+			//aText.anchor.set(0.5);
+			//console.log(this.hudReadout[m]);
+			y += 18;
+		}
+	}
 };
 
 function aiAct(e, index){
@@ -1026,7 +1304,7 @@ function getRandomCoords(rooms, actor, terminal){
 		//pick random wall, place terminal next to it, but not next to door or exit or terminal
 		*/
 
-		
+
 		//so that it works temporarily
 		if(actor || terminal){
 			rndRoomX = rndRoom.tiles[0][Math.floor(Math.random() * rndRoom.tiles[0].length)].x;
@@ -1163,14 +1441,60 @@ function attackActor(aggressor, x, y){
 	else{
 		//console.log(aggressor);
 		//console.log(actorPositions[victimIndex]);
-		victim.hp -= aggressor.dmg;
 		if(victim == player){
-			hud.updateReadout("Ouch, I took " + aggressor.dmg + " damage.");
+			let aug = player.augmentations.find(function(a){return a.type == Aug.DEF;});
+			let playerHit = true;
+			if(aug != undefined){
+				console.log("Def level: " + aug.level);
+				let dodgeAmount = 100*(aug.effectVal*aug.level);
+				let chanceToHit = 100-dodgeAmount;
+				let diceRoll = Math.ceil(Math.random() * 100);
+				console.log("Chance to hit: " + chanceToHit + "%");
+				console.log("Rolled: " + diceRoll);
+				playerHit = diceRoll <= chanceToHit; 
+				//random number between 1 and 100
+				//if that number is the same or under the chance to hit (of say 95) then deal dmg, otherwise player dodges
+				//playerhit is false if missed
+			}
+			if(playerHit){
+				player.hp -= aggressor.dmg;
+				hud.updateReadout("Ouch, I took " + aggressor.dmg + " damage.");
+				hud.updateHP(player.hp);
+			}
+			else{
+				hud.updateReadout("Phew, I dodged the attack!");
+			}
 		}
-		else{
+		else if(aggressor == player){
+			let aug = player.augmentations.find(function(a){return a.type == Aug.VAMP;});
+			// console.log(player.augmentations[0]);
+			// console.log(aug);
+			if(aug != undefined){
+				console.log("Vamp attack");
+				if(player.hp < player.maxHP){
+					player.hp += aggressor.dmg*(aug.level * aug.effectVal); //5% vamp to begin with
+					if(player.hp > player.maxHP){
+						player.hp == player.maxHP;
+					}
+					hud.updateHP();
+				}
+			}
+			victim.hp -= aggressor.dmg;
 			hud.updateReadout("I did " + aggressor.dmg + " damage to the enemy.");
+			let hurtString;
+			if(victim.hp>victim.maxHP*0.9){
+				hud.updateReadout("They're still pretty fresh.");
+			}
+			else if(victim.hp>victim.maxHP*0.5){
+				hud.updateReadout("They're hurt.");
+			}
+			else if(victim.hp<=victim.maxHP*0.5){
+				hud.updateReadout("They look badly hurt.");
+			}
+			else if(victim.hp<=victim.maxHP*0.25){
+				hud.updateReadout("They look close to death.");
+			}
 		}
-
 
 		console.log(victim.hp);
 		if(victim.hp <= 0){
@@ -1191,14 +1515,14 @@ function attackActor(aggressor, x, y){
 			}
 			else{
 				player.score += 100;
-				player.exp += 1000;
+				player.exp += 500;
 				hud.updateReadout("Enemy Down.");
 				if(player.exp >= expThreshold){
 					//UPDATE HUD
 					player.lvl++;
-					player.maxHP += 20;
-					player.dmg += 5;
-
+					player.maxHP += 5;
+					player.hp+=5;
+					player.dmg += 2;
 					//player.maxAP += 0.5;
 					//if max ap is now a full level higher, updateHUD
 
@@ -1209,9 +1533,9 @@ function attackActor(aggressor, x, y){
 					console.log("LEVEL UP!");
 					console.log(player);
 				}
-				player.credits += 50;
-				creditsEarned += 50;
-				hud.updateCredits(player.credits + 50);
+				player.credits += 20;
+				creditsEarned += 20;
+				hud.updateCredits();
 				victim.sprite.kill();
 				victim.sprite = game.add.sprite(victim.y*64, victim.x*64, 'armorDeath', 0); 
 				victim.sprite.anchor.y = 0.3 ;
@@ -1228,9 +1552,6 @@ function attackActor(aggressor, x, y){
 			//victim.sprite.kill();
 
 			//victim.sprite.kill();
-		}
-		if(victim == player){
-			hud.updateHP(player.hp);//change HUD to reflect new health total
 		}
 	}
 
@@ -1296,7 +1617,7 @@ function showFloorSelectScreen(){
 
 function showGameOverScreen(message){
 
-	//music.stop();
+	music.stop();
 	if(message != "Victory"){
 		let gameOverSound = game.add.audio('gameOver')
 		gameOverSound.play();
@@ -1394,6 +1715,10 @@ function validMove(mX, mY){
 		//handle if door locked
 	}
 	else if(map[mX][mY] == Tile.TERMINAL){
+		return false;
+	}
+	else if(map[mX][mY] == Tile.LOOT){
+		console.log("Tile is loot");
 		return false;
 	}
 		
@@ -1674,7 +1999,7 @@ Terminal.prototype = {
 			hud.updateReadout("I don't have enough credits.");
 		}
 	},
-	finalMainframeHack(){
+	finalMainframeHack : function(){
 		showGameOverScreen("Victory");
 	},
 	overOption: function(item, valid){
@@ -1707,6 +2032,8 @@ function Player(game, name, x, y, hp){
 	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
 	this.isUsingTerminal = false;
+	this.isUsingLoot = false;
+	this.augmentations = [];
 };
 
 function Enemy(game, x, y, hp){
@@ -1714,6 +2041,7 @@ function Enemy(game, x, y, hp){
 	this.x = x;	
 	this.y = y;
 	this.hp = hp;
+	this.maxHP = hp;
 	this.dmg = 20;
 	this.sprite = this.game.add.sprite(y*64, x*64, 'armor1', 19); 
 	this.isAlive = true;
