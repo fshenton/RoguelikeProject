@@ -38,14 +38,15 @@ Roguelike.Preload.prototype = {
 
 		//spritesheets
 		this.load.spritesheet('player', 'assets/images/Character1Walk.png', 64, 64);
-		//this.load.spritesheet('player', 'assets/images/Character32.png', 32, 32);
-		//this.load.spritesheet('player', 'assets/images/Character32.png', 32, 32);
-		this.load.spritesheet('agent', 'assets/images/AgentWalk.png', 64, 64);	
-		this.load.spritesheet('armor1', 'assets/images/ArmorWalk.png', 64, 64);	
-		this.load.spritesheet('armor2', 'assets/images/Armor2Walk.png', 64, 64);	
-		//this.load.spritesheet('interior', 'assets/images/Interior-Furniture.png', 32, 32);	
-		this.load.spritesheet('armorDeath', 'assets/images/ArmorDeath.png', 64, 64);	
 		this.load.spritesheet('playerDeath', 'assets/images/Character1Hurt.png', 64, 64);	
+		//this.load.spritesheet('player', 'assets/images/Character32.png', 32, 32);
+		//this.load.spritesheet('player', 'assets/images/Character32.png', 32, 32);
+		this.load.spritesheet('agent', 'assets/images/AgentWalk.png', 64, 64);		
+		this.load.spritesheet('armor1', 'assets/images/Armor1Walk.png', 64, 64);	
+		this.load.spritesheet('armor2', 'assets/images/Armor2Walk.png', 64, 64);	
+		this.load.spritesheet('agentDeath', 'assets/images/AgentDeath.png', 64, 64);	
+		this.load.spritesheet('armor1Death', 'assets/images/Armor1Hurt.png', 64, 64);	
+		this.load.spritesheet('armor2Death', 'assets/images/Armor2Hurt.png', 64, 64);
 		
 
 		this.load.image('terminal1', 'assets/images/terminal1.png', 64, 64);

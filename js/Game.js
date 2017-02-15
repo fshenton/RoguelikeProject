@@ -10,6 +10,7 @@ const numRooms = 20;
 const floorChar = 'R';
 const wallChar = 'w';
 const numEnemies = 20;
+
 const terminalNumber = 10;
 const lootNumber = 5;
 
@@ -23,6 +24,8 @@ var game;
 var floorNumber;
 var topFloor = 10;
 var expThreshold;
+
+var enemyRatios;
 
 var hud;
 
@@ -73,6 +76,19 @@ Roguelike.Game.prototype = {
 		
 		floorNumber = 1;
 
+		enemyRatios = [
+			{e1: 1.0, e2: 0, e3: 0, buff: 0},
+			{e1: 0.9, e2: 0.1, e3: 0, buff: 0.25},
+			{e1: 0.8, e2: 0.2, e3: 0, buff: 0.50},
+			{e1: 0.7, e2: 0.3, e3: 0, buff: 0.75},
+			{e1: 0.6, e2: 0.4, e3: 0, buff: 1.00},
+			{e1: 0.5, e2: 0.5, e3: 0, buff: 1.25},
+			{e1: 0.4, e2: 0.5, e3: 0.1, buff: 1.50},
+			{e1: 0.3, e2: 0.5, e3: 0.2, buff: 1.75},
+			{e1: 0.2, e2: 0.5, e3: 0.3, buff: 2.0},
+			{e1: 0.1, e2: 0.5, e3: 0.4, buff: 2.25}
+			];
+
 		setupFloor(floorNumber);
 
 		//Area outside of level is only to the right/bot of the map, as map is placed at 0,0
@@ -85,13 +101,13 @@ Roguelike.Game.prototype = {
 		creditsEarned = 0;
 
 		//for level change, the current values should be carried over
-		expThreshold = 3000;
+		expThreshold = 800;
 		healCost = 50;
 		upgradeDmgCost = 200;
 		upgradeHpCost = 200;
 
 		hud = new HUD(this.game);
-		hud.initHUD("And so it begins.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber);
+		hud.initHUD("And so it begins.");
 
 		cursors = this.game.input.keyboard.createCursorKeys();
 		this.input.keyboard.addCallbacks(null, null, this.onKeyUp);
@@ -103,8 +119,8 @@ Roguelike.Game.prototype = {
 		//this.game.add.audio('scary').play();
 		this.game.add.audio('mysterious', 0.5, false).play();
 
-		music = this.game.add.audio('synthMusic', 0.7, true)
-		music.play();
+		//music = this.game.add.audio('synthMusic', 0.7, true)
+		//music.play();
 	},
 	/*update: function(){
 	},*/
@@ -260,7 +276,11 @@ Roguelike.Game.prototype = {
 			for(let i = 1; i <= numEnemies; i++){
 				let e = actorList[i];
 				if(e.isAlive){
-					aiAct(e, i);
+					while(e.ap > 0){
+						aiAct(e, i);
+						e.ap--;
+					}
+					e.ap = e.maxAP;
 					//enemies should have ap also
 					//basics have 1
 				}
@@ -418,8 +438,9 @@ function placeLoot(){
 		//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
 
 		//SOME WEIRDNESS GOING ON. DOORS?
+		console.log("Finding space for lootbox.");
 		ranPos = getRandomCoords(rooms, false, true);
-		c = Math.ceil(Math.random() * (250 * floorNumber));
+		c = Math.ceil(Math.random() * (150+(150 * Math.floor(floorNumber/2))));
 		if(l < 2){
 			a = null;
 			c += 50 * floorNumber;
@@ -427,7 +448,7 @@ function placeLoot(){
 		else{
 			let ranAug = Math.floor(Math.random() * 3);
 			if(ranAug == 0){
-				a = new Augmentation(Aug.VAMP, 1, 0.05)
+				a = new Augmentation(Aug.VAMP, 1, 0.10)
 			}
 			else if(ranAug == 1){
 				a = new Augmentation(Aug.DEF, 1, 0.1);
@@ -514,7 +535,7 @@ LootBox.prototype = {
 		}
 
 		if(this.credits != null){
-			this.creditText = game.add.text(game.width/2, game.height/2+50, this.credits, lootStyle, this.textGroup);
+			this.creditText = game.add.text(game.width/2, game.height/2+50, "Credits: " + this.credits, lootStyle, this.textGroup);
 			this.creditText.fixedToCamera = true;
 			this.creditText.inputEnabled = true;
 			this.creditText.anchor.x = 0.5;
@@ -605,8 +626,11 @@ function setupFloor(fn, p){
 	initActors(p);
 	if(fn > 1){
 		hud = new HUD(game);
-		hud.initHUD("A new floor.", /*playerName,*/ player.hp, player.ap, player.dmg, player.credits, floorNumber);
+		hud.initHUD("A new floor.");
 	}
+
+	actorList.forEach(function(i){ console.log("X:", i.x, "Y:", i.y); })
+	//console.log(actorList);
 }
 
 //place an exit tile at a random point on perimiter wall
@@ -685,6 +709,7 @@ function placeTerminals(){
 
 	for(let t = 0; t < terminalNumber; t++){
 		//NEED TO NOT BLOCK DOORS + IDEALLY NOT PUT MORE THAN ONE IN A ROOM
+		console.log("Finding space for terminal.");
 		ranPos = getRandomCoords(rooms, false, true);
 		//not all terminals should have same options
 		let options = ["Heal", "UpgradeDMG", "UpgradeHP", "Log Off"];
@@ -791,11 +816,11 @@ function initActors(p){
 
 	// ////////////////////////
 	// //for quick debug
-	// if(floorNumber == 1){
-	// 	player.augmentations.push(new Augmentation(Aug.VAMP, 1, 0.05));
-	// 	player.augmentations.push(new Augmentation(Aug.APUP, 1, 0.1));
-	// 	player.augmentations.push(new Augmentation(Aug.DEF, 1, 0.1));
-	// }
+	if(floorNumber == 1){
+		player.augmentations.push(new Augmentation(Aug.VAMP, 1, 0.05));
+		player.augmentations.push(new Augmentation(Aug.APUP, 1, 0.1));
+		player.augmentations.push(new Augmentation(Aug.DEF, 1, 0.1));
+	}
 	// console.log(player.augmentations);
 	// ////////////////////////////
 
@@ -809,11 +834,34 @@ function initActors(p){
 	//change proportion of better ai enemies
 	for(let e = 0; e < numEnemies; e++){
 		ranPos = getRandomCoords(rooms, true, false);
-		
-		let enemy = new Enemy(game, ranPos.y, ranPos.x, 50);
+		let enemy;
+		let ratio = enemyRatios[floorNumber - 1];
+		if(e < numEnemies*ratio.e1){
+			enemy = new Enemy(game, ranPos.y, ranPos.x, 50+(50*ratio.buff), 1, 30+(30*ratio.buff), 'armor1', 1);
+		}
+		else if(e < numEnemies*ratio.e1 + numEnemies*ratio.e2){
+			enemy = new Enemy(game, ranPos.y, ranPos.x, 100+(100*ratio.buff), 1, 20+(20*ratio.buff),'armor2', 2);
+		}
+		else if(e < numEnemies*ratio.e1 + numEnemies*ratio.e2 + numEnemies*ratio.e3){
+			enemy = new Enemy(game, ranPos.y, ranPos.x, 65+(65*ratio.buff), 2, 20+(20*ratio.buff), 'agent', 3);
+		}
+
+		// //ratio of enemy types
+		// if(e < numEnemies/2){
+			
+		// }
+		// else{
+		// 	let rndEnemy = Math.floor(Math.random() * 2);
+		// 	if(rndEnemy = 0){
+		// 		enemy = new Enemy(game, ranPos.y, ranPos.x, 100, 1, 'armor2', 2);
+		// 	}
+		// 	else{
+		// 		enemy = new Enemy(game, ranPos.y, ranPos.x, 65, 2, 'agent', 3);
+		// 	}
+		// }
 		
 		actorList.push(enemy);
-		actorPositions.push(ranPos.x + '_' + ranPos.y);//not sure which way around
+		actorPositions.push(ranPos.y + '_' + ranPos.x);//not sure which way around
 
 		enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
 		enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
@@ -832,8 +880,15 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 	this.readout1;
 	this.readout2;
 	this.readout3;
-	//this.hudName;// = name;
+	this.hudNameText;// = name;
+	this.hudNameVal;
+	this.hudLevelText;
+	this.hudLevelVal;
+	this.hudExpText;
+	this.hudExpVal;
+	this.hudExpBar;
 	this.hudHpText;
+	this.hudHpValue;
 	this.hudCurrentHpBar;// = hp;
 	this.hudMaxHpBar;
 	this.hudApText;
@@ -847,7 +902,7 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 };
 
 HUD.prototype = {
-	initHUD: function(message, /*name,*/ hp, ap, dmg, credits, floor){
+	initHUD: function(message){
 		let graphics = this.game.add.graphics(0, 0);
 
 		graphics.beginFill(0x333333);
@@ -860,14 +915,84 @@ HUD.prototype = {
 	   	//console.log(this.game.width);
 
 	   	this.updateReadout(message);
-	   	//this.updateName(name);
-	   	this.updateHP(hp);
-	   	this.updateAP(ap);
-	   	this.updateDMG(dmg);
-	   	this.updateCredits(credits);
-	   	this.updateFloor(floor);
+	   	this.updateName();
+	   	this.updateLevel();
+	   	this.updateEXP();
+	   	this.updateHP();
+	   	this.updateAP();
+	   	this.updateDMG();
+	   	this.updateCredits();
+	   	this.updateFloor();
 	   	this.updateAugs();
 
+	},
+	updateName(){
+		if(this.hudNameText != null){
+			this.hudNameText.destroy();
+			this.hudNameVal.destroy();
+		}
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudNameText = this.game.add.text((this.game.width/2-200), this.game.height-72, "Name: ", style);
+		this.hudNameText.fixedToCamera = true;
+
+		this.hudNameVal = this.game.add.text((this.game.width/2-150), this.game.height-72, player.name, style);
+		this.hudNameVal.fixedToCamera = true;
+	},
+	updateLevel(){
+		if(this.hudLevelText != null){
+			this.hudLevelText.destroy();
+			this.hudLevelVal.destroy();
+		}
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudLevelText = this.game.add.text((this.game.width/2-200), this.game.height-60, "Lv: ", style);
+		this.hudLevelText.fixedToCamera = true;
+
+		this.hudLevelVal = this.game.add.text((this.game.width/2-150), this.game.height-60, player.lvl, style);
+		this.hudLevelVal.fixedToCamera = true;
+
+	},
+	updateEXP(){
+		// //two bars like health
+		if(this.hudExpText != null){
+			this.hudExpText.destroy();
+			this.hudExpValue.destroy();
+			this.hudExpBar.destroy();
+		}
+
+		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudExpText = this.game.add.text((this.game.width/2-200), this.game.height-48, "EXP: ", style);
+		this.hudExpText.fixedToCamera = true;
+
+		// //does this do anything???
+		// if(this.hudHpBar != null){
+		// 	this.hudHpBar.destroy();
+		// }
+
+		// //ADD RED RECTANGLE OF CERTAIN WIDTH, FIXED HEIGHT
+		let graphics = this.game.add.graphics(0, 0);
+
+		graphics.beginFill(0xAA00AA);
+	   	//graphics.lineStyle(1, 0x880000, 1);
+	   	this.hudExpBar = graphics.drawRect(this.game.width/2-150, this.game.height-48, (player.exp/expThreshold*100), 10);
+	   	this.hudExpBar.fixedToCamera = true;
+	   	graphics.endFill();
+
+	   	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		this.hudExpValue = this.game.add.text((this.game.width/2-150), this.game.height-48, player.exp + "/" + expThreshold, style);
+		this.hudExpValue.fixedToCamera = true;
+
+		// graphics.beginFill(0xAA0000);
+		// //console.log(player.hp);
+		// //console.log(player.maxHP);
+		// this.hudMaxHpBar = graphics.drawRect(this.game.width/2+30+player.hp, this.game.height-70, player.maxHP - player.hp, 10);
+	 //   	this.hudMaxHpBar.fixedToCamera = true;
+	 //   	graphics.endFill();
 	},
 	updateReadout: function(message){
 
@@ -940,6 +1065,7 @@ HUD.prototype = {
 	updateHP: function(){
 		if(this.hudHpText != null){
 			this.hudHpText.destroy();
+			this.hudHpValue.destroy();
 		}
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
@@ -947,6 +1073,7 @@ HUD.prototype = {
 		this.hudHpText = this.game.add.text((this.game.width/2), this.game.height-72, "HP: ", style);
 		this.hudHpText.fixedToCamera = true;
 
+		//does this do anything???
 		if(this.hudHpBar != null){
 			this.hudHpBar.destroy();
 		}
@@ -956,16 +1083,17 @@ HUD.prototype = {
 
 		graphics.beginFill(0xFF0000);
 	   	//graphics.lineStyle(1, 0x880000, 1);
-	   	this.hudCurrentHpBar = graphics.drawRect(this.game.width/2+30, this.game.height-72, player.hp, 10);
+	   	this.hudCurrentHpBar = graphics.drawRect(this.game.width/2+30, this.game.height-70, player.hp, 10);
 	   	this.hudCurrentHpBar.fixedToCamera = true;
 		graphics.beginFill(0xAA0000);
 		//console.log(player.hp);
 		//console.log(player.maxHP);
-		this.hudMaxHpBar = graphics.drawRect(this.game.width/2+30+player.hp, this.game.height-72, player.maxHP - player.hp, 10);
+		this.hudMaxHpBar = graphics.drawRect(this.game.width/2+30+player.hp, this.game.height-70, player.maxHP - player.hp, 10);
 	   	this.hudMaxHpBar.fixedToCamera = true;
 	   	graphics.endFill();
 
-	   	
+	   	this.hudHpValue = this.game.add.text((this.game.width/2+33), this.game.height-72, Math.ceil(player.hp) + "/" + player.maxHP, style);
+		this.hudHpValue.fixedToCamera = true;
 
 		//this.hudHP = this.game.add.text((this.game.width/2), this.game.height-72, "HP: " + player.hp, style);
 		//t.anchor.set(0.5);
@@ -1058,14 +1186,16 @@ HUD.prototype = {
 
 		//this.hudAugList = [];
 		
-		console.log(this.hudAugList);
+		//console.log(this.hudAugList);
+		//console.log(player.augmentations);
 
 		for(let i = 0; i < player.augmentations.length; i++){
 			//should not be any duplicates
+			//console.log("augs length", player.augmentations.length)
+			//console.log(player.augmentations[i]);
 			this.hudAugList.push({type: player.augmentations[i].type, level: player.augmentations[i].level});
+			console.log(this.hudAugList);
 		}
-		
-		console.log(this.hudAugList);
 		
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
@@ -1082,9 +1212,27 @@ HUD.prototype = {
 		
 		let y = game.height-72;
 
-		for(let i = 0; i < this.hudAugList.length; i++){
+		
+		let augEffect;
+		let a;
+		
+
+		for(let i = 0; i < player.augmentations.length; i++){
+			let a = player.augmentations[i];
+			// console.log(a);
+			// console.log(a.type);
+			if(a.type == Aug.VAMP){
+				augEffect = (a.level * a.effectVal)	+ "% lifesteal";
+			}
+			else if(a.type == Aug.DEF){
+				augEffect = (a.level * a.effectVal)	+ "% dodge chance";
+			}
+			else if(a.type == Aug.APUP){
+				augEffect = (a.level * a.effectVal)	+ "% add. ap chance";
+			}
+			console.log(a.type);
 			//r = this.readout3;
-			let aText = this.game.add.text(game.width-200, y, this.hudAugList[i].type + " (lvl " + this.hudAugList[i].level + ")", style, this.augTextGroup);
+			let aText = this.game.add.text(game.width-200, y, "(lv" + a.level + ") " + a.type + " " + augEffect, style, this.augTextGroup);
 			aText.fixedToCamera = true;
 			//aText.anchor.set(0.5);
 			//console.log(this.hudReadout[m]);
@@ -1312,6 +1460,9 @@ function getRandomCoords(rooms, actor, terminal){
 			if(map[rndRoomY][rndRoomX] == Tile.FLOOR){
 				emptyCell = true;
 			}
+			else if(map[rndRoomY][rndRoomX] == Tile.DOOR){
+				console.log("DOOOOOR");
+			}
 		}
 	}
 	
@@ -1425,6 +1576,9 @@ function moveTo(actor, index, dir){
 function checkCellOccupied(x, y){
 	//returns true if x and y are in the actorPositions list
 	//ie an actor is at those coords
+	// console.log("x:", x, "y:", y);
+	// console.log(actorPositions.indexOf(x + "_" + y));
+	// console.log(actorPositions);
 	return actorPositions.indexOf(x + "_" + y) != -1;
 };
 
@@ -1488,12 +1642,13 @@ function attackActor(aggressor, x, y){
 			else if(victim.hp>victim.maxHP*0.5){
 				hud.updateReadout("They're hurt.");
 			}
-			else if(victim.hp<=victim.maxHP*0.5){
-				hud.updateReadout("They look badly hurt.");
-			}
 			else if(victim.hp<=victim.maxHP*0.25){
 				hud.updateReadout("They look close to death.");
 			}
+			else if(victim.hp<=victim.maxHP*0.5){
+				hud.updateReadout("They look badly hurt.");
+			}
+			
 		}
 
 		console.log(victim.hp);
@@ -1514,8 +1669,9 @@ function attackActor(aggressor, x, y){
 				//game.state.start("MainMenu");
 			}
 			else{
-				player.score += 100;
-				player.exp += 500;
+				player.score += victim.score;
+				player.exp += victim.exp;
+				hud.updateEXP();
 				hud.updateReadout("Enemy Down.");
 				if(player.exp >= expThreshold){
 					//UPDATE HUD
@@ -1526,21 +1682,33 @@ function attackActor(aggressor, x, y){
 					//player.maxAP += 0.5;
 					//if max ap is now a full level higher, updateHUD
 
-					expThreshold += 3000;
-					hud.updateReadout("I feel stronger.");
+					expThreshold *= 2;
+					hud.updateReadout("I feel stronger (+2dmg, +5hp, +5maxHp).");
 					hud.updateDMG();
 					hud.updateHP();
+					hud.updateLevel();
+					hud.updateEXP();
 					console.log("LEVEL UP!");
 					console.log(player);
 				}
-				player.credits += 20;
-				creditsEarned += 20;
+				player.credits += victim.credits;
+				creditsEarned += victim.credits;
 				hud.updateCredits();
 				victim.sprite.kill();
-				victim.sprite = game.add.sprite(victim.y*64, victim.x*64, 'armorDeath', 0); 
+				let deathSprite;
+				if(victim.type == 1){
+					deathSprite = 'armor1Death';
+				}
+				else if(victim.type == 2){
+					deathSprite = 'armor2Death';
+				}
+				else if(victim.type == 3){
+					deathSprite = 'agentDeath';
+				}
+				victim.sprite = game.add.sprite(victim.y*64, victim.x*64, deathSprite, 0); 
 				victim.sprite.anchor.y = 0.3 ;
-				victim.sprite.animations.add('armorDeath', [0, 1, 2, 3, 4, 5], 18, false);
-				victim.sprite.animations.play('armorDeath');
+				victim.sprite.animations.add(deathSprite, [0, 1, 2, 3, 4, 5], 18, false);
+				victim.sprite.animations.play(deathSprite);
 				console.log("Enemy Killed");
 				enemiesKilled++;
 			}
@@ -1591,7 +1759,7 @@ function showFloorSelectScreen(){
    	choice1Text.fixedToCamera = true;
    	choice1Text.anchor.x = 0.5;
    	choice1Text.inputEnabled = true;
-	choice1Text.events.onInputDown.add(function(){textGroup.destroy(); graphics.destroy(); setupFloor(++floorNumber, player);}, this);
+	choice1Text.events.onInputDown.add(function(){textGroup.destroy(); graphics.destroy(); setupFloor(++floorNumber, player); console.log(floorNumber);}, this);
 	choice1Text.events.onInputOver.add(function(){choice1Text.fill = "#FF0000";}, this);
 	choice1Text.events.onInputOut.add(function(){choice1Text.fill = "#19de65";}, this);
 
@@ -1617,7 +1785,7 @@ function showFloorSelectScreen(){
 
 function showGameOverScreen(message){
 
-	music.stop();
+	//music.stop();
 	if(message != "Victory"){
 		let gameOverSound = game.add.audio('gameOver')
 		gameOverSound.play();
@@ -1948,7 +2116,7 @@ Terminal.prototype = {
 			hud.updateCredits();
 			hud.updateHP();
 
-			healCost += 20;
+			healCost += 15;
 
 			this.displayTerminal();
 		}
@@ -1968,7 +2136,7 @@ Terminal.prototype = {
 			player.dmg += 5;
 			hud.updateDMG();
 
-			upgradeDmgCost += 300;
+			upgradeDmgCost *= 2;
 
 			this.displayTerminal();
 		}
@@ -1991,7 +2159,7 @@ Terminal.prototype = {
 			player.hp += 10;
 			hud.updateHP();
 
-			upgradeHpCost += 300;
+			upgradeHpCost *= 2;
 
 			this.displayTerminal();
 		}
@@ -2036,16 +2204,22 @@ function Player(game, name, x, y, hp){
 	this.augmentations = [];
 };
 
-function Enemy(game, x, y, hp){
+function Enemy(game, x, y, hp, ap, dmg, spriteName, type){
 	this.game = game;
 	this.x = x;	
 	this.y = y;
 	this.hp = hp;
 	this.maxHP = hp;
-	this.dmg = 20;
-	this.sprite = this.game.add.sprite(y*64, x*64, 'armor1', 19); 
+	this.ap = ap;
+	this.maxAP = ap;
+	this.dmg = dmg;
+	this.sprite = this.game.add.sprite(y*64, x*64, spriteName, 19); 
+	this.type = type;
 	this.isAlive = true;
 	this.alerted = false;
+	this.exp = 100*type;
+	this.score = 100*type;
+	this.credits = 10*(type*type);
 };
 
 //builds the mapSize x mapSize square array, fills with walls and then plants 3x3 rooms randomly (no overlap)
