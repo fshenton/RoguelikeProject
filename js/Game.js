@@ -65,6 +65,8 @@ var cursors;
 
 var unnecessaryChecks;
 
+var title;
+
 (function (){
 
 Roguelike.Game = function(){};
@@ -88,6 +90,9 @@ Roguelike.Game.prototype = {
 			{e1: 0.2, e2: 0.5, e3: 0.3, buff: 2.0},
 			{e1: 0.1, e2: 0.5, e3: 0.4, buff: 2.25}
 			];
+
+		title = document.getElementById("gametitle");
+		title.style.visibility = "visible";
 
 		setupFloor(floorNumber);
 
@@ -117,7 +122,7 @@ Roguelike.Game.prototype = {
 		console.log("New Game Started");
 
 		//this.game.add.audio('scary').play();
-		this.game.add.audio('mysterious', 0.5, false).play();
+		this.game.add.audio('mysterious', 0.1, false).play();
 
 		//music = this.game.add.audio('synthMusic', 0.7, true)
 		//music.play();
@@ -451,7 +456,7 @@ function placeLoot(){
 				a = new Augmentation(Aug.VAMP, 1, 0.10)
 			}
 			else if(ranAug == 1){
-				a = new Augmentation(Aug.DEF, 1, 0.1);
+				a = new Augmentation(Aug.DEF, 1, 0.05);
 			}
 			else if(ranAug == 2){
 				a = new Augmentation(Aug.APUP, 1, 0.1);			
@@ -761,7 +766,15 @@ function drawFloor(){
 			}
 			else if(map[x][y] == Tile.DOOR){
 				//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'doorTile'));
-				let door = objLayer.create(y*64, x*64, 'doorTile');
+				let floor = floorLayer.create(y*64, x*64, 'floorTile');
+				// let door = objLayer.create(y*64, x*64, 'doorTile');
+				// if(map[x][y+1]==Tile.WALL){
+				//  	door.anchor.setTo(0.5, 0.5);
+				//  	//door.pivot.x = door.width * .5;
+				//  	//door.pivot.y = door.height * .5;
+				//  	door.angle+=180;
+				//  	//door.anchor.y = 0.5 ;
+				// }
 				//console.log("door tile added");
 			}
 			else if(map[x][y] == Tile.EXIT){
@@ -814,15 +827,15 @@ function initActors(p){
 	actorList.push(player);
 
 
-	// ////////////////////////
-	// //for quick debug
-	if(floorNumber == 1){
-		player.augmentations.push(new Augmentation(Aug.VAMP, 1, 0.05));
-		player.augmentations.push(new Augmentation(Aug.APUP, 1, 0.1));
-		player.augmentations.push(new Augmentation(Aug.DEF, 1, 0.1));
-	}
-	// console.log(player.augmentations);
-	// ////////////////////////////
+	// // ////////////////////////
+	// // //for quick debug
+	// if(floorNumber == 1){
+	// 	player.augmentations.push(new Augmentation(Aug.VAMP, 1, 0.05));
+	// 	player.augmentations.push(new Augmentation(Aug.APUP, 1, 0.1));
+	// 	player.augmentations.push(new Augmentation(Aug.DEF, 1, 0.1));
+	// }
+	// // console.log(player.augmentations);
+	// // ////////////////////////////
 
 	game.physics.enable(player.sprite, Phaser.Physics.ARCADE);
 
@@ -1009,7 +1022,7 @@ HUD.prototype = {
 
 		//console.log(this.hudReadout);
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "12px Consolas", fill: "#ffffff", align: "left"};
 	
 		let y = this.game.height-81;
 		let r;
@@ -1847,7 +1860,13 @@ function showGameOverScreen(message){
 	returnText.fixedToCamera = true;
 	returnText.inputEnabled = true;
 	returnText.anchor.x = 0.5;
-	returnText.events.onInputDown.add(function(){textGroup.destroy(); graphics.destroy(); game.state.start('MainMenu');}, this);
+	returnText.events.onInputDown.add(function(){
+		textGroup.destroy(); 
+		graphics.destroy(); 
+		game.state.start('MainMenu');
+		title = document.getElementById("gametitle");
+		title.style.visibility = "hidden";
+	}, this);
 	returnText.events.onInputOver.add(function(){returnText.fill = "#FF0000";}, this);
 	returnText.events.onInputOut.add(function(){returnText.fill = "#19de65";}, this);
 
@@ -1855,7 +1874,11 @@ function showGameOverScreen(message){
 	restartText.fixedToCamera = true;
 	restartText.inputEnabled = true;
 	restartText.anchor.x = 0.5
-	restartText.events.onInputDown.add(function(){; textGroup.destroy(); graphics.destroy(); game.state.start('Game')}, this);
+	restartText.events.onInputDown.add(function(){; 
+		textGroup.destroy(); 
+		graphics.destroy(); 
+		game.state.start('Game');
+	}, this);
 	restartText.events.onInputOver.add(function(){restartText.fill = "#FF0000";}, this);
 	restartText.events.onInputOut.add(function(){restartText.fill = "#19de65";}, this);
 
@@ -1960,7 +1983,7 @@ Terminal.prototype = {
 		this.graphics = game.add.graphics(0, 0);
 
 		this.graphics.beginFill(0x000000);
-	   	this.graphics.lineStyle(1, 0x777777, 1);
+	   	this.graphics.lineStyle(10, 0x111111, 5);
 	   	let terminalBackground = this.graphics.drawRect(100, 100, game.width-200, game.height-200);
 	   	terminalBackground.fixedToCamera = true;
 	   	this.graphics.endFill();
@@ -1992,10 +2015,10 @@ Terminal.prototype = {
 
 	   		// let costColor;//text should be red if cannot afford
 
-	   		let purchaseStyle = { font: "24px Arial", fill: "#19de65" }
+	   		let purchaseStyle = { font: "15px Arial", fill: "#19de65" }
 
 	   		if(player.credits < healCost){
-	   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+	   			purchaseStyle = { font: "15px Arial", fill: "#FF0000" }
 	   		}
 
 			let healText = game.add.text(game.width/2, game.height/2, this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
@@ -2010,7 +2033,7 @@ Terminal.prototype = {
 			}
 
 			if(player.credits < upgradeDmgCost){
-	   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+	   			purchaseStyle = { font: "15px Arial", fill: "#FF0000" }
 	   		}
 
 			let upgradeDmgText = game.add.text(game.width/2, game.height/2+30, this.options[1] + " (" + upgradeDmgCost + ")", purchaseStyle, this.textGroup);
@@ -2025,7 +2048,7 @@ Terminal.prototype = {
 			}
 
 			if(player.credits < upgradeHpCost){
-	   			purchaseStyle = { font: "24px Arial", fill: "#FF0000" }
+	   			purchaseStyle = { font: "15px Arial", fill: "#FF0000" }
 	   		}
 
 			let upgradeHPText = game.add.text(game.width/2, game.height/2+60, this.options[2] + " (" + upgradeHpCost + ")", purchaseStyle, this.textGroup);
@@ -2041,21 +2064,21 @@ Terminal.prototype = {
 		}
 		//final mainframe
 		else{
-			let bootText = "P.R.A.S.H mainframe. Intruder detected.";
-		   	let fillerText = ".....";
+			let bootText = "P.R.A.S.H mainframe. ";
+		   	let fillerText = "Intruder detected.";
 		   	let welcomeText = playerName + ", you don't need to do this.";
 
 		    this.textGroup = game.add.group();
 
-		   	bootText = game.add.text(game.width/2, game.height/2-100, bootText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+		   	bootText = game.add.text(game.width/2, game.height/2-100, bootText, { font: "15px Arial", fill: "#ff0000" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
 
-		  	fillerText = game.add.text(game.width/2, game.height/2-80, fillerText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+		  	fillerText = game.add.text(game.width/2, game.height/2-80, fillerText, { font: "15px Arial", fill: "#ff0000" }, this.textGroup);
 	   		fillerText.fixedToCamera = true;
 	   		fillerText.anchor.x = 0.5;
 	   		
-	   		welcomeText = game.add.text(game.width/2, game.height/2-40, welcomeText, { font: "15px Arial", fill: "#19de65" }, this.textGroup);
+	   		welcomeText = game.add.text(game.width/2, game.height/2-40, welcomeText, { font: "15px Arial", fill: "#ff0000" }, this.textGroup);
 	   		welcomeText.fixedToCamera = true;
 
 	   		welcomeText.anchor.x = 0.5;

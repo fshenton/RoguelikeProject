@@ -4,75 +4,42 @@ var Roguelike = Roguelike || {};
 
 Roguelike.MainMenu = function(){};
 
-var newGameButton, settingsButton, creditsButton, playButton;
-var class1Button, class2Button;
 var nameInput;
 var menuMusic;
 
+var gameTitle, newGameText;
+
 Roguelike.MainMenu.prototype = {
-	//var background;
-	//var button;
-
-	init: function(){
-		//for score + highscore?
-	}, 
 	create: function(){
-		//background
-		this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'eye');
 
-		var text = "UNNAMED ROGUELIKE";
-		var style = {font: "60px Arial", fill: "#fff", align: "center"};
-		var t = this.game.add.text(this.game.width/2, this.game.height/2-200, text, style);
-		t.anchor.set(0.5);
+		var titleStyle = {font: "100px Tesla", fill: "#ffffff", align: "center"};
+		gameTitle = this.game.add.text(this.game.width/2, 200, "Gone Rogue", titleStyle);
+		gameTitle.anchor.set(0.5);
+		gameTitle.alpha = 0;
+		this.game.add.tween(gameTitle).to({alpha: 1}, 500, "Linear", true, -1);
+
+		var newGameStyle = {font: "30px Tesla", fill: "#00ff00", align: "center"};
+		newGameText = this.game.add.text(this.game.width/2, 300, "New Game", newGameStyle);
+		newGameText.anchor.set(0.5);
+		newGameText.alpha = 0;
+		// let newGameTween = this.game.add.tween(newGameText).to({y: this.game.height/2+50}, 1000, Phaser.Easing.Linear.None);		
+		let newGameTween = this.game.add.tween(newGameText).to({alpha: 1}, 1000, Phaser.Easing.Linear.None);		
 
 
-		localStorage.setItem("playerName", "Kiriyama");
-		this.game.state.start('Game'); //FOR QUICKER DEBUGGING
+		setTimeout(function(){
+			newGameTween.start();
+		}, 1000);
 
-		// //set up the menu buttons
-		// //new game
-		//COULD ADD TWEENS TO MENU BUTTONS FOR COOLNESS
-		// newGameButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
-		// // newGameButton = this.game.add.button(this.game.width/2, this.game.height/2, 'greybutton', actionOnClick, this);
-
-		// newGameButton.onInputOver.add(over, this);
-		// newGameButton.onInputOut.add(out, this);
-		// newGameButton.onInputUp.add(up, this);
-
-		// //settings
-		// settingsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-40, 'greybutton', actionOnClick, this, 2, 1, 0);
-
-		// settingsButton.onInputOver.add(over, this);
-		// settingsButton.onInputOut.add(out, this);
-		// settingsButton.onInputUp.add(up, this);
-
-		// //credits
-		// creditsButton = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY+20, 'greybutton', actionOnClick, this, 2, 1, 0);
-
-		// creditsButton.onInputOver.add(over, this);
-		// creditsButton.onInputOut.add(out, this);
-		// creditsButton.onInputUp.add(up, this);
+		newGameText.inputEnabled = true;
+		newGameText.events.onInputDown.add(startNewGame, this);
+		newGameText.events.onInputUp.add(up, this);
+		newGameText.events.onInputOut.add(out, this);
+		newGameText.events.onInputOver.add(over, this);
 
 		//play music
 		// menuMusic = this.game.add.audio('menuMusic');
 		// menuMusic.play();
 	}, 
-	// 	console.log('button over');
-	// over: function(){
-	// },
-	// out: function(){
-	// 	console.log('button out');
-	// },
-	// up: function(){
-	// 	console.log('button up', arguments);
-	// },
-	// actionOnClick: function(){
-	// 	console.log('button clicked');
-	// },
-	update: function(){
-		//listen for elements to be clicked by user, change display/change state based on what they click
-		//if(newGame selected) this.game.state.start('Game');
-	} 
 }
 
 function up(button) {
@@ -80,45 +47,25 @@ function up(button) {
 }
 
 function over(button) {
-	button.loadTexture('greybuttonpressed');
+	button.fill = "#ff0000";
     console.log('button over');
 }
 
 function out(button) {
-	//if(button.texture !== 'greybutton') button.setTexture('greybutton');
-    button.loadTexture('greybutton');
+    button.fill = "#00ff00";
     console.log('button out');
 }
 
-function actionOnClick(button) {
-	//play sound
-	//take action
-    switch(button){
-    	case newGameButton:
-    		console.log('start new game!');
+function startNewGame(text){
 
-    		//debug
-    		//enter and save name
-    		newGameButton.visible = false;
-    		//settingsButton.visible = false;
-    		//creditsButton.visible = false;
+	console.log('start new game!');
 
-    		//class1Button = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
-    		//class1Button = this.game.add.button(this.game.world.centerX-95, this.game.world.centerY-100, 'greybutton', actionOnClick, this);
+	text.destroy();
 
-    		var playerName = prompt("What are you known as?", "Cloud");
-    		localStorage.setItem("playerName", playerName);
+	var playerName = prompt("What are you known as?", "Cloud");
+	localStorage.setItem("playerName", playerName);
 
-    		//debug
-    		//menuMusic.stop();
-    		this.game.state.start('Game');
-    		break;
-    	case settingsButton:
-    		break;
-		case creditsButton:
-    		break;
-    	default:
-    		break;
-    }
+	// menuMusic.stop();
+	this.game.state.start('Game');
 }
     

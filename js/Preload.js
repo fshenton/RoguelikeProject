@@ -57,7 +57,7 @@ Roguelike.Preload.prototype = {
 		this.load.image('greybuttonpressed', 'assets/images/grey_button01.png')
 
 		//audio
-		//this.load.audio('menuMusic', 'assets/audio/Rachel.mp3');
+		this.load.audio('menuMusic', 'assets/audio/Rachel.mp3');
 		//this.load.audio('gameMusic', 'assets/audio/Blush.mp3');
 
 		//music

@@ -1,9 +1,28 @@
+@font-face {
+  font-family: "SquaredDisplay";
+  src: url(../assets/fonts/squared_display/SquaredDisplay.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Tesla";
+  src: url(../assets/fonts/tesla/tesla.ttf) format("truetype");
+}
+
 body{
-	/*background: url(../assets/images/Blade-Runner-2-Director.jpg);*/
-	background-color: #cccccc;
+	background: url(../assets/images/pexels-photo-211929_1080p.jpg);
+	/*background-color: #cccccc;*/
 	border : 5px;
 	padding : 5px;}
 
-h1, h3{
+#gametitle{
 	text-align: center;
+	color: white;
+	font-size : 400%;
+	padding: 0;
+	margin: 0;
+	visibility: hidden;
 }
+
+
+/*h1 { font-family: "SquaredDisplay", sans-serif }*/
+h1 { font-family: "Tesla", sans-serif }
