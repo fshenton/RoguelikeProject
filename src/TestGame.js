@@ -1,7 +1,6 @@
 'use strict';
 
-//var Roguelike = Roguelike || {};
-
+//THIS FILE HAS ALL PHASER FUNCTIONALITY REMOVED SO THAT IT CAN BE TESTED
 
 
 const mapSize = 40;
@@ -32,20 +31,13 @@ var hud;
 var gameMusic;
 
 var map;
-var floorLayer;
-var blockLayer;
-var objLayer;
 
 var rooms;
 var doors;
 
-var marker;
-
 var playerName;
 var player;
-//var enemy; 
-var actorList;//, UI;
-//var enemyList;
+var actorList;
 var actorPositions;
 var terminalPositions;
 var terminalList;
@@ -59,19 +51,19 @@ var healCost;
 var upgradeDmgCost;
 var upgradeHpCost;
 
-var music;
-
 var cursors;
-
-var unnecessaryChecks;
 
 var title;
 
-(function (){
+// (function (){
 
-Roguelike.Game = function(){};
+//Roguelike.Game = function(){};
 
-Roguelike.Game.prototype = {
+// Roguelike.Game.prototype = {
+
+var roguelikeGame = function(){};
+
+roguelikeGame.prototype = {
 	create: function(){
 
 		game = this.game;
@@ -91,13 +83,13 @@ Roguelike.Game.prototype = {
 			{e1: 0.1, e2: 0.5, e3: 0.4, buff: 2.25}
 			];
 
-		title = document.getElementById("gametitle");
-		title.style.visibility = "visible";
+		//title = document.getElementById("gametitle");
+		//title.style.visibility = "visible";
 
 		setupFloor(floorNumber);
 
 		//Area outside of level is only to the right/bot of the map, as map is placed at 0,0
-		this.game.world.resize(4800, 4800);
+		//this.game.world.resize(4800, 4800);
 
 		//for level change, the enemiesKilled should be persistant
 		enemiesKilled = 0;
@@ -111,18 +103,18 @@ Roguelike.Game.prototype = {
 		upgradeDmgCost = 200;
 		upgradeHpCost = 200;
 
-		hud = new HUD(this.game);
-		hud.initHUD("And so it begins.");
+		//hud = new HUD(this.game);
+		//hud.initHUD("And so it begins.");
 
-		cursors = this.game.input.keyboard.createCursorKeys();
-		this.input.keyboard.addCallbacks(null, null, this.onKeyUp);
+		//cursors = this.game.input.keyboard.createCursorKeys();
+		//this.input.keyboard.addCallbacks(null, null, this.onKeyUp);
 
-		this.input.onTap.add(this.onMouseTap, this);
+		//this.input.onTap.add(this.onMouseTap, this);
 
 		console.log("New Game Started");
 
 		//this.game.add.audio('scary').play();
-		this.game.add.audio('mysterious', 0.1, false).play();
+		//this.game.add.audio('mysterious', 0.1, false).play();
 
 		//music = this.game.add.audio('synthMusic', 0.7, true)
 		//music.play();
@@ -478,7 +470,7 @@ function placeLoot(){
 }
 
 function LootBox(aug, credits, x, y){
-	this.sprite = game.add.sprite(y*64, x*64, 'safeTile'); 
+	//function Lootthis.sprite = game.add.sprite(y*64, x*64, 'safeTile'); 
 	this.aug = aug;
 	this.credits = credits;
 	this.augText;
@@ -627,15 +619,13 @@ function setupFloor(fn, p){
 	drawFloor();
 	placeTerminals();
 	placeLoot(); //contain loot, credits or traps
-	//placeFurniture(); blocks pathing, adds interest
 	initActors(p);
-	if(fn > 1){
-		hud = new HUD(game);
-		hud.initHUD("A new floor.");
-	}
+	// if(fn > 1){
+	// 	hud = new HUD(game);
+	// 	hud.initHUD("A new floor.");
+	// }
 
-	actorList.forEach(function(i){ console.log("X:", i.x, "Y:", i.y); })
-	//console.log(actorList);
+	//actorList.forEach(function(i){ console.log("X:", i.x, "Y:", i.y); })
 }
 
 //place an exit tile at a random point on perimiter wall
@@ -691,8 +681,8 @@ function placeExit(){
 
 	// }
 
-	console.log(exitY);
-	console.log(exitX);
+	//console.log(exitY);
+	//console.log(exitX);
 
 	exitY = 1;
 	exitX = 0;
@@ -746,9 +736,9 @@ function drawFloor(){
 	//do I even need tilemap?
 
 	//EVEN USING GROUPS?
-	blockLayer = game.add.group();
-	floorLayer = game.add.group();
-	objLayer = game.add.group();
+	//blockLayer = game.add.group();
+	//floorLayer = game.add.group();
+	//objLayer = game.add.group();
 
 	//DEF NEEDED TO ADD FOG OF WAR TO UNEXPLORED ROOMS
 
@@ -756,17 +746,17 @@ function drawFloor(){
 		for(let y = 0; y< mapSize; y++){
 			if(map[x][y] == Tile.FLOOR){
 				//floorLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'floorTile'));
-				let floor = floorLayer.create(y*64, x*64, 'floorTile');
+				//let floor = floorLayer.create(y*64, x*64, 'floorTile');
 				//console.log("floor tile added");
 			}
 			else if(map[x][y] == Tile.WALL){
 				//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'wallTile'));
-				let wall = blockLayer.create(y*64, x*64, 'wallTile');
+				//let wall = blockLayer.create(y*64, x*64, 'wallTile');
 				//console.log("wall tile added");
 			}
 			else if(map[x][y] == Tile.DOOR){
 				//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'doorTile'));
-				let floor = floorLayer.create(y*64, x*64, 'floorTile');
+				//let floor = floorLayer.create(y*64, x*64, 'floorTile');
 				// let door = objLayer.create(y*64, x*64, 'doorTile');
 				// if(map[x][y+1]==Tile.WALL){
 				//  	door.anchor.setTo(0.5, 0.5);
@@ -779,7 +769,7 @@ function drawFloor(){
 			}
 			else if(map[x][y] == Tile.EXIT){
 				//objLayer.addChild(tMap.game.add.sprite(x*32, y*32, 'doorTile'));
-				let exit = objLayer.create(y*64, x*64, 'exitTile');
+				//let exit = objLayer.create(y*64, x*64, 'exitTile');
 				//console.log("door tile added");
 			}
 		}
@@ -813,15 +803,15 @@ function initActors(p){
 		console.log("p is existing");
 		player.x = ranPos.y;
 		player.y = ranPos.x;
-		player.sprite.kill();
-		player.sprite = game.add.sprite(player.y*64, player.x*64, 'player', 19); 
+		// player.sprite.kill();
+		// player.sprite = game.add.sprite(player.y*64, player.x*64, 'player', 19); 
 	}
 
-	player.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 18, false);
-	player.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 18, false);
-	player.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 18, false);
-	player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 18, false);
-	player.sprite.anchor.y = 0.3 ;
+	// player.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 18, false);
+	// player.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 18, false);
+	// player.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 18, false);
+	// player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 18, false);
+	// player.sprite.anchor.y = 0.3 ;
 
 	actorPositions.push(ranPos.x + '_' + ranPos.y); 
 	actorList.push(player);
@@ -837,10 +827,10 @@ function initActors(p){
 	// // console.log(player.augmentations);
 	// // ////////////////////////////
 
-	game.physics.enable(player.sprite, Phaser.Physics.ARCADE);
+	//game.physics.enable(player.sprite, Phaser.Physics.ARCADE);
 
 	//needs offset
-	game.camera.follow(player.sprite);
+	//game.camera.follow(player.sprite);
 
 
 	//change dmg and hp based on floorNumber
@@ -876,11 +866,11 @@ function initActors(p){
 		actorList.push(enemy);
 		actorPositions.push(ranPos.y + '_' + ranPos.x);//not sure which way around
 
-		enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
-		enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
-		enemy.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 60, false);
-		enemy.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 60, false);
-		enemy.sprite.anchor.y = 0.3 ;
+		// enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
+		// enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
+		// enemy.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 60, false);
+		// enemy.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 60, false);
+		// enemy.sprite.anchor.y = 0.3 ;
 	}
 
 	console.log("Actor number:", actorList.length);
@@ -916,13 +906,13 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 
 HUD.prototype = {
 	initHUD: function(message){
-		let graphics = this.game.add.graphics(0, 0);
+		//let graphics = this.game.add.graphics(0, 0);
 
-		graphics.beginFill(0x333333);
-	   	graphics.lineStyle(1, 0x777777, 1);
-	   	let hudBackground = graphics.drawRect(0, this.game.height-101, this.game.width-1, 100);
-	   	hudBackground.fixedToCamera = true;
-	   	graphics.endFill();
+		// graphics.beginFill(0x333333);
+	 //   	graphics.lineStyle(1, 0x777777, 1);
+	 //   	let hudBackground = graphics.drawRect(0, this.game.height-101, this.game.width-1, 100);
+	 //   	hudBackground.fixedToCamera = true;
+	 //   	graphics.endFill();
 
 	   	//console.log(this.game.height);
 	   	//console.log(this.game.width);
@@ -1949,7 +1939,7 @@ function Room(num){
 
 function Terminal(options, x, y, final){
 	this.options = options;
-	this.sprite = game.add.sprite(y*64, x*64, 'terminal1'); 
+	//this.sprite = game.add.sprite(y*64, x*64, 'terminal1'); 
 	this.graphics = null;
 	this.textGroup = null;
 	this.finalMainframe = final;
@@ -2220,7 +2210,7 @@ function Player(game, name, x, y, hp){
 	this.lvl = 1;
 	this.exp = 0;
 	this.credits = 0;
-	this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
+	//this.sprite = this.game.add.sprite(y*64, x*64, 'player', 19); 
 	this.isAlive = true;
 	this.isUsingTerminal = false;
 	this.isUsingLoot = false;
@@ -2236,7 +2226,7 @@ function Enemy(game, x, y, hp, ap, dmg, spriteName, type){
 	this.ap = ap;
 	this.maxAP = ap;
 	this.dmg = dmg;
-	this.sprite = this.game.add.sprite(y*64, x*64, spriteName, 19); 
+	//this.sprite = this.game.add.sprite(y*64, x*64, spriteName, 19); 
 	this.type = type;
 	this.isAlive = true;
 	this.alerted = false;
@@ -2394,7 +2384,7 @@ function expandRandomRooms(){
 
 	//console.log("in expand random room method");
 
-	unnecessaryChecks = 0;
+	//unnecessaryChecks = 0;
 
 	while(roomCannotExpand < numRooms){
 
@@ -2428,7 +2418,7 @@ function expandRandomRooms(){
 			}
 		}
 		else{
-			unnecessaryChecks++;
+			//unnecessaryChecks++;
 			//console.log("Room ", checkRoom.id, " cannot be expanded further, but still being considered.");
 		}
 	}
@@ -2535,7 +2525,7 @@ function expand(r, d){
 				}
 			}
 			else{
-				unnecessaryChecks++;
+				//unnecessaryChecks++;
 				//console.log("Shouldn't be checking as flagged that this direction is not expandable.");
 			}
 			return success;
@@ -2628,7 +2618,7 @@ function expand(r, d){
 				}
 			}
 			else{
-				unnecessaryChecks++;
+				//unnecessaryChecks++;
 				//console.log("Shouldn't be checking as flagged that this direction is not expandable.");
 			}
 			return success;
@@ -2726,7 +2716,7 @@ function expand(r, d){
 				}
 			}
 			else{
-				unnecessaryChecks++;
+				//unnecessaryChecks++;
 				//console.log("Shouldn't be checking as flagged that this direction is not expandable.");
 			}
 			return success;
@@ -2819,7 +2809,7 @@ function expand(r, d){
 				}
 			}
 			else{
-				unnecessaryChecks++;
+				//unnecessaryChecks++;
 				// console.log("Shouldn't be checking as flagged that this direction is not expandable.");
 			}
 			return success;
@@ -3235,7 +3225,7 @@ function randomlyConnectAdjacentRooms(){
 }
 
 
-}());
+// }());
 
 
 

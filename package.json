@@ -1,0 +1,19 @@
+{
+  "name": "roguelikeproject",
+  "preferGlobal": true,
+  "version": "0.0.1",
+  "author": "Frank Shenton <fshenton@gmail.com>",
+  "description": "a simple web browser game",
+  "scripts": {
+    "test": "test/test.js"
+  },
+  "dependencies": {
+    "chai": "^3.5.0",
+    "express": "^4.14.1",
+    "mocha": "^3.2.0",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "jasmine": "^2.5.3"
+  }
+}
