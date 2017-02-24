@@ -12,6 +12,8 @@ var gameTitle, newGameText;
 Roguelike.MainMenu.prototype = {
 	create: function(){
 
+		//this.game.state.start("Game");
+
 		var titleStyle = {font: "100px Tesla", fill: "#ffffff", align: "center"};
 		gameTitle = this.game.add.text(this.game.width/2, 200, "Gone Rogue", titleStyle);
 		gameTitle.anchor.set(0.5);
@@ -37,8 +39,8 @@ Roguelike.MainMenu.prototype = {
 		newGameText.events.onInputOver.add(over, this);
 
 		//play music
-		// menuMusic = this.game.add.audio('menuMusic');
-		// menuMusic.play();
+		//menuMusic = this.game.add.audio('menuMusic');
+		//menuMusic.play();
 	}, 
 }
 

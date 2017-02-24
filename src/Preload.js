@@ -69,6 +69,11 @@ Roguelike.Preload.prototype = {
 		this.load.audio('scary', 'assets/audio/kastenfrosch__scary.mp3');
 		this.load.audio('mysterious', 'assets/audio/kastenfrosch__mysterious.mp3');
 		this.load.audio('gameOver', 'assets/audio/landlucky__game-over-sfx-and-voice.mp3');
+		this.load.audio('playerHurt', 'assets/audio/alex-audio__hurt.mp3');
+		this.load.audio('miss', 'assets/audio/petenice__whoosh.wav');
+		this.load.audio('heartbeat', 'assets/audio/urupin__heartbeat.mp3')
+		this.load.audio('openContainer', 'assets/audio/lukeupf__container.wav');
+		this.load.audio('APup', 'assets/audio/skowm001__1-tone-chime.wav');
 		//footsteps
 		//combat
 
