@@ -2,8 +2,6 @@
 
 //var Roguelike = Roguelike || {};
 
-
-
 const mapSize = 30; //40
 const minRoomsize = 3;
 const numRooms = 25;
@@ -130,9 +128,9 @@ Roguelike.Game.prototype = {
 		//this.game.add.audio('scary').play();
 		this.game.add.audio('mysterious', 0.1, false).play();
 
-		music = this.game.add.audio('synthMusic', 0.3, true)
+		//music = this.game.add.audio('synthMusic', 0.3, true)
 		heartbeat = this.game.add.audio('heartbeat', 0.5);
-		music.play();
+		//music.play();
 	},
 	/*update: function(){
 	},*/
@@ -695,6 +693,9 @@ function Augmentation(type, level, effectVal){
 
 //initialises all elements of current floor
 function setupFloor(fn, p){
+	floorNumber = fn;
+	healCost = 50+50*Math.floor(0.5*floorNumber);
+
 	initMap();
 	expandRandomRooms(); //also populates room adjacency lists
 	// console.log("AFTER EXPAND:");
@@ -715,7 +716,9 @@ function setupFloor(fn, p){
 		hud.initHUD("A new floor.");
 	}
 
-	actorList.forEach(function(i){ console.log("X:", i.x, "Y:", i.y); })
+	actorList.forEach(function(i){ console.log("x:", i.x, "y:", i.y); });
+	actorPositions.forEach(function(i){ console.log(i; });
+	//console.log(actorPositions);
 	console.log(JSON.stringify(map));
 }
 //place an exit tile at a random point on perimiter wall
@@ -774,8 +777,8 @@ function placeExit(){
 	// console.log(exitY);
 	// console.log(exitX);
 
-	exitY = 1;
-	exitX = 0;
+	//exitY = 1;
+	//exitX = 0;
 
 	// console.log("Exit at mapY: " + exitY + " and mapX: " + exitX);
 
@@ -797,7 +800,7 @@ function placeTerminals(){
 		console.log("Finding space for terminal.");
 		ranPos = getRandomCoords(rooms, false, true);
 		//not all terminals should have same options
-		let options = ["Heal", "UpgradeDMG", "UpgradeHP", "Log Off"];
+		let options = ["Heal", "Upgrade Damage", "Upgrade HP", "Log Off"];
 		let terminal = new Terminal(options, ranPos.y, ranPos.x, false)
 		map[ranPos.y][ranPos.x] = Tile.TERMINAL;
 		terminalPositions.push(ranPos.x + '_' + ranPos.y); 
@@ -957,7 +960,7 @@ function initActors(p){
 		// }
 		
 		actorList.push(enemy);
-		actorPositions.push(ranPos.y + '_' + ranPos.x);//not sure which way around
+		actorPositions.push(ranPos.x + '_' + ranPos.y);//not sure which way around
 
 		enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
 		enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
@@ -1330,15 +1333,15 @@ HUD.prototype = {
 
 			if(a.type == Aug.VAMP){
 				typeString = "Vampiric";
-				augEffect = "(" + (a.level * a.effectVal)*100	+ "%)";
+				augEffect = "(" + ((a.level * a.effectVal)*100).toFixed(0)	+ "%)";
 			}
 			else if(a.type == Aug.DEF){
 				typeString = "Defence";
-				augEffect = "(" + (a.level * a.effectVal)*100	+ "% dodge)";
+				augEffect = "(" + ((a.level * a.effectVal)*100).toFixed(0)	+ "% dodge)";
 			}
 			else if(a.type == Aug.APUP){
 				typeString = "Mobility";
-				augEffect = "(" + (a.level * a.effectVal)*100	+ "% +1 AP)";
+				augEffect = "(" + ((a.level * a.effectVal)*100).toFixed(0)	+ "% +1 AP)";
 			}
 			console.log(a.type);
 			//r = this.readout3;
@@ -1622,8 +1625,10 @@ function getRandomCoords(rooms, actor, object){
 		rndRoomX = rndRoom.tiles[0][Math.floor(Math.random() * rndRoom.tiles[0].length)].x;
 		rndRoomY = rndRoom.tiles[Math.floor(Math.random() * rndRoom.tiles.length)][0].y;
 		if(map[rndRoomY][rndRoomX] == Tile.FLOOR){
-			if(actor && actorPositions.indexOf(rndRoomY + "_" + rndRoomX) == -1){
+			if(actor && actorPositions.indexOf(rndRoomX + "_" + rndRoomY) == -1){
 					emptyCell = true;
+					// console.log("actorPositions before: " + actorPositions);
+					// console.log("Actor to be placed at " + rndRoomX + "_" + rndRoomY);
 			}
 			else if(object){	
 				let validObjectPosition = objectAreaCheck(rndRoomY, rndRoomX);
@@ -2028,7 +2033,7 @@ function showFloorSelectScreen(){
 
 function showGameOverScreen(message){
 	let gameOverColour = (message == "Victory") ? "#19de65" : "#FF0000";
-	music.stop();
+	//music.stop();
 	gameOver = true;
 
 	// if(heartbeat.isPlaying){
@@ -2150,6 +2155,10 @@ function validMove(mX, mY, player){
 		console.log("Tile is loot xy: " + mX + " " + mY);
 		return false;
 	}
+	else if(mX <= 0 || mY <= 0){
+		console.log("out of bounds");
+		return false;
+	}
 		
 	return true;
 };
@@ -2202,8 +2211,10 @@ function Terminal(options, x, y, final){
 Terminal.prototype = {
 	displayTerminal: function(){
 
-		this.terminalHum = game.add.audio('terminalHum', 1.25);
-		this.terminalHum.play();
+		if(this.terminalHum == null){
+			this.terminalHum = game.add.audio('terminalHum', 1.25);
+		}
+		else if(!this.terminalHum.isPlaying) this.terminalHum.play();
 
 		//GAME SHOULD PAUSE DURING THIS SCREEN
 
@@ -2256,13 +2267,11 @@ Terminal.prototype = {
 
 	   		// let costColor;//text should be red if cannot afford
 
-	   		let purchaseStyle = { font: "15px Consolas", fill: "#19de65" }
+	   		let purchaseStyle = { font: "15px Consolas", fill: "#19de65" };
 
 	   		if(player.credits < healCost){
-	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" }
+	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" };
 	   		}
-
-	   		healCost += healCost*Math.floor(0.5*floorNumber);
 
 			let healText = game.add.text(game.width/2, yOffset, this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
 			healText.fixedToCamera = true;
@@ -2473,7 +2482,7 @@ function Player(game, name, x, y, hp){
 	this.augmentations = [];
 };
 
-function Enemy(game, x, y, hp, ap, dmg, spriteName, type, dodge){
+function Enemy(game, x, y, hp, ap, dmg, spriteName, type){
 	this.game = game;
 	this.x = x;	
 	this.y = y;

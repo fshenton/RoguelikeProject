@@ -64,7 +64,7 @@ function startNewGame(text){
 
 	text.destroy();
 
-	var playerName = prompt("What are you known as?", "Cloud");
+	var playerName = prompt("What's your name?", "Cloud");
 	localStorage.setItem("playerName", playerName);
 
 	// menuMusic.stop();
