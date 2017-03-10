@@ -23,6 +23,11 @@ body{
 	visibility: hidden;
 }
 
+#game-div{
+	width: 50%;
+	margin: auto;
+}
+
 
 /*h1 { font-family: "SquaredDisplay", sans-serif }*/
 h1 { font-family: "Tesla", sans-serif }

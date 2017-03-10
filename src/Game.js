@@ -70,6 +70,8 @@ var unnecessaryChecks;
 
 var title;
 
+var enemyTurn = false;
+
 // (function (){
 
 Roguelike.Game = function(){};
@@ -154,7 +156,7 @@ Roguelike.Game.prototype = {
 
 		//console.log("Player x: ", player.x, "Player y: ", player.y);
 
-		if(!player.isUsingTerminal && !player.isUsingLoot && !player.isViewingHelp){ //player cannot move while using terminal
+		if(!player.isUsingTerminal && !player.isUsingLoot && !player.isViewingHelp && !enemyTurn){ //player cannot move while using terminal
 			//THEY MOVE AFTER CHOOSING LOG OFF
 			switch(event.keyCode){
 				case Phaser.Keyboard.LEFT:
@@ -337,6 +339,8 @@ Roguelike.Game.prototype = {
 		if(Math.floor(player.ap) <= 0){
 			//console.log("AI TURN, AP: " + player.ap);
 			//AI TURN
+			//disable player movement
+			enemyTurn = true;
 			for(let i = 1; i < actorList.length; i++){
 				let e = actorList[i];
 				if(e.isAlive){
@@ -371,6 +375,7 @@ Roguelike.Game.prototype = {
 			
 			hud.updateAP(player.ap);
 			//update HUD
+			enemyTurn = false;
 		}
 	},
 	onMouseTap: function(pointer, doubleTap){
@@ -466,6 +471,7 @@ Roguelike.Game.prototype = {
 		if(!gameOver){
 			if(player.hp <= player.maxHP*0.2){
 				if(!heartbeat.isPlaying){
+					console.log("play heartbeat");
 					heartbeat.play();
 				}
 			}
@@ -717,7 +723,7 @@ function setupFloor(fn, p){
 	}
 
 	actorList.forEach(function(i){ console.log("x:", i.x, "y:", i.y); });
-	actorPositions.forEach(function(i){ console.log(i; });
+	actorPositions.forEach(function(i){ console.log(i); });
 	//console.log(actorPositions);
 	console.log(JSON.stringify(map));
 }
@@ -927,6 +933,9 @@ function initActors(p){
 
 	//needs offset
 	game.camera.follow(player.sprite);
+	console.log(player.x, player.y);
+	console.log(game.camera.x, game.camera.y);
+	//game.camera.focusOnXY(player.y*64, player.x*64);
 
 
 	//change dmg and hp based on floorNumber
@@ -1063,6 +1072,9 @@ HUD.prototype = {
 	},
 	updateEXP(){
 		// //two bars like health
+		console.log("updateEXP");
+		console.log("leftOffset: ", this.leftOffset);
+
 		if(this.hudExpText != null){
 			this.hudExpText.destroy();
 			this.hudExpValue.destroy();
@@ -1102,6 +1114,9 @@ HUD.prototype = {
 	},
 	updateReadout: function(message){
 
+		console.log("updateReadout");
+		console.log("leftOffset: ", this.leftOffset);
+		console.log(message);
 		//IF SPACE IN READOUTS AREA, ADD NEW MESSAGE TO TOP, SHIFT ALL DOWN (USE UNSHIFT?)
 		//IF NOT SPACE, POP LAST ONE/s, ADD NEW ONES
 
@@ -1121,6 +1136,8 @@ HUD.prototype = {
 	
 		let y = this.game.height-81;
 		let r;
+
+		console.log("y:", y)
 
 		//console.log(this.readout0);
 
@@ -1214,8 +1231,8 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudApText = this.game.add.text(this.leftOffset, this.game.height-54, "AP: ", style);
-		this.hudApText.fixedToCamera = true;
+		//this.hudApText = this.game.add.text(this.leftOffset, this.game.height-54, "AP: ", style);
+		//this.hudApText.fixedToCamera = true;
 
 		//change to x number of images, hide when ap is used, show again once ap is regained
 		
@@ -1254,6 +1271,9 @@ HUD.prototype = {
 	},
 	updateCredits: function(){
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+
+		console.log("updateCredits");
+		console.log("leftOffset: ", this.leftOffset);
 
 		if(this.hudCredits != null){
 			this.hudCredits.destroy();
@@ -1388,73 +1408,73 @@ HUD.prototype = {
 		let helpTitle = this.game.add.text(this.helpBackground.width/2+48, 60, "Help", titleStyle, this.helpTextGroup);
 	   	helpTitle.fixedToCamera = true;
 
-	   	let leftOffset = this.game.width/8+10;
+	   	let leftHelpOffset = this.game.width/8+10;
 	  	
 	  	//CONTROLS
 	  	let controlsTitleTopOffset = 80;
-		let controlsTitle = this.game.add.text(leftOffset, controlsTitleTopOffset, "Controls", titleStyle, this.helpTextGroup);
+		let controlsTitle = this.game.add.text(leftHelpOffset, controlsTitleTopOffset, "Controls", titleStyle, this.helpTextGroup);
 	   	controlsTitle.fixedToCamera = true;
-	   	let controls1 = this.game.add.text(leftOffset, controlsTitleTopOffset+30, "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
+	   	let controls1 = this.game.add.text(leftHelpOffset, controlsTitleTopOffset+30, "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
 	   	controls1.fixedToCamera = true;
-	   	let controls2 = this.game.add.text(leftOffset, controlsTitleTopOffset+50, "Left mouse button: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
+	   	let controls2 = this.game.add.text(leftHelpOffset, controlsTitleTopOffset+50, "Left mouse button: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
 	   	controls2.fixedToCamera = true;
 
 	   	//HUD
 	   	let hudExplanationTitleTopOffset = 170;
-	   	let hudExplanationTitle = this.game.add.text(leftOffset, hudExplanationTitleTopOffset, "HUD explanation", titleStyle, this.helpTextGroup);
+	   	let hudExplanationTitle = this.game.add.text(leftHelpOffset, hudExplanationTitleTopOffset, "HUD explanation", titleStyle, this.helpTextGroup);
 	   	hudExplanationTitle.fixedToCamera = true;
 	   	
 	   	//health bar
 	   	graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0xFF0000);
-	   	let helpHPbar = graphics.drawRect(leftOffset, hudExplanationTitleTopOffset+30, 80, 10);
+	   	let helpHPbar = graphics.drawRect(leftHelpOffset, hudExplanationTitleTopOffset+30, 80, 10);
 	   	helpHPbar.fixedToCamera = true;
 		graphics.beginFill(0xAA0000);
-		let helpMaxHPbar = graphics.drawRect(leftOffset+80, hudExplanationTitleTopOffset+30, 20, 10);
+		let helpMaxHPbar = graphics.drawRect(leftHelpOffset+80, hudExplanationTitleTopOffset+30, 20, 10);
 	   	helpMaxHPbar.fixedToCamera = true;
 	   	graphics.endFill();
-	   	let helpHpValue = this.game.add.text(leftOffset+5, hudExplanationTitleTopOffset+28, 80 + "/" + 100, mainTextStyle);
+	   	let helpHpValue = this.game.add.text(leftHelpOffset+5, hudExplanationTitleTopOffset+28, 80 + "/" + 100, mainTextStyle);
 		helpHpValue.fixedToCamera = true;
-		let helpHpExplanation = this.game.add.text(leftOffset+110, hudExplanationTitleTopOffset+28, "Shows your current health and maximum health.", mainTextStyle, this.helpTextGroup);
+		let helpHpExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+28, "Shows your current health and maximum health.", mainTextStyle, this.helpTextGroup);
 		helpHpExplanation.fixedToCamera = true;
 
 		//ap bar
 		graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0xFF9900);
-		let helpApBar1 = graphics.drawRect(leftOffset, hudExplanationTitleTopOffset+48, 20, 10);
+		let helpApBar1 = graphics.drawRect(leftHelpOffset, hudExplanationTitleTopOffset+48, 20, 10);
 		helpApBar1.fixedToCamera = true;
-        let helpApBar2 = graphics.drawRect(leftOffset+25, hudExplanationTitleTopOffset+48, 20, 10);
+        let helpApBar2 = graphics.drawRect(leftHelpOffset+25, hudExplanationTitleTopOffset+48, 20, 10);
         helpApBar2.fixedToCamera = true;
         graphics.endFill();
-        let helpApExplanation = this.game.add.text(leftOffset+110, hudExplanationTitleTopOffset+46, "Shows your remaining actions this turn.", mainTextStyle, this.helpTextGroup);
+        let helpApExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+46, "Shows your remaining actions this turn.", mainTextStyle, this.helpTextGroup);
 		helpApExplanation.fixedToCamera = true;
 
 		//experience bar
 		graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0xAA00AA);
-	    let helpExpBar = graphics.drawRect(leftOffset, hudExplanationTitleTopOffset+68, (500/1600)*100, 10);
+	    let helpExpBar = graphics.drawRect(leftHelpOffset, hudExplanationTitleTopOffset+68, (500/1600)*100, 10);
 	   	helpExpBar.fixedToCamera = true;
 	   	graphics.endFill();
-		let helpExpValue = this.game.add.text(leftOffset+5, hudExplanationTitleTopOffset+66, 500 + "/" + 1600, mainTextStyle);
+		let helpExpValue = this.game.add.text(leftHelpOffset+5, hudExplanationTitleTopOffset+66, 500 + "/" + 1600, mainTextStyle);
 		helpExpValue.fixedToCamera = true;
-		let helpExpExplanation = this.game.add.text(leftOffset+110, hudExplanationTitleTopOffset+66, "Shows your current experience and how close you are to levelling up.", mainTextStyle, this.helpTextGroup);
+		let helpExpExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+66, "Shows your current experience and how close you are to levelling up.", mainTextStyle, this.helpTextGroup);
 		helpExpExplanation.fixedToCamera = true;
 
 		//HOW TO PLAY
 		let hudPlayTitleTopOffset = 270;
-	   	let howToPlayTitle = this.game.add.text(leftOffset, hudPlayTitleTopOffset, "How to play", titleStyle, this.helpTextGroup);
+	   	let howToPlayTitle = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset, "How to play", titleStyle, this.helpTextGroup);
 	   	howToPlayTitle.fixedToCamera = true;
-	   	let how1 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+30, "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
+	   	let how1 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+30, "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
 	   	how1.fixedToCamera = true;
-	   	let how2 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+50, "Once you have used your actions, your turn ends and your enemies may act.", mainTextStyle, this.helpTextGroup);
+	   	let how2 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+50, "Once you have used your actions, your turn ends and your enemies may act.", mainTextStyle, this.helpTextGroup);
 	   	how2.fixedToCamera = true;
-	   	let how3 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+70, "Credits gained from loot boxes and defeating enemies can be spent at computer terminals.", mainTextStyle, this.helpTextGroup);
+	   	let how3 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+70, "Credits gained from loot boxes and defeating enemies can be spent at computer terminals.", mainTextStyle, this.helpTextGroup);
 	   	how3.fixedToCamera = true;
-	   	let how4 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+90, "Your objective is to find the exit on each floor, working your way to the final floor.", mainTextStyle, this.helpTextGroup);
+	   	let how4 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+90, "Your objective is to find the exit on each floor, working your way to the final floor.", mainTextStyle, this.helpTextGroup);
 	   	how4.fixedToCamera = true;
-	   	let how5 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+110, "Upon reaching the final floor you will need to access the main terminal.", mainTextStyle, this.helpTextGroup);
+	   	let how5 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+110, "Upon reaching the final floor you will need to access the main terminal.", mainTextStyle, this.helpTextGroup);
 	   	how5.fixedToCamera = true;
-	   	let how6 = this.game.add.text(leftOffset, hudPlayTitleTopOffset+130, "Each level is more difficult than the last, so level up, upgrade and find augmentations.", mainTextStyle, this.helpTextGroup);
+	   	let how6 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+130, "Each level is more difficult than the last, so level up, upgrade and find augmentations.", mainTextStyle, this.helpTextGroup);
 	   	how6.fixedToCamera = true;
 
 		this.closeHelpText = this.game.add.text(this.game.width-130, 60, "x", titleStyle);
@@ -1764,11 +1784,7 @@ function moveTo(actor, index, dir){
 		}
 	}
 
-	if(actorKilled)
-	{
-
-	} 
-	else if(!cellOccupied){
+	if(!cellOccupied){
 		//only move sprite and change x and y position of actor
 		//if cell is free to move into
 
@@ -1781,12 +1797,17 @@ function moveTo(actor, index, dir){
 		//actor.sprite.y = newPosX*64;
 		//actor.sprite.x = newPosY*64;
 
-		Roguelike.game.add.tween(actor.sprite).to({x: newPosY*64, y: newPosX*64}, 500).start();
+		Roguelike.game.add.tween(actor.sprite).to({x: newPosY*64, y: newPosX*64}, 250).start();
+
 
 		// if(actor == player){
 		// 	console.log("New position, x:" , newPosX , "and y:", newPosY);
 		// }
 	}
+
+	/*if(actor==player){
+		game.camera.focusOnXY(player.x*64, player.y*64);
+	}*/
 
 	return true;
 };
@@ -1944,6 +1965,8 @@ function attackActor(aggressor, x, y){
 					deathSpriteName = 'agentDeath';
 				}
 				let deathSprite = game.add.sprite(victim.y*64, victim.x*64, deathSpriteName, 0); 
+				//console.log("death sprite:", deathSprite.y, ",", deathSprite.x);
+				//deathSprite.x;
 				deathSprite.anchor.y = 0.3 ;
 				deathSprite.animations.add(deathSprite, [0, 1, 2, 3, 4, 5], 18, false);
 				deathSprite.animations.play(deathSprite);
@@ -2133,8 +2156,8 @@ function showGameOverScreen(message){
 function validMove(mX, mY, player){
 
 	//THIS CAUSES ERRORS!
-	console.log("mx: " + mX + " my: " + mY);
-	console.log(map[mX][mY]);
+	//console.log("mx: " + mX + " my: " + mY);
+	//console.log(map[mX][mY]);
 	if(map[mX][mY] == Tile.WALL){
 		//console.log("found wall");
 		return false;

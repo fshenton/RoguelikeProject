@@ -4,7 +4,9 @@
 var Roguelike = Roguelike || {};
 
 //create game
-Roguelike.game = new Phaser.Game(800, 600, Phaser.AUTO, '');
+//Roguelike.game = new Phaser.Game(1366, 768, Phaser.AUTO, 'game-div');
+Roguelike.game = new Phaser.Game(800, 600, Phaser.AUTO, 'game-div');
+//Roguelike.game = new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO, '');
 //CANVAS MODE FOR DEBUGGING?
 
 //add states
