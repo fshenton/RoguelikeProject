@@ -127,7 +127,7 @@ Roguelike.Game.prototype = {
 
 		console.log("New Game Started");
 
-		//this.game.add.audio('scary').play();
+		this.game.add.audio('scary').play();
 		//this.game.add.audio('mysterious', 0.1, false).play();
 
 		//music = this.game.add.audio('Enthusiast', 0.2, true);
@@ -919,7 +919,7 @@ function initActors(p){
 	player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 18, false);
 	player.sprite.anchor.y = 0.3 ;
 
-	actorPositions.push(ranPos.x + '_' + ranPos.y); 
+	actorPositions.push(ranPos.y + '_' + ranPos.x); 
 	actorList.push(player);
 
 
@@ -985,7 +985,7 @@ function initActors(p){
 		// }
 		
 		actorList.push(enemy);
-		actorPositions.push(ranPos.x + '_' + ranPos.y);//not sure which way around
+		actorPositions.push(ranPos.y + '_' + ranPos.x);//not sure which way around
 
 		enemy.sprite.animations.add('walkLeft', [9, 10, 11, 12, 13, 14, 15, 16, 17], 60, false);
 		enemy.sprite.animations.add('walkUp', [0, 1, 2, 3, 4, 5, 6, 7, 8], 60, false);
@@ -2289,6 +2289,7 @@ function Terminal(options, x, y, final){
 	this.textGroup = null;
 	this.finalMainframe = final;
 	this.terminalHum;
+	this.terminalStart;
 	//difficulty?
 	//healPlayer
 	//unlock room door
@@ -2312,8 +2313,13 @@ Terminal.prototype = {
 		player.isUsingTerminal = true; //game pause
 
 		if(this.textGroup != null){
+			this.terminalStart = false;
 			this.textGroup.destroy();
 		}
+		else{
+			this.terminalStart = true;
+		}
+
 		if(this.graphics != null){
 			this.graphics.destroy();
 		}
@@ -2340,18 +2346,22 @@ Terminal.prototype = {
 		   	bootText = game.add.text(game.width/2, yOffset-150, bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
+		    if(this.terminalStart){	bootText.alpha = 0;}
 
 		  	let fillerText1 = game.add.text(game.width/2, yOffset-120, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText1.fixedToCamera = true;
 	   		fillerText1.anchor.x = 0.5;
+	   		if(this.terminalStart){fillerText1.alpha = 0;}
 
 	   		let fillerText2 = game.add.text(game.width/2, yOffset-90, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText2.fixedToCamera = true;
 	   		fillerText2.anchor.x = 0.5;
+	   		if(this.terminalStart){fillerText2.alpha = 0;}
 	   		
 	   		welcomeText = game.add.text(game.width/2, yOffset-60, welcomeText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		welcomeText.fixedToCamera = true;
 	   		welcomeText.anchor.x = 0.5;
+	   		if(this.terminalStart){welcomeText.alpha = 0;}
 
 	   		// let costColor;//text should be red if cannot afford
 
@@ -2366,6 +2376,7 @@ Terminal.prototype = {
 			healText.inputEnabled = true;
 			healText.anchor.x = 0.5;
 			healText.events.onInputDown.add(this.healPlayer, this);
+			if(this.terminalStart){healText.alpha = 0;}
 
 			if(player.credits >= healCost){
 				healText.events.onInputOver.add(this.overOption, this);
@@ -2381,6 +2392,7 @@ Terminal.prototype = {
 			upgradeDmgText.inputEnabled = true;
 			upgradeDmgText.anchor.x = 0.5;
 			upgradeDmgText.events.onInputDown.add(this.upgradeDMG, this);
+			if(this.terminalStart){upgradeDmgText.alpha = 0;}
 
 			if(player.credits >= upgradeDmgCost){
 				upgradeDmgText.events.onInputOver.add(this.overOption, this);
@@ -2396,6 +2408,7 @@ Terminal.prototype = {
 			upgradeHPText.inputEnabled = true;
 			upgradeHPText.anchor.x = 0.5;
 			upgradeHPText.events.onInputDown.add(this.upgradeHP, this);
+			if(this.terminalStart){upgradeHPText.alpha = 0;}
 
 			if(player.credits >= upgradeHpCost){
 				upgradeHPText.events.onInputOver.add(this.overOption, this);
@@ -2414,18 +2427,22 @@ Terminal.prototype = {
 		   	bootText = game.add.text(game.width/2, yOffset-150, bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
+		    if(this.terminalStart){	bootText.alpha = 0;}
 
 		   	let fillerText1 = game.add.text(game.width/2, yOffset-120, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText1.fixedToCamera = true;
 	   		fillerText1.anchor.x = 0.5;
+	   		if(this.terminalStart){fillerText1.alpha = 0;}
 
 		  	intruderText = game.add.text(game.width/2, yOffset-90, intruderText, { font: "15px Consolas", fill: "#ff0000" }, this.textGroup);
 	   		intruderText.fixedToCamera = true;
 	   		intruderText.anchor.x = 0.5;
+	   		if(this.terminalStart){intruderText.alpha = 0;}
 
 	   		pleaseText = game.add.text(game.width/2, yOffset-30, pleaseText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		pleaseText.fixedToCamera = true;
 	   		pleaseText.anchor.x = 0.5;
+	   		if(this.terminalStart){pleaseText.alpha = 0;}
 
 	   		let virusText = game.add.text(game.width/2, yOffset+30, this.options[0], { font: "32px Consolas", fill: "#0055DD" }, this.textGroup);
 			virusText.fixedToCamera = true;
@@ -2437,6 +2454,7 @@ Terminal.prototype = {
 			virusText.events.onInputDown.add(this.finalMainframeHack, this);
 			virusText.events.onInputOver.add(this.overOption, this);
 			virusText.events.onInputOut.add(function(){ virusText.fill = "#0055DD"});
+			if(this.terminalStart){virusText.alpha = 0;}
 		}
 		
 		let logoffText = game.add.text(game.width/2, yOffset+90, this.options[3], { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
@@ -2453,7 +2471,20 @@ Terminal.prototype = {
 		}, this);
 		logoffText.events.onInputOver.add(this.overOption, this);
 		logoffText.events.onInputOut.add(this.outOption, this);
+		if(this.terminalStart){logoffText.alpha = 0;}
 
+		let animations = [];
+		let time = 200;
+
+		if(this.terminalStart){
+			for(let i = 0; i < this.textGroup.length; i++){
+				animations.push(game.add.tween(this.textGroup.children[i]).to({alpha: 1}, 1000, Phaser.Easing.Linear.None));	
+				setTimeout(function(){
+					animations[i].start();
+				}, time+(i*200));
+			}
+		}
+		
 		// game.paused = true;
 		// console.log("game paused");
 

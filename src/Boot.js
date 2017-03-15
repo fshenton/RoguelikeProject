@@ -31,10 +31,10 @@ Roguelike.Boot.prototype = {
 			this.scale.maxHeight = 900;
 		}
 		else{
-			this.scale.minWidth = 1280;
-			this.scale.minHeight = 720;
-			this.scale.maxWidth = 1280;
-			this.scale.maxHeight = 720;
+			this.scale.minWidth = 1024;
+			this.scale.minHeight = 576;
+			this.scale.maxWidth = 1024;
+			this.scale.maxHeight = 576;
 		}
 
 		this.scale.pageAlignHorizontally = true;
