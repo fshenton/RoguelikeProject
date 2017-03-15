@@ -21,10 +21,10 @@ body{
 	padding: 0;
 	margin: 0;
 	visibility: hidden;
+	height:0px;
 }
 
 #game-div{
-	width: 50%;
 	margin: auto;
 }
 

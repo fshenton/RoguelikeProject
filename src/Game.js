@@ -7,7 +7,7 @@ const minRoomsize = 3;
 const numRooms = 25;
 const floorChar = 'R';
 const wallChar = 'w';
-const numEnemies = 15; //20
+const numEnemies = 20; //20
 
 const terminalNumber = 3;
 const lootNumber = 5;
@@ -97,8 +97,8 @@ Roguelike.Game.prototype = {
 			{e1: 0.0, e2: 0.5, e3: 0.5, buff: 2.25}
 			];
 
-		title = document.getElementById("gametitle");
-		title.style.visibility = "visible";
+		//title = document.getElementById("gametitle");
+		//title.style.visibility = "visible";
 
 		setupFloor(floorNumber);
 
@@ -108,7 +108,7 @@ Roguelike.Game.prototype = {
 		//for level change, the enemiesKilled should be persistant
 		enemiesKilled = 0;
 
-		//for level change, the enemiesKilled should be persistant
+		//for level change, the creditsEarned should be persistant
 		creditsEarned = 0;
 
 		//for level change, the current values should be carried over
@@ -128,11 +128,14 @@ Roguelike.Game.prototype = {
 		console.log("New Game Started");
 
 		//this.game.add.audio('scary').play();
-		this.game.add.audio('mysterious', 0.1, false).play();
+		//this.game.add.audio('mysterious', 0.1, false).play();
 
-		//music = this.game.add.audio('synthMusic', 0.3, true)
-		heartbeat = this.game.add.audio('heartbeat', 0.5);
-		//music.play();
+		//music = this.game.add.audio('Enthusiast', 0.2, true);
+		
+		music = this.game.add.audio('eCommerce', 0.2, true);
+
+		heartbeat = this.game.add.audio('heartbeat', 0.3);
+		music.play();
 	},
 	/*update: function(){
 	},*/
@@ -331,7 +334,7 @@ Roguelike.Game.prototype = {
 		//reduce ap as acted
 		if(acted){
 			player.ap -= 1;
-			hud.updateAP(player.ap);
+			hud.updateAP();
 			//UPDATE HUD
 		}
 
@@ -373,7 +376,7 @@ Roguelike.Game.prototype = {
 				player.ap = player.maxAP;
 			}
 			
-			hud.updateAP(player.ap);
+			hud.updateAP();
 			//update HUD
 			enemyTurn = false;
 		}
@@ -582,7 +585,7 @@ LootBox.prototype = {
 
 		this.graphics.beginFill(0x222222);
 	   	this.graphics.lineStyle(1, 0x444444, 3);
-	   	let lootBackground = this.graphics.drawRect(200, 150, game.width/2, game.height/2);
+	   	let lootBackground = this.graphics.drawRect(game.width/3, 150, game.width/3, game.height/2);
 	   	lootBackground.fixedToCamera = true;
 	   	this.graphics.endFill();
 		
@@ -651,6 +654,7 @@ LootBox.prototype = {
 	},
 	takeCredits : function(){
 		player.credits += this.credits;
+		creditsEarned += this.credits;
 		hud.updateReadout("I found " + this.credits + " credits.");
 		hud.updateCredits();
 		this.credits = null;
@@ -936,19 +940,31 @@ function initActors(p){
 	console.log(player.x, player.y);
 	console.log(game.camera.x, game.camera.y);
 	//game.camera.focusOnXY(player.y*64, player.x*64);
-
-
+	let awayFromPlayer;
+	let distX;
+	let distY;
 	//change dmg and hp based on floorNumber
 	//change proportion of better ai enemies
 	for(let e = 0; e < numEnemies; e++){
-		ranPos = getRandomCoords(rooms, true, false);
+		awayFromPlayer = false;
+		distX = 0;
+		distY = 0;
+		while(!awayFromPlayer){
+			console.log("checking if near player");
+			ranPos = getRandomCoords(rooms, true, false);
+			distX = Math.abs(player.y - ranPos.x);
+			distY = Math.abs(player.x - ranPos.y);
+			if(distX >= 3 || distY >= 3){
+				awayFromPlayer = true;
+			}
+		}
 		let enemy;
 		let ratio = enemyRatios[floorNumber - 1];
 		if(e < numEnemies*ratio.e1){
 			enemy = new Enemy(game, ranPos.y, ranPos.x, 50+(50*ratio.buff), 1, 20+(30*ratio.buff), 'armor1', 1);
 		}
 		else if(e < numEnemies*ratio.e1 + numEnemies*ratio.e2){
-			enemy = new Enemy(game, ranPos.y, ranPos.x, 100+(100*ratio.buff), 1, 20+(20*ratio.buff),'armor2', 2);
+			enemy = new Enemy(game, ranPos.y, ranPos.x, 100+(100*ratio.buff), 1, 20+(30*ratio.buff),'armor2', 2);
 		}
 		else if(e < numEnemies*ratio.e1 + numEnemies*ratio.e2 + numEnemies*ratio.e3){
 			enemy = new Enemy(game, ranPos.y, ranPos.x, 65+(65*ratio.buff), 2, 20+(20*ratio.buff), 'agent', 3);
@@ -1113,10 +1129,6 @@ HUD.prototype = {
 	 //   	graphics.endFill();
 	},
 	updateReadout: function(message){
-
-		console.log("updateReadout");
-		console.log("leftOffset: ", this.leftOffset);
-		console.log(message);
 		//IF SPACE IN READOUTS AREA, ADD NEW MESSAGE TO TOP, SHIFT ALL DOWN (USE UNSHIFT?)
 		//IF NOT SPACE, POP LAST ONE/s, ADD NEW ONES
 
@@ -1134,10 +1146,10 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#ffffff", align: "left"};
 	
-		let y = this.game.height-81;
+		let readoutY = this.game.height-81;
 		let r;
 
-		console.log("y:", y)
+		//console.log("y:", y)
 
 		//console.log(this.readout0);
 
@@ -1158,26 +1170,26 @@ HUD.prototype = {
 		for(let m = 0; m < this.hudReadout.length; m++){
 			if(m == 0){
 				//r = this.readout0;
-				this.readout0 = this.game.add.text(10, y, this.hudReadout[m], style);
+				this.readout0 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
 				this.readout0.fixedToCamera = true;
 			}
 			else if(m == 1){
 				//r = this.readout1;
-				this.readout1 = this.game.add.text(10, y, this.hudReadout[m], style);
+				this.readout1 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
 				this.readout1.fixedToCamera = true;
 			}
 			else if(m == 2){
 				//r = this.readout2;
-				this.readout2 = this.game.add.text(10, y, this.hudReadout[m], style);
+				this.readout2 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
 				this.readout2.fixedToCamera = true;
 			} 
 			else if(m == 3){
 				//r = this.readout3;
-				this.readout3 = this.game.add.text(10, y, this.hudReadout[m], style);
+				this.readout3 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
 				this.readout3.fixedToCamera = true;
 			} 
 			//console.log(this.hudReadout[m]);
-			y += 18;
+			readoutY += 18;
 		}
 	},
 	// updateName: function(name){
@@ -1230,9 +1242,8 @@ HUD.prototype = {
 		}
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
-
-		//this.hudApText = this.game.add.text(this.leftOffset, this.game.height-54, "AP: ", style);
-		//this.hudApText.fixedToCamera = true;
+		this.hudApText = this.game.add.text(this.leftOffset, this.game.height-54, "AP: ", style);
+		this.hudApText.fixedToCamera = true;
 
 		//change to x number of images, hide when ap is used, show again once ap is regained
 		
@@ -1331,7 +1342,7 @@ HUD.prototype = {
 			this.hudAugText.destroy();
 
 		}
-		this.hudAugText = game.add.text(game.width-200, game.height-90, "Augmentations:", style);
+		this.hudAugText = game.add.text(game.width-300, game.height-90, "Augmentations:", style);
 		this.hudAugText.fixedToCamera = true;
 	
 		if(this.augTextGroup != null){
@@ -1340,7 +1351,7 @@ HUD.prototype = {
 
 		this.augTextGroup = game.add.group();
 		
-		let y = game.height-72;
+		let augY = game.height-72;
 
 		let a;
 		let augEffect;
@@ -1366,11 +1377,11 @@ HUD.prototype = {
 			console.log(a.type);
 			//r = this.readout3;
 			
-			let aText = this.game.add.text(game.width-200, y, "lv." + a.level + " " + typeString + " " + augEffect, style, this.augTextGroup);
+			let aText = this.game.add.text(game.width-300, augY, "lv." + a.level + " " + typeString + " " + augEffect, style, this.augTextGroup);
 			aText.fixedToCamera = true;
 			//aText.anchor.set(0.5);
 			//console.log(this.hudReadout[m]);
-			y += 18;
+			augY += 18;
 		}
 	},
 	addHelp: function(){
@@ -1399,19 +1410,19 @@ HUD.prototype = {
 		let graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0x222222);
 	   	graphics.lineStyle(1, 0x444444, 1);
-	    this.helpBackground = graphics.drawRect(this.game.width/8, 50, 600, 400);
+	    this.helpBackground = graphics.drawRect(this.game.width/4, this.game.height/4, this.game.width/2, this.game.height/2);
 	   	this.helpBackground.fixedToCamera = true;
 	   	graphics.endFill();
 
 		this.helpTextGroup = this.game.add.group();
 
-		let helpTitle = this.game.add.text(this.helpBackground.width/2+48, 60, "Help", titleStyle, this.helpTextGroup);
+		let helpTitle = this.game.add.text(this.game.width/2, this.game.height/4, "Help", titleStyle, this.helpTextGroup);
 	   	helpTitle.fixedToCamera = true;
 
-	   	let leftHelpOffset = this.game.width/8+10;
+	   	let leftHelpOffset = this.game.width/4+10;
 	  	
 	  	//CONTROLS
-	  	let controlsTitleTopOffset = 80;
+	  	let controlsTitleTopOffset = this.game.height/4+20;
 		let controlsTitle = this.game.add.text(leftHelpOffset, controlsTitleTopOffset, "Controls", titleStyle, this.helpTextGroup);
 	   	controlsTitle.fixedToCamera = true;
 	   	let controls1 = this.game.add.text(leftHelpOffset, controlsTitleTopOffset+30, "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
@@ -1420,7 +1431,7 @@ HUD.prototype = {
 	   	controls2.fixedToCamera = true;
 
 	   	//HUD
-	   	let hudExplanationTitleTopOffset = 170;
+	   	let hudExplanationTitleTopOffset = this.game.height/4+100;
 	   	let hudExplanationTitle = this.game.add.text(leftHelpOffset, hudExplanationTitleTopOffset, "HUD explanation", titleStyle, this.helpTextGroup);
 	   	hudExplanationTitle.fixedToCamera = true;
 	   	
@@ -1461,7 +1472,7 @@ HUD.prototype = {
 		helpExpExplanation.fixedToCamera = true;
 
 		//HOW TO PLAY
-		let hudPlayTitleTopOffset = 270;
+		let hudPlayTitleTopOffset = this.game.height/4+200;
 	   	let howToPlayTitle = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset, "How to play", titleStyle, this.helpTextGroup);
 	   	howToPlayTitle.fixedToCamera = true;
 	   	let how1 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+30, "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
@@ -1477,7 +1488,7 @@ HUD.prototype = {
 	   	let how6 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+130, "Each level is more difficult than the last, so level up, upgrade and find augmentations.", mainTextStyle, this.helpTextGroup);
 	   	how6.fixedToCamera = true;
 
-		this.closeHelpText = this.game.add.text(this.game.width-130, 60, "x", titleStyle);
+		this.closeHelpText = this.game.add.text(this.game.width*0.70, this.game.height/4, "x", titleStyle);
 		this.closeHelpText.inputEnabled = true;
 	   	this.closeHelpText.events.onInputUp.add(function(){
 	   		this.helpBackground.destroy();
@@ -1507,9 +1518,13 @@ function aiAct(e, index){
 
 	//NEED TO CHECK FOR WALLS THAT WOULD OBSCURE SIGHT
 
-	if(!e.alerted && Math.abs(dx) + Math.abs(dy) <= 5)
+	if(!e.alerted && Math.abs(dx) + Math.abs(dy) < 3+e.type)
 	{
 		e.alerted = true;
+	}
+	else if(e.alerted && Math.abs(dx) + Math.abs(dy) > 4+e.type)
+	{
+		e.alerted = false;
 	}
 	
 	let posX;
@@ -1524,8 +1539,8 @@ function aiAct(e, index){
 
 		if(dx < 0){ //player is below
 			if(dy > 0){
-				rndChoice = Math.floor(Math.random() * 2);
-				if(rndChoice == 0){
+				//check valid move in one direction, if not valid, 
+				if(validMove(e.x, e.y -1, false)){
 					posX = 0;
 					posY = -1;
 				}
@@ -1533,10 +1548,19 @@ function aiAct(e, index){
 					posX = 1;
 					posY = 0;
 				}
+
+				// rndChoice = Math.floor(Math.random() * 2);
+				// if(rndChoice == 0){
+				// 	posX = 0;
+				// 	posY = -1;
+				// }
+				// else{
+				// 	posX = 1;
+				// 	posY = 0;
+				// }
 			}
 			else if(dy < 0){
-				rndChoice = Math.floor(Math.random() * 2);
-				if(rndChoice == 0){
+				if(validMove(e.x, e.y + 1, false)){
 					posX = 0;
 					posY = 1;
 				}
@@ -1544,16 +1568,25 @@ function aiAct(e, index){
 					posX = 1;
 					posY = 0;
 				}
+
+				// rndChoice = Math.floor(Math.random() * 2);
+				// if(rndChoice == 0){
+				// 	posX = 0;
+				// 	posY = 1;
+				// }
+				// else{
+				// 	posX = 1;
+				// 	posY = 0;
+				// }
 			}
-			else if(dy ==0){
+			else if(dy == 0){
 				posX = 1;
 				posY = 0;
 			}
 		}
 		else if(dx > 0){ //player is above
 			if(dy > 0){
-				rndChoice = Math.floor(Math.random() * 2);
-				if(rndChoice == 0){
+				if(validMove(e.x, e.y -1, false)){
 					posX = 0;
 					posY = -1;
 				}
@@ -1561,10 +1594,19 @@ function aiAct(e, index){
 					posX = -1;
 					posY = 0;
 				}
+
+				// rndChoice = Math.floor(Math.random() * 2);
+				// if(rndChoice == 0){
+				// 	posX = 0;
+				// 	posY = -1;
+				// }
+				// else{
+				// 	posX = -1;
+				// 	posY = 0;
+				// }
 			}
 			else if(dy < 0){
-				rndChoice = Math.floor(Math.random() * 2);
-				if(rndChoice == 0){
+				if(validMove(e.x, e.y + 1, false)){
 					posX = 0;
 					posY = 1;
 				}
@@ -1572,6 +1614,16 @@ function aiAct(e, index){
 					posX = -1;
 					posY = 0;
 				}
+
+				// rndChoice = Math.floor(Math.random() * 2);
+				// if(rndChoice == 0){
+				// 	posX = 0;
+				// 	posY = 1;
+				// }
+				// else{
+				// 	posX = -1;
+				// 	posY = 0;
+				// }
 			}
 			else if(dy == 0){
 				posX = -1;
@@ -1861,7 +1913,7 @@ function attackActor(aggressor, x, y){
 				pHit.play();
 				player.hp -= aggressor.dmg;
 				hud.updateReadout("I took " + aggressor.dmg + " damage.");
-				hud.updateHP(player.hp);
+				hud.updateHP();
 			}
 			else{
 				let playerDodged = game.add.audio('miss', 0.3).play();
@@ -2030,7 +2082,20 @@ function showFloorSelectScreen(){
    	choice1Text.fixedToCamera = true;
    	choice1Text.anchor.x = 0.5;
    	choice1Text.inputEnabled = true;
-	choice1Text.events.onInputDown.add(function(){textGroup.destroy(); graphics.destroy(); setupFloor(++floorNumber, player); console.log(floorNumber);}, this);
+	choice1Text.events.onInputDown.add(function(){
+		textGroup.destroy(); 
+		graphics.destroy(); 
+		setupFloor(++floorNumber, player); 
+		music.fadeOut(2000);
+		// if(music.key == 'eCommerce'){
+		// 	music = game.add.audio('Enthusiast', 0.2, true);
+		// }
+		// else{
+		// 	music = game.add.audio('eCommerce', 0.2, true);
+		// }
+		// music.fadeIn(2000);
+		console.log(floorNumber);
+	}, this);
 	choice1Text.events.onInputOver.add(function(){choice1Text.fill = "#FF0000";}, this);
 	choice1Text.events.onInputOut.add(function(){choice1Text.fill = "#fff";}, this);
 
@@ -2056,7 +2121,7 @@ function showFloorSelectScreen(){
 
 function showGameOverScreen(message){
 	let gameOverColour = (message == "Victory") ? "#19de65" : "#FF0000";
-	//music.stop();
+	music.stop();
 	gameOver = true;
 
 	// if(heartbeat.isPlaying){
@@ -2073,7 +2138,7 @@ function showGameOverScreen(message){
 
 	graphics.beginFill(0x222222);
    	graphics.lineStyle(1, 0x444444, 1);
-   	let gameOverBackground = graphics.drawRect(100, 100, game.width-200, game.height-220);
+   	let gameOverBackground = graphics.drawRect(game.width/3, 100, game.width/3, game.height-220);
    	gameOverBackground.fixedToCamera = true;
    	graphics.endFill();
 
@@ -2131,8 +2196,8 @@ function showGameOverScreen(message){
 		textGroup.destroy(); 
 		graphics.destroy(); 
 		game.state.start('MainMenu');
-		title = document.getElementById("gametitle");
-		title.style.visibility = "hidden";
+		//title = document.getElementById("gametitle");
+		//title.style.visibility = "hidden";
 	}, this);
 	returnText.events.onInputOver.add(function(){returnText.fill = "#FF0000";}, this);
 	returnText.events.onInputOut.add(function(){returnText.fill = "#19de65";}, this);
@@ -2175,11 +2240,11 @@ function validMove(mX, mY, player){
 		return false;
 	}
 	else if(map[mX][mY] == Tile.LOOT){
-		console.log("Tile is loot xy: " + mX + " " + mY);
+		//console.log("Tile is loot xy: " + mX + " " + mY);
 		return false;
 	}
 	else if(mX <= 0 || mY <= 0){
-		console.log("out of bounds");
+		//console.log("out of bounds");
 		return false;
 	}
 		
@@ -2257,7 +2322,7 @@ Terminal.prototype = {
 
 		this.graphics.beginFill(0x000000);
 	   	this.graphics.lineStyle(10, 0x111111, 3);
-	   	let terminalBackground = this.graphics.drawRect(100, 100, game.width-200, game.height-250);
+	   	let terminalBackground = this.graphics.drawRect(game.width/4, 100, game.width/2, game.height-250);
 	   	terminalBackground.fixedToCamera = true;
 	   	this.graphics.endFill();
 
@@ -2518,9 +2583,9 @@ function Enemy(game, x, y, hp, ap, dmg, spriteName, type){
 	this.type = type;
 	this.isAlive = true;
 	this.alerted = false;
-	this.dodgeChance = 5*type;
+	this.dodgeChance = 5*(type-1);
 	this.exp = 100*type;
-	this.score = 100*type;
+	this.score = 100*type*floorNumber;
 	this.credits = 10*(type*type);
 };
 

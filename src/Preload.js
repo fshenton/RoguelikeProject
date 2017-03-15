@@ -61,7 +61,10 @@ Roguelike.Preload.prototype = {
 		//this.load.audio('gameMusic', 'assets/audio/Blush.mp3');
 
 		//music
-		this.load.audio('synthMusic', 'assets/audio/cabled-mess__filtered-note-08-01.mp3');
+		//this.load.audio('synthMusic', 'assets/audio/cabled-mess__filtered-note-08-01.mp3');
+		this.load.audio('Enthusiast', 'assets/audio/Tours_-_01_-_Enthusiast.mp3');
+		this.load.audio('B-3', 'assets/audio/BoxCat_Games_-_04_-_B-3.mp3');
+		this.load.audio('eCommerce', 'assets/audio/BoxCat_Games_-_09_-_eCommerce.mp3');
 
 		//sfx
 		this.load.audio('terminalHum', 'assets/audio/bmusic92__computer-hum.mp3');

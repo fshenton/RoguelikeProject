@@ -24,21 +24,21 @@ Roguelike.Boot.prototype = {
 
 		//window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio
 
-		// if(window.screen.width > 1900 && window.screen.height > 1000){
-		// 	this.scale.minWidth = 1900;
-		// 	this.scale.minHeight = 1000;
-		// 	this.scale.maxWidth = 1900;
-		// 	this.scale.maxHeight = 1000;
-		// }
-		// else{
-		// 	this.scale.minWidth = 1200;
-		// 	this.scale.minHeight = 700;
-		// 	this.scale.maxWidth = 1200;
-		// 	this.scale.maxHeight = 700;
-		// }
+		if(window.screen.width > 1900 && window.screen.height > 1000){
+			this.scale.minWidth = 1600;
+			this.scale.minHeight = 900;
+			this.scale.maxWidth = 1600;
+			this.scale.maxHeight = 900;
+		}
+		else{
+			this.scale.minWidth = 1280;
+			this.scale.minHeight = 720;
+			this.scale.maxWidth = 1280;
+			this.scale.maxHeight = 720;
+		}
 
-		//this.scale.pageAlignHorizontally = true;
-		//this.scale.pageAlignVertically = true;
+		this.scale.pageAlignHorizontally = true;
+		this.scale.pageAlignVertically = true;
 		//screensize will be set automatically
 		this.scale.updateLayout(true);
 
