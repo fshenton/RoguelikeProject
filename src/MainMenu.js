@@ -15,13 +15,13 @@ Roguelike.MainMenu.prototype = {
 		//this.game.state.start("Game");
 
 		var titleStyle = {font: "100px Tesla", fill: "#ffffff", align: "center"};
-		gameTitle = this.game.add.text(this.game.width/2, this.game.height/2-100, "Gone Rogue", titleStyle);
+		gameTitle = this.game.add.text(Math.floor(this.game.width/2), Math.floor(this.game.height/2-100), "Gone Rogue", titleStyle);
 		gameTitle.anchor.set(0.5);
 		gameTitle.alpha = 0;
 		this.game.add.tween(gameTitle).to({alpha: 1}, 500, "Linear", true, -1);
 
 		var newGameStyle = {font: "30px Tesla", fill: "#00ff00", align: "center"};
-		newGameText = this.game.add.text(this.game.width/2, this.game.height/2, "New Game", newGameStyle);
+		newGameText = this.game.add.text(Math.floor(this.game.width/2), Math.floor(this.game.height/2), "New Game", newGameStyle);
 		newGameText.anchor.set(0.5);
 		newGameText.alpha = 0;
 		// let newGameTween = this.game.add.tween(newGameText).to({y: this.game.height/2+50}, 1000, Phaser.Easing.Linear.None);		

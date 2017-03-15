@@ -471,6 +471,7 @@ Roguelike.Game.prototype = {
 		}	
 	},
 	update: function(){
+		//this.game.camera.focusOnXY(player.sprite.x, player.sprite.y-100);
 		if(!gameOver){
 			if(player.hp <= player.maxHP*0.2){
 				if(!heartbeat.isPlaying){
@@ -593,7 +594,7 @@ LootBox.prototype = {
 
 	    this.textGroup = game.add.group();
 
-	   	openText = game.add.text(game.width/2, game.height/2-100, openText, { font: "15px Consolas", fill: "#fff" }, this.textGroup);
+	   	openText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2-100), openText, { font: "15px Consolas", fill: "#fff" }, this.textGroup);
 	   	openText.fixedToCamera = true;
 	   	openText.anchor.x = 0.5;
 
@@ -610,7 +611,7 @@ LootBox.prototype = {
 	   			existingAug = true;
 	   		}
 
-			this.augText = game.add.text(game.width/2, game.height/2-50, this.aug.type + existingString, lootStyle, this.textGroup);
+			this.augText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2-50), this.aug.type + existingString, lootStyle, this.textGroup);
 			this.augText.fixedToCamera = true;
 			this.augText.inputEnabled = true;
 			this.augText.anchor.x = 0.5;
@@ -625,7 +626,7 @@ LootBox.prototype = {
 		}
 
 		if(this.credits != null){
-			this.creditText = game.add.text(game.width/2, game.height/2, "Credits: " + this.credits, lootStyle, this.textGroup);
+			this.creditText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2), "Credits: " + this.credits, lootStyle, this.textGroup);
 			this.creditText.fixedToCamera = true;
 			this.creditText.inputEnabled = true;
 			this.creditText.anchor.x = 0.5;
@@ -634,7 +635,7 @@ LootBox.prototype = {
 			this.creditText.events.onInputOut.add(this.outOption, this);
 		}
 	
-		let closeText = game.add.text(game.width/2, game.height/2+50, "Close box", { font: "15px Consolas", fill: "#ffffff" }, this.textGroup);
+		let closeText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2+50), "Close box", { font: "15px Consolas", fill: "#ffffff" }, this.textGroup);
 		closeText.fixedToCamera = true;
 		closeText.inputEnabled = true;
 		closeText.anchor.x = 0.5;
@@ -722,7 +723,7 @@ function setupFloor(fn, p){
 	//placeFurniture(); blocks pathing, adds interest
 	initActors(p);
 	if(fn > 1){
-		hud = new HUD(game);
+		//hud = new HUD(game);
 		hud.initHUD("A new floor.");
 	}
 
@@ -1033,6 +1034,8 @@ function HUD(game){//, messages, name, hp, ap, credits, floor, weapon, equipment
 
 HUD.prototype = {
 	initHUD: function(message){
+		console.log("INIT HUD");
+
 		this.leftOffset = this.game.width/2-30;
 		let graphics = this.game.add.graphics(0, 0);
 
@@ -1068,7 +1071,7 @@ HUD.prototype = {
 		// this.hudNameText = this.game.add.text(this.game.width/2, this.game.height-90, "Name: ", style);
 		// this.hudNameText.fixedToCamera = true;
 
-		this.hudNameVal = this.game.add.text(this.leftOffset, this.game.height-90, player.name, style);
+		this.hudNameVal = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-90), player.name, style);
 		this.hudNameVal.fixedToCamera = true;
 	},
 	updateLevel(){
@@ -1079,10 +1082,10 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudLevelText = this.game.add.text(this.leftOffset+80, this.game.height-90, "Lv:", style);
+		this.hudLevelText = this.game.add.text(Math.floor(this.leftOffset+80), Math.floor(this.game.height-90), "Lv:", style);
 		this.hudLevelText.fixedToCamera = true;
 
-		this.hudLevelVal = this.game.add.text(this.leftOffset+100, this.game.height-90, " " + player.lvl, style);
+		this.hudLevelVal = this.game.add.text(Math.floor(this.leftOffset+100), Math.floor(this.game.height-90), " " + player.lvl, style);
 		this.hudLevelVal.fixedToCamera = true;
 
 	},
@@ -1099,7 +1102,7 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudExpText = this.game.add.text(this.leftOffset, this.game.height-36, "EXP: ", style);
+		this.hudExpText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-36), "EXP: ", style);
 		this.hudExpText.fixedToCamera = true;
 
 		// //does this do anything???
@@ -1118,7 +1121,7 @@ HUD.prototype = {
 
 	   	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudExpValue = this.game.add.text(this.leftOffset+34, this.game.height-36, player.exp + "/" + expThreshold, style);
+		this.hudExpValue = this.game.add.text(Math.floor(this.leftOffset+34), Math.floor(this.game.height-36), player.exp + "/" + expThreshold, style);
 		this.hudExpValue.fixedToCamera = true;
 
 		// graphics.beginFill(0xAA0000);
@@ -1170,22 +1173,22 @@ HUD.prototype = {
 		for(let m = 0; m < this.hudReadout.length; m++){
 			if(m == 0){
 				//r = this.readout0;
-				this.readout0 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
+				this.readout0 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout0.fixedToCamera = true;
 			}
 			else if(m == 1){
 				//r = this.readout1;
-				this.readout1 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
+				this.readout1 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout1.fixedToCamera = true;
 			}
 			else if(m == 2){
 				//r = this.readout2;
-				this.readout2 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
+				this.readout2 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout2.fixedToCamera = true;
 			} 
 			else if(m == 3){
 				//r = this.readout3;
-				this.readout3 = this.game.add.text(50, readoutY, this.hudReadout[m], style);
+				this.readout3 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout3.fixedToCamera = true;
 			} 
 			//console.log(this.hudReadout[m]);
@@ -1207,7 +1210,7 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudHpText = this.game.add.text(this.leftOffset, this.game.height-72, "HP: ", style);
+		this.hudHpText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-72), "HP: ", style);
 		this.hudHpText.fixedToCamera = true;
 
 		//does this do anything???
@@ -1220,16 +1223,16 @@ HUD.prototype = {
 
 		graphics.beginFill(0xFF0000);
 	   	//graphics.lineStyle(1, 0x880000, 1);
-	   	this.hudCurrentHpBar = graphics.drawRect(this.leftOffset+30, this.game.height-70, player.hp, 10);
+	   	this.hudCurrentHpBar = graphics.drawRect(Math.floor(this.leftOffset+30), Math.floor(this.game.height-70), player.hp, 10);
 	   	this.hudCurrentHpBar.fixedToCamera = true;
 		graphics.beginFill(0xAA0000);
 		//console.log(player.hp);
 		//console.log(player.maxHP);
-		this.hudMaxHpBar = graphics.drawRect(this.leftOffset+30+player.hp, this.game.height-70, player.maxHP - player.hp, 10);
+		this.hudMaxHpBar = graphics.drawRect(Math.floor(this.leftOffset+30+player.hp), Math.floor(this.game.height-70), player.maxHP - player.hp, 10);
 	   	this.hudMaxHpBar.fixedToCamera = true;
 	   	graphics.endFill();
 
-	   	this.hudHpValue = this.game.add.text(this.leftOffset+33, this.game.height-72, Math.ceil(player.hp) + "/" + player.maxHP, style);
+	   	this.hudHpValue = this.game.add.text(Math.floor(this.leftOffset+33), Math.floor(this.game.height-72), Math.ceil(player.hp) + "/" + player.maxHP, style);
 		this.hudHpValue.fixedToCamera = true;
 
 		//this.hudHP = this.game.add.text((this.game.width/2), this.game.height-72, "HP: " + player.hp, style);
@@ -1242,9 +1245,8 @@ HUD.prototype = {
 		}
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
-		this.hudApText = this.game.add.text(this.leftOffset, this.game.height-54, "AP: ", style);
+		this.hudApText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-54), "AP: ", style);
 		this.hudApText.fixedToCamera = true;
-
 		//change to x number of images, hide when ap is used, show again once ap is regained
 		
 		if(this.hudApBar != null){
@@ -1277,7 +1279,7 @@ HUD.prototype = {
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 
-		this.hudDmgText = this.game.add.text(this.leftOffset+120, this.game.height-90, "Dmg: " + player.dmg, style);
+		this.hudDmgText = this.game.add.text(Math.floor(this.leftOffset+120), Math.floor(this.game.height-90), "Dmg: " + player.dmg, style);
 		this.hudDmgText.fixedToCamera = true;
 	},
 	updateCredits: function(){
@@ -1290,7 +1292,7 @@ HUD.prototype = {
 			this.hudCredits.destroy();
 		}
 
-		this.hudCredits = this.game.add.text(this.leftOffset, this.game.height-16, "Credits: " + player.credits, style);
+		this.hudCredits = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-16), "Credits: " + player.credits, style);
 		//t.anchor.set(0.5);
 		this.hudCredits.fixedToCamera = true;
 	},
@@ -1342,7 +1344,7 @@ HUD.prototype = {
 			this.hudAugText.destroy();
 
 		}
-		this.hudAugText = game.add.text(game.width-300, game.height-90, "Augmentations:", style);
+		this.hudAugText = game.add.text(Math.floor(game.width-300), Math.floor(game.height-90), "Augmentations:", style);
 		this.hudAugText.fixedToCamera = true;
 	
 		if(this.augTextGroup != null){
@@ -1377,7 +1379,7 @@ HUD.prototype = {
 			console.log(a.type);
 			//r = this.readout3;
 			
-			let aText = this.game.add.text(game.width-300, augY, "lv." + a.level + " " + typeString + " " + augEffect, style, this.augTextGroup);
+			let aText = this.game.add.text(Math.floor(game.width-300), Math.floor(augY), "lv." + a.level + " " + typeString + " " + augEffect, style, this.augTextGroup);
 			aText.fixedToCamera = true;
 			//aText.anchor.set(0.5);
 			//console.log(this.hudReadout[m]);
@@ -1385,24 +1387,41 @@ HUD.prototype = {
 		}
 	},
 	addHelp: function(){
+		if(this.hudHelpButton != null){
+			console.log("Destroy help button");
+			this.hudHelpButton.destroy();
+			this.hudHelpText.destroy();
+		}
+
 		let graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0x222222);
 	   	graphics.lineStyle(1, 0x444444, 1);
 	   	this.hudHelpButton = graphics.drawRect(15, 15, 30, 30);
 	   	this.hudHelpButton.fixedToCamera = true;
-	   	this.hudHelpButton.inputEnabled = true;
+	   	
 	   	graphics.endFill();
+
+
+	   	if(player.isViewingHelp){
+	    	this.hudHelpButton.inputEnabled = false;
+	    	console.log("player IS viewing help");
+	    } 
+	    else{
+	    	this.hudHelpButton.inputEnabled = true;
+	    	console.log("player NOT viewing help");
+	    }
 
 	   	this.hudHelpButton.events.onInputUp.add(this.showHelp, this);
 	   	this.hudHelpButton.events.onInputOver.add(function(){ this.hudHelpText.fill = "#ff0000";}, this);
 	    this.hudHelpButton.events.onInputOut.add(function(){ this.hudHelpText.fill = "#fff";}, this);
 
 	   	let style = {font: "24px Consolas", fill: "#fff", align: "left"};
-	   	this.hudHelpText = this.game.add.text(22, 19, "?", style);
+	   	this.hudHelpText = this.game.add.text(Math.floor(22), Math.floor(19), "?", style);
 	   	this.hudHelpText.fixedToCamera = true;
 	   	
 	},
 	showHelp: function(){
+		console.log("show help, playerisViewingHelp=" + player.isViewingHelp);
 		this.hudHelpButton.inputEnabled = false;
 		this.hudHelpText.fill = "#fff";
 		player.isViewingHelp = true;
@@ -1416,23 +1435,23 @@ HUD.prototype = {
 
 		this.helpTextGroup = this.game.add.group();
 
-		let helpTitle = this.game.add.text(this.game.width/2, this.game.height/4, "Help", titleStyle, this.helpTextGroup);
+		let helpTitle = this.game.add.text(Math.floor(this.game.width/2), Math.floor(this.game.height/4), "Help", titleStyle, this.helpTextGroup);
 	   	helpTitle.fixedToCamera = true;
 
 	   	let leftHelpOffset = this.game.width/4+10;
 	  	
 	  	//CONTROLS
 	  	let controlsTitleTopOffset = this.game.height/4+20;
-		let controlsTitle = this.game.add.text(leftHelpOffset, controlsTitleTopOffset, "Controls", titleStyle, this.helpTextGroup);
+		let controlsTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(controlsTitleTopOffset), "Controls", titleStyle, this.helpTextGroup);
 	   	controlsTitle.fixedToCamera = true;
-	   	let controls1 = this.game.add.text(leftHelpOffset, controlsTitleTopOffset+30, "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
+	   	let controls1 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(controlsTitleTopOffset+30), "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
 	   	controls1.fixedToCamera = true;
-	   	let controls2 = this.game.add.text(leftHelpOffset, controlsTitleTopOffset+50, "Left mouse button: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
+	   	let controls2 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(controlsTitleTopOffset+50), "Left mouse button: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
 	   	controls2.fixedToCamera = true;
 
 	   	//HUD
 	   	let hudExplanationTitleTopOffset = this.game.height/4+100;
-	   	let hudExplanationTitle = this.game.add.text(leftHelpOffset, hudExplanationTitleTopOffset, "HUD explanation", titleStyle, this.helpTextGroup);
+	   	let hudExplanationTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudExplanationTitleTopOffset), "HUD explanation", titleStyle, this.helpTextGroup);
 	   	hudExplanationTitle.fixedToCamera = true;
 	   	
 	   	//health bar
@@ -1444,9 +1463,9 @@ HUD.prototype = {
 		let helpMaxHPbar = graphics.drawRect(leftHelpOffset+80, hudExplanationTitleTopOffset+30, 20, 10);
 	   	helpMaxHPbar.fixedToCamera = true;
 	   	graphics.endFill();
-	   	let helpHpValue = this.game.add.text(leftHelpOffset+5, hudExplanationTitleTopOffset+28, 80 + "/" + 100, mainTextStyle);
+	   	let helpHpValue = this.game.add.text(Math.floor(leftHelpOffset+5), Math.floor(hudExplanationTitleTopOffset+28), 80 + "/" + 100, mainTextStyle);
 		helpHpValue.fixedToCamera = true;
-		let helpHpExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+28, "Shows your current health and maximum health.", mainTextStyle, this.helpTextGroup);
+		let helpHpExplanation = this.game.add.text(Math.floor(leftHelpOffset+110), Math.floor(hudExplanationTitleTopOffset+28), "Shows your current health and maximum health.", mainTextStyle, this.helpTextGroup);
 		helpHpExplanation.fixedToCamera = true;
 
 		//ap bar
@@ -1457,7 +1476,7 @@ HUD.prototype = {
         let helpApBar2 = graphics.drawRect(leftHelpOffset+25, hudExplanationTitleTopOffset+48, 20, 10);
         helpApBar2.fixedToCamera = true;
         graphics.endFill();
-        let helpApExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+46, "Shows your remaining actions this turn.", mainTextStyle, this.helpTextGroup);
+        let helpApExplanation = this.game.add.text(Math.floor(leftHelpOffset+110), Math.floor(hudExplanationTitleTopOffset+46), "Shows your remaining actions this turn.", mainTextStyle, this.helpTextGroup);
 		helpApExplanation.fixedToCamera = true;
 
 		//experience bar
@@ -1466,29 +1485,29 @@ HUD.prototype = {
 	    let helpExpBar = graphics.drawRect(leftHelpOffset, hudExplanationTitleTopOffset+68, (500/1600)*100, 10);
 	   	helpExpBar.fixedToCamera = true;
 	   	graphics.endFill();
-		let helpExpValue = this.game.add.text(leftHelpOffset+5, hudExplanationTitleTopOffset+66, 500 + "/" + 1600, mainTextStyle);
+		let helpExpValue = this.game.add.text(Math.floor(leftHelpOffset+5), Math.floor(hudExplanationTitleTopOffset+66), 500 + "/" + 1600, mainTextStyle);
 		helpExpValue.fixedToCamera = true;
-		let helpExpExplanation = this.game.add.text(leftHelpOffset+110, hudExplanationTitleTopOffset+66, "Shows your current experience and how close you are to levelling up.", mainTextStyle, this.helpTextGroup);
+		let helpExpExplanation = this.game.add.text(Math.floor(leftHelpOffset+110), Math.floor(hudExplanationTitleTopOffset+66), "Shows your current experience and how close you are to levelling up.", mainTextStyle, this.helpTextGroup);
 		helpExpExplanation.fixedToCamera = true;
 
 		//HOW TO PLAY
 		let hudPlayTitleTopOffset = this.game.height/4+200;
-	   	let howToPlayTitle = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset, "How to play", titleStyle, this.helpTextGroup);
+	   	let howToPlayTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset), "How to play", titleStyle, this.helpTextGroup);
 	   	howToPlayTitle.fixedToCamera = true;
-	   	let how1 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+30, "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
+	   	let how1 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+30), "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
 	   	how1.fixedToCamera = true;
-	   	let how2 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+50, "Once you have used your actions, your turn ends and your enemies may act.", mainTextStyle, this.helpTextGroup);
+	   	let how2 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+50), "Once you have used your actions, your turn ends and your enemies may act.", mainTextStyle, this.helpTextGroup);
 	   	how2.fixedToCamera = true;
-	   	let how3 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+70, "Credits gained from loot boxes and defeating enemies can be spent at computer terminals.", mainTextStyle, this.helpTextGroup);
+	   	let how3 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+70), "Credits gained from loot boxes and defeating enemies can be spent at computer terminals.", mainTextStyle, this.helpTextGroup);
 	   	how3.fixedToCamera = true;
-	   	let how4 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+90, "Your objective is to find the exit on each floor, working your way to the final floor.", mainTextStyle, this.helpTextGroup);
+	   	let how4 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+90), "Your objective is to find the exit on each floor, working your way to the final floor.", mainTextStyle, this.helpTextGroup);
 	   	how4.fixedToCamera = true;
-	   	let how5 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+110, "Upon reaching the final floor you will need to access the main terminal.", mainTextStyle, this.helpTextGroup);
+	   	let how5 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+110), "Upon reaching the final floor you will need to access the main terminal.", mainTextStyle, this.helpTextGroup);
 	   	how5.fixedToCamera = true;
-	   	let how6 = this.game.add.text(leftHelpOffset, hudPlayTitleTopOffset+130, "Each level is more difficult than the last, so level up, upgrade and find augmentations.", mainTextStyle, this.helpTextGroup);
+	   	let how6 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+130), "Each level is more difficult than the last, so level up, upgrade and find augmentations.", mainTextStyle, this.helpTextGroup);
 	   	how6.fixedToCamera = true;
 
-		this.closeHelpText = this.game.add.text(this.game.width*0.70, this.game.height/4, "x", titleStyle);
+		this.closeHelpText = this.game.add.text(Math.floor(this.game.width*0.70), Math.floor(this.game.height/4), "x", titleStyle);
 		this.closeHelpText.inputEnabled = true;
 	   	this.closeHelpText.events.onInputUp.add(function(){
 	   		this.helpBackground.destroy();
@@ -2022,7 +2041,7 @@ function attackActor(aggressor, x, y){
 				deathSprite.anchor.y = 0.3 ;
 				deathSprite.animations.add(deathSprite, [0, 1, 2, 3, 4, 5], 18, false);
 				deathSprite.animations.play(deathSprite);
-				hud.initHUD(); //hud covers corpses
+				//hud.initHUD(); //hud covers corpses
 
 				//victim.sprite = game.add.sprite(victim.y*64, victim.x*64, deathSprite, 0); 
 				//victim.sprite.anchor.y = 0.3 ;
@@ -2074,11 +2093,11 @@ function showFloorSelectScreen(){
 
    	let optionPicked = false;
 
-   	floorSelectText = game.add.text(game.width/2, game.height/2-150, floorSelectText, { font: "24px Consolas", fill: "#0055DD" }, textGroup);
+   	floorSelectText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2-150), floorSelectText, { font: "24px Consolas", fill: "#0055DD" }, textGroup);
    	floorSelectText.fixedToCamera = true;
    	floorSelectText.anchor.x = 0.5;
 
-   	choice1Text = game.add.text(game.width/2, game.height/2-80, choice1Text, { font: "15px Consolas", fill: "#fff" }, textGroup);
+   	choice1Text = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2-80), choice1Text, { font: "15px Consolas", fill: "#fff" }, textGroup);
    	choice1Text.fixedToCamera = true;
    	choice1Text.anchor.x = 0.5;
    	choice1Text.inputEnabled = true;
@@ -2086,7 +2105,7 @@ function showFloorSelectScreen(){
 		textGroup.destroy(); 
 		graphics.destroy(); 
 		setupFloor(++floorNumber, player); 
-		music.fadeOut(2000);
+		//music.fadeOut(2000);
 		// if(music.key == 'eCommerce'){
 		// 	music = game.add.audio('Enthusiast', 0.2, true);
 		// }
@@ -2101,7 +2120,7 @@ function showFloorSelectScreen(){
 
 	//when on the penultimate floor, can only go to top floor
 	if(floorNumber < topFloor-1){
-		choice2Text = game.add.text(game.width/2, game.height/2-50, choice2Text, { font: "15px Consolas", fill: "#fff" }, textGroup);
+		choice2Text = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2-50), choice2Text, { font: "15px Consolas", fill: "#fff" }, textGroup);
 	   	choice2Text.fixedToCamera = true;
 	   	choice2Text.anchor.x = 0.5;
 	   	choice2Text.inputEnabled = true;
@@ -2110,7 +2129,7 @@ function showFloorSelectScreen(){
 		choice2Text.events.onInputOut.add(function(){choice2Text.fill = "#fff";}, this);
 	}
  
-	stayText = game.add.text(game.width/2, game.height/2, stayText, { font: "15px Consolas", fill: "#fff" }, textGroup);
+	stayText = game.add.text(Math.floor(game.width/2), Math.floor(game.height/2), stayText, { font: "15px Consolas", fill: "#fff" }, textGroup);
    	stayText.fixedToCamera = true;
    	stayText.anchor.x = 0.5;
    	stayText.inputEnabled = true;
@@ -2158,36 +2177,36 @@ function showGameOverScreen(message){
    	let xOffset = game.width/2;
    	let yOffset = game.height/2-50;
 
-   	gameOverText = game.add.text(xOffset, yOffset-100, gameOverText, gameOverStyle, textGroup);
+   	gameOverText = game.add.text(Math.floor(xOffset), Math.floor(yOffset-100), gameOverText, gameOverStyle, textGroup);
    	gameOverText.fill = gameOverColour;
    	gameOverText.fixedToCamera = true;
    	gameOverText.anchor.x = 0.5;
 
-   	statsText = game.add.text(xOffset, yOffset-40, statsText, titleStyle, textGroup);
+   	statsText = game.add.text(Math.floor(xOffset), Math.floor(yOffset-40), statsText, titleStyle, textGroup);
    	statsText.fixedToCamera = true;
    	statsText.anchor.x = 0.5;
 
-   	killedText = game.add.text(xOffset, yOffset-10, killedText, mainTextStyle, textGroup);
+   	killedText = game.add.text(Math.floor(xOffset), Math.floor(yOffset-10), killedText, mainTextStyle, textGroup);
    	killedText.fixedToCamera = true;
    	killedText.anchor.x = 1;
 
-   	scoreText = game.add.text(xOffset, yOffset+10, scoreText, mainTextStyle, textGroup);
+   	scoreText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+10), scoreText, mainTextStyle, textGroup);
    	scoreText.fixedToCamera = true;
     scoreText.anchor.x = 1;
 
-   	creditsText = game.add.text(xOffset, yOffset+30, creditsText, mainTextStyle, textGroup);
+   	creditsText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+30), creditsText, mainTextStyle, textGroup);
    	creditsText.fixedToCamera = true;
    	creditsText.anchor.x = 1;
 
-   	levelText = game.add.text(xOffset, yOffset+50, levelText, mainTextStyle, textGroup);
+   	levelText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+50), levelText, mainTextStyle, textGroup);
    	levelText.fixedToCamera = true;
    	levelText.anchor.x = 1;
 
-   	floorsClearedText = game.add.text(xOffset, yOffset+70, floorsClearedText, mainTextStyle, textGroup);
+   	floorsClearedText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+70), floorsClearedText, mainTextStyle, textGroup);
    	floorsClearedText.fixedToCamera = true;
    	floorsClearedText.anchor.x = 1;
 
-	returnText = game.add.text(xOffset, yOffset+120, returnText, mainTextStyle, textGroup);
+	returnText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+120), returnText, mainTextStyle, textGroup);
 	returnText.fill = "#19de65";
 	returnText.fixedToCamera = true;
 	returnText.inputEnabled = true;
@@ -2202,7 +2221,7 @@ function showGameOverScreen(message){
 	returnText.events.onInputOver.add(function(){returnText.fill = "#FF0000";}, this);
 	returnText.events.onInputOut.add(function(){returnText.fill = "#19de65";}, this);
 
-	restartText = game.add.text(xOffset, yOffset+150, restartText, mainTextStyle, textGroup);
+	restartText = game.add.text(Math.floor(xOffset), Math.floor(yOffset+150), restartText, mainTextStyle, textGroup);
 	restartText.fill = "#19de65";
 	restartText.fixedToCamera = true;
 	restartText.inputEnabled = true;
@@ -2343,22 +2362,22 @@ Terminal.prototype = {
 
 		    this.textGroup = game.add.group();
 
-		   	bootText = game.add.text(game.width/2, yOffset-150, bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		   	bootText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-150), bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
 		    if(this.terminalStart){	bootText.alpha = 0;}
 
-		  	let fillerText1 = game.add.text(game.width/2, yOffset-120, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		  	let fillerText1 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-120), fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText1.fixedToCamera = true;
 	   		fillerText1.anchor.x = 0.5;
 	   		if(this.terminalStart){fillerText1.alpha = 0;}
 
-	   		let fillerText2 = game.add.text(game.width/2, yOffset-90, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+	   		let fillerText2 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-90), fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText2.fixedToCamera = true;
 	   		fillerText2.anchor.x = 0.5;
 	   		if(this.terminalStart){fillerText2.alpha = 0;}
 	   		
-	   		welcomeText = game.add.text(game.width/2, yOffset-60, welcomeText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+	   		welcomeText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-60), welcomeText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		welcomeText.fixedToCamera = true;
 	   		welcomeText.anchor.x = 0.5;
 	   		if(this.terminalStart){welcomeText.alpha = 0;}
@@ -2371,7 +2390,7 @@ Terminal.prototype = {
 	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" };
 	   		}
 
-			let healText = game.add.text(game.width/2, yOffset, this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
+			let healText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset), this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
 			healText.fixedToCamera = true;
 			healText.inputEnabled = true;
 			healText.anchor.x = 0.5;
@@ -2387,7 +2406,7 @@ Terminal.prototype = {
 	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" }
 	   		}
 
-			let upgradeDmgText = game.add.text(game.width/2, yOffset+30, this.options[1] + " (" + upgradeDmgCost + ")", purchaseStyle, this.textGroup);
+			let upgradeDmgText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+30), this.options[1] + " (" + upgradeDmgCost + ")", purchaseStyle, this.textGroup);
 			upgradeDmgText.fixedToCamera = true;
 			upgradeDmgText.inputEnabled = true;
 			upgradeDmgText.anchor.x = 0.5;
@@ -2403,7 +2422,7 @@ Terminal.prototype = {
 	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" }
 	   		}
 
-			let upgradeHPText = game.add.text(game.width/2, yOffset+60, this.options[2] + " (" + upgradeHpCost + ")", purchaseStyle, this.textGroup);
+			let upgradeHPText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+60), this.options[2] + " (" + upgradeHpCost + ")", purchaseStyle, this.textGroup);
 			upgradeHPText.fixedToCamera = true;
 			upgradeHPText.inputEnabled = true;
 			upgradeHPText.anchor.x = 0.5;
@@ -2424,27 +2443,27 @@ Terminal.prototype = {
 
 		    this.textGroup = game.add.group();
 
-		   	bootText = game.add.text(game.width/2, yOffset-150, bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		   	bootText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-150), bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
 		    if(this.terminalStart){	bootText.alpha = 0;}
 
-		   	let fillerText1 = game.add.text(game.width/2, yOffset-120, fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		   	let fillerText1 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-120), fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText1.fixedToCamera = true;
 	   		fillerText1.anchor.x = 0.5;
 	   		if(this.terminalStart){fillerText1.alpha = 0;}
 
-		  	intruderText = game.add.text(game.width/2, yOffset-90, intruderText, { font: "15px Consolas", fill: "#ff0000" }, this.textGroup);
+		  	intruderText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-90), intruderText, { font: "15px Consolas", fill: "#ff0000" }, this.textGroup);
 	   		intruderText.fixedToCamera = true;
 	   		intruderText.anchor.x = 0.5;
 	   		if(this.terminalStart){intruderText.alpha = 0;}
 
-	   		pleaseText = game.add.text(game.width/2, yOffset-30, pleaseText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+	   		pleaseText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-30), pleaseText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 	   		pleaseText.fixedToCamera = true;
 	   		pleaseText.anchor.x = 0.5;
 	   		if(this.terminalStart){pleaseText.alpha = 0;}
 
-	   		let virusText = game.add.text(game.width/2, yOffset+30, this.options[0], { font: "32px Consolas", fill: "#0055DD" }, this.textGroup);
+	   		let virusText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+30), this.options[0], { font: "32px Consolas", fill: "#0055DD" }, this.textGroup);
 			virusText.fixedToCamera = true;
 			virusText.inputEnabled = true;
 			virusText.anchor.x = 0.5;
@@ -2457,7 +2476,7 @@ Terminal.prototype = {
 			if(this.terminalStart){virusText.alpha = 0;}
 		}
 		
-		let logoffText = game.add.text(game.width/2, yOffset+90, this.options[3], { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		let logoffText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+90), this.options[3], { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
 		logoffText.fixedToCamera = true;
 		logoffText.inputEnabled = true;
 		logoffText.anchor.x = 0.5;
@@ -2474,14 +2493,14 @@ Terminal.prototype = {
 		if(this.terminalStart){logoffText.alpha = 0;}
 
 		let animations = [];
-		let time = 200;
+		let time = 0;
 
 		if(this.terminalStart){
 			for(let i = 0; i < this.textGroup.length; i++){
 				animations.push(game.add.tween(this.textGroup.children[i]).to({alpha: 1}, 1000, Phaser.Easing.Linear.None));	
 				setTimeout(function(){
 					animations[i].start();
-				}, time+(i*200));
+				}, time+(i*100));
 			}
 		}
 		
