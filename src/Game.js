@@ -127,7 +127,7 @@ Roguelike.Game.prototype = {
 
 		console.log("New Game Started");
 
-		this.game.add.audio('scary').play();
+		//this.game.add.audio('scary').play();
 		//this.game.add.audio('mysterious', 0.1, false).play();
 
 		//music = this.game.add.audio('Enthusiast', 0.2, true);
