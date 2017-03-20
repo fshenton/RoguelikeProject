@@ -81,6 +81,9 @@ Roguelike.Game.prototype = {
 
 		game = this.game;
 		
+		game.time.advancedTiming = true;
+		game.forceSingleUpdate = true
+
 		floorNumber = 1;
 		gameOver = false;
 
@@ -137,8 +140,9 @@ Roguelike.Game.prototype = {
 		heartbeat = this.game.add.audio('heartbeat', 0.3);
 		music.play();
 	},
-	/*update: function(){
-	},*/
+	render: function(){
+		//game.debug.text(game.time.fps, 2, 14, "#00ff00");
+	},
 	onKeyUp: function(event){
 
 		let acted = false;
@@ -471,7 +475,8 @@ Roguelike.Game.prototype = {
 		}	
 	},
 	update: function(){
-		//this.game.camera.focusOnXY(player.sprite.x, player.sprite.y-100);
+		//this.game.camera.focusOnXY(Math.floor(player.sprite.x), Math.floor(player.sprite.y+100));
+
 		if(!gameOver){
 			if(player.hp <= player.maxHP*0.2){
 				if(!heartbeat.isPlaying){
@@ -724,6 +729,7 @@ function setupFloor(fn, p){
 	initActors(p);
 	if(fn > 1){
 		//hud = new HUD(game);
+		console.log("floorNUmber " + floorNumber)
 		hud.initHUD("A new floor.");
 	}
 
@@ -1061,6 +1067,9 @@ HUD.prototype = {
 	   	this.addHelp();
 	},
 	updateName(){
+		console.log("--------------------");
+		console.log("updateName");
+		console.log("this.leftOffset: " + this.leftOffset);
 		if(this.hudNameText != null){
 			this.hudNameText.destroy();
 			this.hudNameVal.destroy();
@@ -1075,6 +1084,9 @@ HUD.prototype = {
 		this.hudNameVal.fixedToCamera = true;
 	},
 	updateLevel(){
+		console.log("--------------------");
+		console.log("updateLevel");
+		console.log("this.leftOffset: " + this.leftOffset);
 		if(this.hudLevelText != null){
 			this.hudLevelText.destroy();
 			this.hudLevelVal.destroy();
@@ -1091,6 +1103,7 @@ HUD.prototype = {
 	},
 	updateEXP(){
 		// //two bars like health
+		console.log("--------------------");
 		console.log("updateEXP");
 		console.log("leftOffset: ", this.leftOffset);
 
@@ -1134,6 +1147,9 @@ HUD.prototype = {
 	updateReadout: function(message){
 		//IF SPACE IN READOUTS AREA, ADD NEW MESSAGE TO TOP, SHIFT ALL DOWN (USE UNSHIFT?)
 		//IF NOT SPACE, POP LAST ONE/s, ADD NEW ONES
+		console.log("--------------------");
+		console.log("updateReadout");
+		console.log("this.leftOffset: " + this.leftOffset);
 
 		if(message != null){
 			if(this.hudReadout.length < 4){
@@ -1175,21 +1191,25 @@ HUD.prototype = {
 				//r = this.readout0;
 				this.readout0 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout0.fixedToCamera = true;
+				//this.readout0.preUpdate();
 			}
 			else if(m == 1){
 				//r = this.readout1;
 				this.readout1 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout1.fixedToCamera = true;
+				//this.readout1.preUpdate();
 			}
 			else if(m == 2){
 				//r = this.readout2;
 				this.readout2 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout2.fixedToCamera = true;
+				//this.readout2.preUpdate();
 			} 
 			else if(m == 3){
 				//r = this.readout3;
 				this.readout3 = this.game.add.text(Math.floor(50), Math.floor(readoutY), this.hudReadout[m], style);
 				this.readout3.fixedToCamera = true;
+				//this.readout3.preUpdate();
 			} 
 			//console.log(this.hudReadout[m]);
 			readoutY += 18;
@@ -1203,6 +1223,10 @@ HUD.prototype = {
 	// 	this.hudName.fixedToCamera = true;
 	// },
 	updateHP: function(){
+		console.log("--------------------");
+		console.log("updateHP");
+		console.log("this.leftOffset: " + this.leftOffset);
+
 		if(this.hudHpText != null){
 			this.hudHpText.destroy();
 			this.hudHpValue.destroy();
@@ -1240,13 +1264,22 @@ HUD.prototype = {
 		//this.hudHpBar.fixedToCamera = true;
 	},
 	updateAP: function(){
+		console.log("--------------------");
+		console.log("updateAP");
+		console.log("this.leftOffset: " + this.leftOffset);
+
 		if(this.hudApText != null){
 			this.hudApText.destroy();
 		}
 
 		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
 		this.hudApText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-54), "AP: ", style);
+		//this.hudApText.preUpdate();
+
+		//console.log(this.hudApText);
 		this.hudApText.fixedToCamera = true;
+		//console.log(this.hudApText);
+		
 		//change to x number of images, hide when ap is used, show again once ap is regained
 		
 		if(this.hudApBar != null){
@@ -1388,7 +1421,7 @@ HUD.prototype = {
 	},
 	addHelp: function(){
 		if(this.hudHelpButton != null){
-			console.log("Destroy help button");
+			//console.log("Destroy help button");
 			this.hudHelpButton.destroy();
 			this.hudHelpText.destroy();
 		}
@@ -1398,6 +1431,7 @@ HUD.prototype = {
 	   	graphics.lineStyle(1, 0x444444, 1);
 	   	this.hudHelpButton = graphics.drawRect(15, 15, 30, 30);
 	   	this.hudHelpButton.fixedToCamera = true;
+	   	//this.hudHelpButton.preUpdate();
 	   	
 	   	graphics.endFill();
 
@@ -1418,6 +1452,7 @@ HUD.prototype = {
 	   	let style = {font: "24px Consolas", fill: "#fff", align: "left"};
 	   	this.hudHelpText = this.game.add.text(Math.floor(22), Math.floor(19), "?", style);
 	   	this.hudHelpText.fixedToCamera = true;
+	   	//this.hudHelpText.preUpdate();
 	   	
 	},
 	showHelp: function(){
@@ -1868,7 +1903,7 @@ function moveTo(actor, index, dir){
 		//actor.sprite.y = newPosX*64;
 		//actor.sprite.x = newPosY*64;
 
-		Roguelike.game.add.tween(actor.sprite).to({x: newPosY*64, y: newPosX*64}, 250).start();
+		Roguelike.game.add.tween(actor.sprite).to({x: newPosY*64, y: newPosX*64}, 200).start();
 
 
 		// if(actor == player){
@@ -1962,6 +1997,7 @@ function attackActor(aggressor, x, y){
 						hud.updateHP();
 					}
 				}
+				game.add.audio('zap', 0.2, false).play();
 				victim.hp -= aggressor.dmg;
 				hud.updateReadout("I did " + aggressor.dmg + " damage to the enemy.");
 				let hurtString;
@@ -2039,9 +2075,10 @@ function attackActor(aggressor, x, y){
 				//console.log("death sprite:", deathSprite.y, ",", deathSprite.x);
 				//deathSprite.x;
 				deathSprite.anchor.y = 0.3 ;
+				//deathSprite.preUpdate();
 				deathSprite.animations.add(deathSprite, [0, 1, 2, 3, 4, 5], 18, false);
 				deathSprite.animations.play(deathSprite);
-				//hud.initHUD(); //hud covers corpses
+				hud.initHUD(); //hud covers corpses
 
 				//victim.sprite = game.add.sprite(victim.y*64, victim.x*64, deathSprite, 0); 
 				//victim.sprite.anchor.y = 0.3 ;
@@ -2497,7 +2534,7 @@ Terminal.prototype = {
 
 		if(this.terminalStart){
 			for(let i = 0; i < this.textGroup.length; i++){
-				animations.push(game.add.tween(this.textGroup.children[i]).to({alpha: 1}, 1000, Phaser.Easing.Linear.None));	
+				animations.push(game.add.tween(this.textGroup.children[i]).to({alpha: 1}, 500, Phaser.Easing.Linear.None));	
 				setTimeout(function(){
 					animations[i].start();
 				}, time+(i*100));

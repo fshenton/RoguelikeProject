@@ -77,6 +77,7 @@ Roguelike.Preload.prototype = {
 		this.load.audio('heartbeat', 'assets/audio/urupin__heartbeat.mp3')
 		this.load.audio('openContainer', 'assets/audio/lukeupf__container.wav');
 		this.load.audio('APup', 'assets/audio/skowm001__1-tone-chime.wav');
+		this.load.audio('zap', 'assets/audio/2joelaudio__electric-zap-001.wav');
 		//footsteps
 		//combat
 
