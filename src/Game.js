@@ -13,8 +13,8 @@ const terminalNumber = 3;
 const lootNumber = 5;
 
 var titleStyle = {font: "24px Consolas", fill: "#fff"};
-var gameOverStyle = {font: "48px Consolas", fill: "#fff"};
-var mainTextStyle = {font: "12px Consolas", fill: "#fff", align: "left"};
+var gameOverStyle = {font: "48px Tesla", fill: "#fff"};
+var mainTextStyle = {font: "14px Consolas", fill: "#fff", align: "left"};
 
 //numitems
 //numterminals
@@ -1075,7 +1075,7 @@ HUD.prototype = {
 			this.hudNameVal.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		// this.hudNameText = this.game.add.text(this.game.width/2, this.game.height-90, "Name: ", style);
 		// this.hudNameText.fixedToCamera = true;
@@ -1092,7 +1092,7 @@ HUD.prototype = {
 			this.hudLevelVal.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		this.hudLevelText = this.game.add.text(Math.floor(this.leftOffset+80), Math.floor(this.game.height-90), "Lv:", style);
 		this.hudLevelText.fixedToCamera = true;
@@ -1113,7 +1113,7 @@ HUD.prototype = {
 			this.hudExpBar.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		this.hudExpText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-36), "EXP: ", style);
 		this.hudExpText.fixedToCamera = true;
@@ -1128,13 +1128,13 @@ HUD.prototype = {
 
 		graphics.beginFill(0xAA00AA);
 	   	//graphics.lineStyle(1, 0x880000, 1);
-	   	this.hudExpBar = graphics.drawRect(this.leftOffset+30, this.game.height-34, (player.exp/expThreshold*100), 10);
+	   	this.hudExpBar = graphics.drawRect(this.leftOffset+35, this.game.height-34, (player.exp/expThreshold*100), 12);
 	   	this.hudExpBar.fixedToCamera = true;
 	   	graphics.endFill();
 
-	   	var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+	   	var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
-		this.hudExpValue = this.game.add.text(Math.floor(this.leftOffset+34), Math.floor(this.game.height-36), player.exp + "/" + expThreshold, style);
+		this.hudExpValue = this.game.add.text(Math.floor(this.leftOffset+36), Math.floor(this.game.height-36), player.exp + "/" + expThreshold, style);
 		this.hudExpValue.fixedToCamera = true;
 
 		// graphics.beginFill(0xAA0000);
@@ -1163,7 +1163,7 @@ HUD.prototype = {
 
 		//console.log(this.hudReadout);
 
-		var style = {font: "12px Consolas", fill: "#ffffff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#ffffff", align: "left"};
 	
 		let readoutY = this.game.height-81;
 		let r;
@@ -1232,7 +1232,7 @@ HUD.prototype = {
 			this.hudHpValue.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		this.hudHpText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-72), "HP: ", style);
 		this.hudHpText.fixedToCamera = true;
@@ -1247,16 +1247,16 @@ HUD.prototype = {
 
 		graphics.beginFill(0xFF0000);
 	   	//graphics.lineStyle(1, 0x880000, 1);
-	   	this.hudCurrentHpBar = graphics.drawRect(Math.floor(this.leftOffset+30), Math.floor(this.game.height-70), player.hp, 10);
+	   	this.hudCurrentHpBar = graphics.drawRect(Math.floor(this.leftOffset+35), Math.floor(this.game.height-70), player.hp, 12);
 	   	this.hudCurrentHpBar.fixedToCamera = true;
 		graphics.beginFill(0xAA0000);
 		//console.log(player.hp);
 		//console.log(player.maxHP);
-		this.hudMaxHpBar = graphics.drawRect(Math.floor(this.leftOffset+30+player.hp), Math.floor(this.game.height-70), player.maxHP - player.hp, 10);
+		this.hudMaxHpBar = graphics.drawRect(Math.floor(this.leftOffset+35+player.hp), Math.floor(this.game.height-70), player.maxHP - player.hp, 12);
 	   	this.hudMaxHpBar.fixedToCamera = true;
 	   	graphics.endFill();
 
-	   	this.hudHpValue = this.game.add.text(Math.floor(this.leftOffset+33), Math.floor(this.game.height-72), Math.ceil(player.hp) + "/" + player.maxHP, style);
+	   	this.hudHpValue = this.game.add.text(Math.floor(this.leftOffset+36), Math.floor(this.game.height-72), Math.ceil(player.hp) + "/" + player.maxHP, style);
 		this.hudHpValue.fixedToCamera = true;
 
 		//this.hudHP = this.game.add.text((this.game.width/2), this.game.height-72, "HP: " + player.hp, style);
@@ -1272,7 +1272,7 @@ HUD.prototype = {
 			this.hudApText.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 		this.hudApText = this.game.add.text(Math.floor(this.leftOffset), Math.floor(this.game.height-54), "AP: ", style);
 		//this.hudApText.preUpdate();
 
@@ -1289,10 +1289,10 @@ HUD.prototype = {
 		let graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0xFF9900);
 
-		let x = this.leftOffset+30;
+		let x = this.leftOffset+35;
 
 		for(let a = 0; a < player.ap; a++){
-			this.hudApBar = graphics.drawRect(x, this.game.height-52, 20, 10);
+			this.hudApBar = graphics.drawRect(x, this.game.height-52, 20, 12);
 			x += 25;
 		}
 
@@ -1310,13 +1310,13 @@ HUD.prototype = {
 			this.hudDmgText.destroy();
 		}
 
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		this.hudDmgText = this.game.add.text(Math.floor(this.leftOffset+120), Math.floor(this.game.height-90), "Dmg: " + player.dmg, style);
 		this.hudDmgText.fixedToCamera = true;
 	},
 	updateCredits: function(){
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		console.log("updateCredits");
 		console.log("leftOffset: ", this.leftOffset);
@@ -1371,7 +1371,7 @@ HUD.prototype = {
 			console.log(this.hudAugList);
 		}
 		
-		var style = {font: "12px Consolas", fill: "#fff", align: "left"};
+		var style = {font: "15px Consolas", fill: "#fff", align: "left"};
 
 		if(this.hudAugText != null){
 			this.hudAugText.destroy();
@@ -1592,109 +1592,125 @@ function aiAct(e, index){
 		//if in a straight line direction, chooses that direction
 
 		if(dx < 0){ //player is below
-			if(dy > 0){
+			if(dy > 0){ //player to left
 				//check valid move in one direction, if not valid, 
-				if(validMove(e.x, e.y -1, false)){
+				if(validMove(e.x, e.y - 1, false)){ //left
 					posX = 0;
 					posY = -1;
 				}
-				else{
+				else if(validMove(e.x + 1, e.y, false)){ //down
 					posX = 1;
 					posY = 0;
 				}
-
-				// rndChoice = Math.floor(Math.random() * 2);
-				// if(rndChoice == 0){
-				// 	posX = 0;
-				// 	posY = -1;
-				// }
-				// else{
-				// 	posX = 1;
-				// 	posY = 0;
-				// }
-			}
-			else if(dy < 0){
-				if(validMove(e.x, e.y + 1, false)){
+				else if(validMove(e.x, e.y + 1, false)){ //right
 					posX = 0;
 					posY = 1;
 				}
-				else{
+			}
+			else if(dy < 0){ //player to right
+				if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
+				else if(validMove(e.x+1, e.y, false)){ //down
 					posX = 1;
 					posY = 0;
 				}
-
-				// rndChoice = Math.floor(Math.random() * 2);
-				// if(rndChoice == 0){
-				// 	posX = 0;
-				// 	posY = 1;
-				// }
-				// else{
-				// 	posX = 1;
-				// 	posY = 0;
-				// }
+				else if(validMove(e.x, e.y-1, false)){ //left
+					posX = 0;
+					posY = -1;
+				}
 			}
 			else if(dy == 0){
-				posX = 1;
-				posY = 0;
+				if(validMove(e.x + 1, e.y, false)){ //down
+					posX = 1;
+					posY = 0;
+				}
+				else if(validMove(e.x, e.y - 1, false)){ //left
+					posX = 0;
+					posY = -1;
+				} 
+				else if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
 			}
 		}
 		else if(dx > 0){ //player is above
-			if(dy > 0){
-				if(validMove(e.x, e.y -1, false)){
+			if(dy > 0){ //player to left
+				//check valid move in one direction, if not valid, 
+				if(validMove(e.x, e.y - 1, false)){ //left
 					posX = 0;
 					posY = -1;
 				}
-				else{
-					posX = -1;
+				else if(validMove(e.x + 1, e.y, false)){ //up
+					posX = 1;
 					posY = 0;
 				}
-
-				// rndChoice = Math.floor(Math.random() * 2);
-				// if(rndChoice == 0){
-				// 	posX = 0;
-				// 	posY = -1;
-				// }
-				// else{
-				// 	posX = -1;
-				// 	posY = 0;
-				// }
-			}
-			else if(dy < 0){
-				if(validMove(e.x, e.y + 1, false)){
+				else if(validMove(e.x, e.y + 1, false)){ //right
 					posX = 0;
 					posY = 1;
 				}
-				else{
+			}
+			else if(dy < 0){ //player to right
+				if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
+				else if(validMove(e.x - 1, e.y, false)){ //up
 					posX = -1;
 					posY = 0;
 				}
-
-				// rndChoice = Math.floor(Math.random() * 2);
-				// if(rndChoice == 0){
-				// 	posX = 0;
-				// 	posY = 1;
-				// }
-				// else{
-				// 	posX = -1;
-				// 	posY = 0;
-				// }
+				else if(validMove(e.x, e.y -1, false)){ //left
+					posX = 0;
+					posY = -1;
+				}
 			}
 			else if(dy == 0){
-				posX = -1;
-				posY = 0;
+				if(validMove(e.x - 1, e.y, false)){ //up
+					posX = -1;
+					posY = 0;
+				}
+				else if(validMove(e.x, e.y - 1, false)){ //left
+					posX = 0;
+					posY = -1;
+				} 
+				else if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
 			}
 		}
 		else if(dx == 0){ //player is to the sides
-			if(dy < 0){
-				posX = 0;
-				posY = 1;
+			if(dy < 0){ //right
+				if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
+				else if(validMove(e.x - 1, e.y, false)){ //up
+					posX = -1;
+					posY = 0;
+				}
+				else if(validMove(e.x + 1, e.y, false)){ //down
+					posX = 1;
+					posY = 0;
+				}
 			}
-			else if(dy > 0){
-				posX = 0;
-				posY = -1;
+			else if(dy > 0){ //left
+				if(validMove(e.x, e.y - 1, false)){ //left
+					posX = 0;
+					posY = -1;
+				}
+				else if(validMove(e.x - 1, e.y, false)){ //up
+					posX = -1;
+					posY = 0;
+				}
+				else if(validMove(e.x + 1, e.y, false)){ //down
+					posX = 1;
+					posY = 0;
+				}
 			}
 		}
-	
 	}
 	else{
 		//walk randomly
@@ -1702,37 +1718,54 @@ function aiAct(e, index){
 		//console.log("random dir: ", rndDir);
 		switch(rndDir){
 			case 0:
-				posX = 0;
-				posY = -1;
+				if(validMove(e.x, e.y - 1, false)){ //left
+					posX = 0;
+					posY = -1;
+				}
+				else if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
 				break;
 			case 1:
-				posX = -1;
-				posY = 0;
+				if(validMove(e.x - 1, e.y, false)){ //up
+					posX = -1;
+					posY = 0;
+				}
+				else if(validMove(e.x + 1, e.y, false)){ //down
+					posX = 1;
+					posY = 0;
+				}
 				break;
 			case 2:
-				posX = 0;
-				posY = 1;
+				if(validMove(e.x, e.y + 1, false)){ //right
+					posX = 0;
+					posY = 1;
+				}
+				else if(validMove(e.x, e.y - 1, false)){ //left
+					posX = 0;
+					posY = -1;
+				}
 				break;
 			case 3:
-				posX = 1;
-				posY = 0;
+				if(validMove(e.x + 1, e.y, false)){ //down
+					posX = 1;
+					posY = 0;
+				}
+				else if(validMove(e.x - 1, e.y, false)){ //up
+					posX = -1;
+					posY = 0;
+				}
+				else 
 				break;
 			default:
 				break;
 		}
-		//console.log("enemy x: ", e.x, "enemy y: ", e.y);
-		//console.log("pos x: ", posX, "pos y: ", posY);
 	}
 
-	//CAUSING ISSUES?
-	//console.log("EnemyX: " + e.x + " PlayerX: " + player.x);
-	//console.log("EnemyY: " + e.y + " PlayerY: " + player.y);
-	if(validMove(e.x + posX, e.y + posY, false)){
+	if(posX != null && posY != null){//validMove(e.x + posX, e.y + posY, false)){
 		moveTo(e, index, {x: posX, y: posY});
 	}
-	// else{
-	// 	aiAct(e, index);
-	// }
 };
 
 //finds a valid cell to place objects, based on rules for each object type
@@ -1966,6 +1999,7 @@ function attackActor(aggressor, x, y){
 				let pHit = game.add.audio('playerHurt', 0.5);
 				pHit.play();
 				player.hp -= aggressor.dmg;
+				if(player.hp < 0) player.hp = 0;
 				hud.updateReadout("I took " + aggressor.dmg + " damage.");
 				hud.updateHP();
 			}
@@ -2399,32 +2433,32 @@ Terminal.prototype = {
 
 		    this.textGroup = game.add.group();
 
-		   	bootText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-150), bootText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		   	bootText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-150), bootText, { font: "18px Consolas", fill: "#19de65" }, this.textGroup);
 		   	bootText.fixedToCamera = true;
 		   	bootText.anchor.x = 0.5;
 		    if(this.terminalStart){	bootText.alpha = 0;}
 
-		  	let fillerText1 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-120), fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+		  	let fillerText1 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-120), fillerText, { font: "18px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText1.fixedToCamera = true;
 	   		fillerText1.anchor.x = 0.5;
 	   		if(this.terminalStart){fillerText1.alpha = 0;}
 
-	   		let fillerText2 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-90), fillerText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+	   		let fillerText2 = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-90), fillerText, { font: "18px Consolas", fill: "#19de65" }, this.textGroup);
 	   		fillerText2.fixedToCamera = true;
 	   		fillerText2.anchor.x = 0.5;
 	   		if(this.terminalStart){fillerText2.alpha = 0;}
 	   		
-	   		welcomeText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-60), welcomeText, { font: "15px Consolas", fill: "#19de65" }, this.textGroup);
+	   		welcomeText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset-60), welcomeText, { font: "18px Consolas", fill: "#19de65" }, this.textGroup);
 	   		welcomeText.fixedToCamera = true;
 	   		welcomeText.anchor.x = 0.5;
 	   		if(this.terminalStart){welcomeText.alpha = 0;}
 
 	   		// let costColor;//text should be red if cannot afford
 
-	   		let purchaseStyle = { font: "15px Consolas", fill: "#19de65" };
+	   		let purchaseStyle = { font: "18px Consolas", fill: "#19de65" };
 
 	   		if(player.credits < healCost){
-	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" };
+	   			purchaseStyle = { font: "18px Consolas", fill: "#FF0000" };
 	   		}
 
 			let healText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset), this.options[0] + " (" + healCost + ")", purchaseStyle, this.textGroup);
@@ -2440,7 +2474,7 @@ Terminal.prototype = {
 			}
 
 			if(player.credits < upgradeDmgCost){
-	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" }
+	   			purchaseStyle = { font: "18px Consolas", fill: "#FF0000" }
 	   		}
 
 			let upgradeDmgText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+30), this.options[1] + " (" + upgradeDmgCost + ")", purchaseStyle, this.textGroup);
@@ -2456,7 +2490,7 @@ Terminal.prototype = {
 			}
 
 			if(player.credits < upgradeHpCost){
-	   			purchaseStyle = { font: "15px Consolas", fill: "#FF0000" }
+	   			purchaseStyle = { font: "18px Consolas", fill: "#FF0000" }
 	   		}
 
 			let upgradeHPText = game.add.text(Math.floor(game.width/2), Math.floor(yOffset+60), this.options[2] + " (" + upgradeHpCost + ")", purchaseStyle, this.textGroup);
