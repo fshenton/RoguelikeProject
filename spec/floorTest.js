@@ -31,9 +31,6 @@ describe('Floor', function() {
 	it('should have creates doors equal to rooms-1', function() {
 	    expect(doors.length).toEqual(rooms.length-1);
 	});
-	it('should have creates doors equal to rooms-1', function() {
-	    expect(doors.length).toEqual(rooms.length-1);
-	});
 	it('should have perimeter wall around map (115 tiles), and have one exit tile', function(){
 		let wallCount = 0;
 		let exitCount = 0;

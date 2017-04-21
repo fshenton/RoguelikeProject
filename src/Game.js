@@ -318,6 +318,7 @@ Roguelike.Game.prototype = {
 				player.sprite.animations.add('walkRight', [27, 28, 29, 30, 31, 32, 33, 34, 35], 18, false);
 				player.sprite.animations.add('walkDown', [18, 19, 20, 21, 22, 23, 24, 25, 26], 18, false);
 				player.sprite.anchor.y = 0.3;
+				game.camera.follow(player.sprite);
 			},this);
 			player.isStunned = false;
 			acted=true;
@@ -1474,7 +1475,7 @@ HUD.prototype = {
 		let graphics = this.game.add.graphics(0, 0);
 		graphics.beginFill(0x222222);
 	   	graphics.lineStyle(1, 0x444444, 1);
-	    this.helpBackground = graphics.drawRect(this.game.width/4, this.game.height/4, this.game.width/2, this.game.height/2);
+	    this.helpBackground = graphics.drawRect(this.game.width/5, this.game.height/5, 850, 500);
 	   	this.helpBackground.fixedToCamera = true;
 	   	graphics.endFill();
 
@@ -1486,7 +1487,7 @@ HUD.prototype = {
 	   	let leftHelpOffset = this.game.width/4+10;
 	  	
 	  	//CONTROLS
-	  	let controlsTitleTopOffset = this.game.height/4+20;
+	  	let controlsTitleTopOffset = this.game.height/4+50;
 		let controlsTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(controlsTitleTopOffset), "Controls", titleStyle, this.helpTextGroup);
 	   	controlsTitle.fixedToCamera = true;
 	   	let controls1 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(controlsTitleTopOffset+30), "Arrows keys: player movement/use object/attack enemy", mainTextStyle, this.helpTextGroup);
@@ -1495,7 +1496,7 @@ HUD.prototype = {
 	   	controls2.fixedToCamera = true;
 
 	   	//HUD
-	   	let hudExplanationTitleTopOffset = this.game.height/4+100;
+	   	let hudExplanationTitleTopOffset = this.game.height/4+150;
 	   	let hudExplanationTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudExplanationTitleTopOffset), "HUD explanation", titleStyle, this.helpTextGroup);
 	   	hudExplanationTitle.fixedToCamera = true;
 	   	
@@ -1536,7 +1537,7 @@ HUD.prototype = {
 		helpExpExplanation.fixedToCamera = true;
 
 		//HOW TO PLAY
-		let hudPlayTitleTopOffset = this.game.height/4+200;
+		let hudPlayTitleTopOffset = this.game.height/4+250;
 	   	let howToPlayTitle = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset), "How to play", titleStyle, this.helpTextGroup);
 	   	howToPlayTitle.fixedToCamera = true;
 	   	let how1 = this.game.add.text(Math.floor(leftHelpOffset), Math.floor(hudPlayTitleTopOffset+30), "Moving/using objects/attacking enemies costs at least one action point (AP).", mainTextStyle, this.helpTextGroup);
@@ -2250,7 +2251,7 @@ function showGameOverScreen(message){
 
    	let textGroup = game.add.group();
 
-   	let floorsCleared = (floorNumber == topFloor) ? topFloor : floorNumber-1;
+   	let floorsCleared = (message == "Victory") ? topFloor : floorNumber-1;
    	player.score += (1000*floorsCleared);
 
    	let gameOverText = message;
@@ -2259,7 +2260,7 @@ function showGameOverScreen(message){
    	let scoreText = "Score: " + player.score;
    	let creditsText = "Credits earned: " + creditsEarned;
    	let levelText = "Level: " + player.lvl;
-   	let floorsClearedText = floorsCleared;
+   	let floorsClearedText = "Floors cleared:" + floorsCleared;
    	let returnText = "Return to menu?";
    	let restartText = "Restart?";
 
