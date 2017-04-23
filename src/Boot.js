@@ -17,20 +17,16 @@ Roguelike.Boot.prototype = {
 		
 		this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 
-		//this.scale.minHeight = window.innerHeight*window.devicePixelRatio;
-		//this.scale.maxHeight = window.innerHeight*window.devicePixelRatio;
-		//this.scale.minWidth = window.innerWidth*window.devicePixelRatio;
-		//this.scale.maxWidth = window.innerWidth*window.devicePixelRatio;
-
-		//window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio
-
+		//changes game size depending on screen size (only 2 options)
 		if(window.screen.width > 1900 && window.screen.height > 1000){
+			//for desktop
 			this.scale.minWidth = 1600;
 			this.scale.minHeight = 900;
 			this.scale.maxWidth = 1600;
 			this.scale.maxHeight = 900;
 		}
 		else{
+			//for laptop
 			this.scale.minWidth = 1024;
 			this.scale.minHeight = 576;
 			this.scale.maxWidth = 1024;
@@ -39,11 +35,7 @@ Roguelike.Boot.prototype = {
 
 		this.scale.pageAlignHorizontally = true;
 		this.scale.pageAlignVertically = true;
-		//screensize will be set automatically
 		this.scale.updateLayout(true);
-
-		//physics system for movement
-		this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
 		//start preloader
 		this.game.state.start('Preload');
